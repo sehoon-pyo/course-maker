@@ -160,14 +160,14 @@ export default {
 
 ```tsx
 // courses/my-course/ch.1_intro/sec.1_variable/sl.2_definition/index.tsx
-import { Bullets, Slide, Title, badge, bold, code } from "@/elements";
+import { Bullets, Slide, Title, badge, bold, code, t } from "@/elements";
 
 const text = {
   title: "변수의 정의",
   items: [
     "값을 담는 이름표",
-    ["타입은 ", badge("동적", "green"), "으로 결정된다"],
-    ["대입은 ", code("x = 10"), " 처럼 ", bold("등호"), "를 쓴다"],
+    t`타입은 ${badge("동적", "green")}으로 결정된다`,
+    t`대입은 ${code("x = 10")} 처럼 ${bold("등호")}를 쓴다`,
   ],
 };
 
@@ -187,7 +187,7 @@ export default function VariableDefinition() {
 
 - **슬라이드 한 장은 TSX 파일 하나**입니다.
 - **문구는 파일 맨 위의 `text` 객체**에 모으고, 아래의 컴포넌트에서는 가져다 쓰기만 합니다. 문구만 고칠 때 파일 맨 위만 보면 됩니다.
-- `text` 객체에는 문자열, 배열, `badge()` 같은 헬퍼 호출만 넣고 **조건문이나 반복문 같은 로직은 넣지 않습니다.**
+- `text` 객체에는 문자열, `t` 템플릿, `badge()` 같은 헬퍼 호출만 넣고 **조건문이나 반복문 같은 로직은 넣지 않습니다.**
 
 **쓸 수 있는 요소**
 
@@ -198,11 +198,15 @@ export default function VariableDefinition() {
 | `Paragraph` | 문단 |
 | `Bullets` | 불릿 목록 |
 
-**한 문장 안에서 서식을 섞기**: 문자열 대신 배열을 쓰고, 공백은 문자열에 직접 넣습니다.
+**한 문장 안에서 서식을 섞기**: 템플릿 문자열 `t`로 문장을 한 줄로 쓰고, 서식이 필요한 곳에만 `${ }`로 아래 헬퍼를 넣습니다.
 
 ```ts
-["타입은 ", badge("동적", "green"), "으로 결정된다"]
+t`타입은 ${badge("동적", "green")}으로 결정된다`
 ```
+
+- `${ }` 안에는 아래 헬퍼(`badge`, `bold`, `code`)나 문자열만 넣을 수 있습니다. 다른 값을 넣으면 타입 검사가 막습니다.
+- 서식이 없는 문장은 `t` 없이 그냥 `"..."`로 씁니다.
+- 공백은 글 안에 그대로 쓰면 됩니다.
 
 | 헬퍼 | 결과 |
 |---|---|
