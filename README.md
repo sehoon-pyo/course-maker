@@ -1,12 +1,10 @@
 # course-maker
 
-> 초안입니다. `TODO`로 표시한 부분은 아직 정해지지 않았거나 채워야 하는 내용입니다.
-
 ## 1. 소개
 
 강의자료를 쉽게 만들도록 도와주는 도구입니다. 슬라이드를 TSX 파일로 작성하고, 브라우저의 미리보기 창에서 바로 확인합니다. Claude Code 같은 AI 도구에 슬라이드 수정을 시킬 수도 있습니다.
 
-<!-- TODO: 미리보기 화면 스크린샷 또는 GIF -->
+![미리보기 화면](docs/images/preview.png)
 
 - 슬라이드는 16:9(1920×1080) 한 장이 TSX 파일 하나입니다.
 - 강의 내용은 `courses/` 아래에서 강의별로 따로 관리합니다.
@@ -40,11 +38,13 @@
 ## 4. 5분 시작하기
 
 ```bash
-git clone <저장소 주소>      # TODO: 저장소 주소
+git clone https://github.com/sehoon-pyo/course-maker.git
 cd course-maker
 npm install
 npm run dev
 ```
+
+이 저장소는 **비공개(private)**입니다. 사용 승인을 받아 저장소에 초대된 GitHub 계정으로 로그인한 상태에서만 `git clone`이 됩니다. 초대받지 않았다면 저장소 주소가 `404`로 보입니다.
 
 터미널에 나오는 주소(기본값 `http://localhost:5173/`)를 브라우저에서 열면 샘플 강의가 보입니다.
 
@@ -140,7 +140,7 @@ courses/my-course/                 강의 (course)
 
 - `ch.1_`, `sec.1_`, `sl.1_` 앞의 번호는 chapter와 section의 순서를 정합니다.
 - **슬라이드의 순서는 section의 `meta.ts`에 있는 `slides` 배열이 정합니다.**
-- 슬라이드 폴더 이름 규칙(`sl.N_이름`)은 아직 확정되지 않았습니다. (TODO)
+- 슬라이드 폴더 이름은 `sl.N_이름` 형식입니다. 앞의 `ch.N_`, `sec.N_`과 같은 규칙이며, 슬라이드의 순서는 폴더 이름의 번호가 아니라 section `meta.ts`의 `slides` 배열이 정합니다.
 
 ### 6-3. meta.ts 예시
 
@@ -228,7 +228,7 @@ PowerPoint나 DOM에만 있는 개념은 `pptx layout`, `dom element`처럼 앞�
 
 ## 9. 폰트와 라이선스
 
-**폰트**: 슬라이드에는 네이버의 NanumSquare(R, B)를 씁니다. 파일은 `assets/fonts/`에 있습니다. 이 폰트의 이용 조건은 원 배포처의 안내를 따릅니다. (TODO: 배포처와 이용 조건 링크)
+**폰트**: 슬라이드에는 네이버의 NanumSquare(R, B)를 씁니다. 파일은 `assets/fonts/`에 있습니다. 이 폰트의 배포처와 이용 조건은 [네이버 한글한글 아름답게 - 나눔글꼴](https://hangeul.naver.com/fonts/search?f=nanum)의 안내를 따릅니다.
 
 **이 프로젝트의 사용 조건**: 저작권자가 **사용을 승인한 사람만** 사용할 수 있습니다. 승인 없이 복사, 수정, 배포, 사용할 수 없습니다.
 

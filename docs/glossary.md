@@ -11,7 +11,7 @@
 | **course** | 하나의 전체 강의. 최상단 단위 | `courses/{강의}/` | 강의마다 별도 git 저장소 |
 | **chapter** | 실제 파일로 배포하는 단위 | `ch.N_{이름}/` | 이름은 가칭. 번호 `N`이 순서 |
 | **section** | 수업 주제 단위 | `sec.N_{이름}/` | PowerPoint의 구역(Section)과 같은 개념. 번호 `N`이 순서 |
-| **slide** | 슬라이드 한 장. 파일 하나(`index.tsx`). **크기는 1920×1080px 고정(16:9)**이며 HTML, PPTX, PDF 모든 출력에서 같음 | `sl.N_{이름}/` | 폴더 이름 규칙은 확정 전. 순서는 section `meta.ts`의 `slides` 배열이 정함 |
+| **slide** | 슬라이드 한 장. 파일 하나(`index.tsx`). **크기는 1920×1080px 고정(16:9)**이며 HTML, PPTX, PDF 모든 출력에서 같음 | `sl.N_{이름}/` | 순서는 폴더 이름의 번호가 아니라 section `meta.ts`의 `slides` 배열이 정함 |
 | **element** | 슬라이드를 구성하는 요소 (제목, 불릿, 그림, 표, 뱃지 등) | | `group`으로 여러 개를 묶을 수 있음 |
 | **group** | 여러 element를 묶은 것 | | PPT의 그룹 도형과 1:1 대응 |
 
