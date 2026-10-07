@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { allSlides, findPath } from "@/courses";
+import { courses, findPath, slidesOfChapter, slidesOfCourse } from "@/courses";
 import { Sidebar } from "./Sidebar";
 import { Stage } from "./Stage";
 import { TopBar } from "./TopBar";
@@ -27,13 +27,30 @@ export function App() {
   const [key, go] = useHashRoute();
   const [sidebarOpen, setSidebarOpen] = useState(loadSidebarOpen);
 
-  const found = allSlides.findIndex((s) => s.key === key);
-  const index = found >= 0 ? found : 0;
-  const current = allSlides[index];
+  // 해시가 가리키는 슬라이드가 없으면 슬라이드가 있는 첫 강의의 첫 슬라이드를 보여 준다.
+  const found = findPath(key);
+  const current = found?.slide ?? courses.flatMap(slidesOfCourse)[0];
+  const path = found ?? (current ? findPath(current.key) : undefined);
+  const course = path?.course;
+  const chapter = path?.chapter;
+  const courseSlides = course ? slidesOfCourse(course) : [];
+  const index = current ? courseSlides.indexOf(current) : -1;
 
   const move = (delta: number) => {
-    const next = allSlides[index + delta];
+    const next = courseSlides[index + delta];
     if (next) go(next.key);
+  };
+
+  const selectCourse = (courseId: string) => {
+    const target = courses.find((c) => c.id === courseId);
+    const first = target ? slidesOfCourse(target)[0] : undefined;
+    if (first) go(first.key);
+  };
+
+  const selectChapter = (chapterId: string) => {
+    const target = course?.chapters.find((ch) => ch.id === chapterId);
+    const first = target ? slidesOfChapter(target)[0] : undefined;
+    if (first) go(first.key);
   };
 
   const toggleSidebar = () => {
@@ -52,19 +69,39 @@ export function App() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  if (!current) {
+  if (!path || !course || !chapter || !current) {
     return <p className="empty">표시할 슬라이드가 없습니다. courses/ 아래에 슬라이드를 추가하세요.</p>;
   }
 
   const { Component } = current;
-  const path = findPath(current.key);
-  const crumbs = path ? [path.course.title, path.chapter.title, path.section.title, path.slide.name] : [];
+  const crumbs = [path.chapter.title, path.section.title, path.slide.name];
 
   return (
     <div className="preview">
-      <TopBar sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} crumbs={crumbs} />
+      <TopBar sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} crumbs={crumbs}>
+        <label className="course-select">
+          <span>강의</span>
+          <select value={course.id} onChange={(e) => selectCourse(e.target.value)}>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="course-select">
+          <span>chapter</span>
+          <select value={chapter.id} onChange={(e) => selectChapter(e.target.value)}>
+            {course.chapters.map((ch) => (
+              <option key={ch.id} value={ch.id}>
+                {ch.title}
+              </option>
+            ))}
+          </select>
+        </label>
+      </TopBar>
       <div className="body">
-        {sidebarOpen && <Sidebar currentKey={current.key} onSelect={go} />}
+        {sidebarOpen && <Sidebar chapter={chapter} currentKey={current.key} onSelect={go} />}
         <main className="main">
           <Stage>
             <Component />
@@ -74,9 +111,9 @@ export function App() {
               이전
             </button>
             <span>
-              {index + 1} / {allSlides.length}
+              {index + 1} / {courseSlides.length}
             </span>
-            <button type="button" onClick={() => move(1)} disabled={index === allSlides.length - 1}>
+            <button type="button" onClick={() => move(1)} disabled={index === courseSlides.length - 1}>
               다음
             </button>
           </footer>

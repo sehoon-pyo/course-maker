@@ -117,7 +117,8 @@ export function findPath(key: string): SlidePath | undefined {
   return undefined;
 }
 
-/** 미리보기에서 이전/다음으로 이동하는 순서 */
-export const allSlides: SlideNode[] = courses.flatMap((c) =>
-  c.chapters.flatMap((ch) => ch.sections.flatMap((s) => s.slides)),
-);
+export const slidesOfChapter = (chapter: ChapterNode): SlideNode[] =>
+  chapter.sections.flatMap((section) => section.slides);
+
+/** 한 강의의 슬라이드를 미리보기에서 이전/다음으로 이동하는 순서대로 반환한다. */
+export const slidesOfCourse = (course: CourseNode): SlideNode[] => course.chapters.flatMap(slidesOfChapter);
