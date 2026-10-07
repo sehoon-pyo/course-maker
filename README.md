@@ -14,14 +14,15 @@
 
 | 기능 | 상태 |
 |---|---|
-| 미리보기 창 (목차, 강의/chapter 선택, 이전/다음, 방향키 이동) | 사용 가능 |
+| 미리보기 창 (목차, 강의/chapter 선택, 슬라이드와 chapter 이동 버튼, 방향키, chapter 기준 번호) | 사용 가능 |
 | 파일을 고치면 미리보기에 바로 반영 | 사용 가능 |
 | 슬라이드 요소: 제목, 문단, 불릿, 인라인 서식(뱃지, 굵게, 코드) | 사용 가능 |
 | 슬라이드 마스터와 layout (대제목, 목차, 컨텐츠, 제목만 있는 컨텐츠), 강의 전용 마스터 | 사용 가능 |
-| 위치를 정해 놓는 요소: 글, 도형, 이미지, 칩, 프롬프트 상자 | 사용 가능 |
+| 위치를 정해 놓는 요소: 글, 도형, 이미지, 칩, 프롬프트 상자 (칩과 프롬프트 상자의 아이콘은 선택), 도형과 글자의 글로우(네온) | 사용 가능 |
+| chapter 바로 아래의 슬라이드: section 앞(`head`: 대제목, 목차)과 뒤(`tail`: 진행 현황 등) | 사용 가능 |
 | 목차 (chapter의 section으로 자동으로 채움) | 사용 가능 |
 | 강의 전용 요소 (`courses/{강의}/elements/`) | 사용 가능 |
-| 숨김 슬라이드 (미리보기에서는 보이고 내보낼 때 제외) | 미리보기만 (내보내기는 아직 없음) |
+| 숨김 슬라이드 (미리보기에서는 보이고 번호에는 세지 않으며 내보낼 때 제외) | 미리보기만 (내보내기는 아직 없음) |
 | 표, 요소 묶기(group), 자동 배치(Row/Column), 날짜/바닥글/슬라이드 번호 | 아직 없음 |
 | 단일 HTML 파일로 내보내기 | 아직 없음 |
 | PPTX로 내보내기 (슬라이드 마스터까지 PowerPoint 마스터로 내보낼 예정) | 아직 없음 |
@@ -55,7 +56,8 @@ npm run dev
 
 - 왼쪽 위의 ☰ 버튼으로 목차를 접고 펼 수 있습니다.
 - 상단 바에서 강의와 chapter를 고를 수 있습니다.
-- 슬라이드 이동은 화면 아래의 이전/다음 버튼이나 방향키(← →)로 합니다.
+- 슬라이드 이동은 화면 아래의 `< 이전`, `다음 >` 버튼이나 방향키(← →)로 합니다. chapter 사이의 이동은 `<< 이전 챕터`, `다음 챕터 >>` 버튼이나 `Ctrl + ←`, `Ctrl + →`입니다. `<`, `>`는 chapter 끝에서 멈춥니다.
+- 아래의 번호(`3 / 12`)는 **chapter 안**의 번호이고 사이드바의 번호도 chapter 안에서 이어집니다. 숨김 슬라이드는 번호를 매기지 않고 `숨김 / 12`로 보입니다.
 - `courses/sample`의 슬라이드 파일을 고치고 저장하면 화면이 바로 바뀝니다.
 
 ## 5. 프로젝트 구조
@@ -138,7 +140,9 @@ git init
 courses/my-course/                 강의 (course)
 ├─ meta.ts                         강의 제목과 chapter 순서
 └─ ch.1_intro/                     chapter (배포 파일 하나가 될 단위)
-   ├─ meta.ts                      chapter 제목과 section 순서
+   ├─ meta.ts                      chapter 제목, section 순서, 앞뒤 슬라이드(head, tail)
+   ├─ sl.1_title/                  chapter 바로 아래의 슬라이드 (section에 속하지 않는 대제목, 목차 등)
+   │  └─ index.tsx
    └─ sec.1_variable/              section (수업 주제 단위)
       ├─ meta.ts                   section 제목과 슬라이드 순서
       └─ sl.1_title/               슬라이드 한 장
@@ -148,6 +152,7 @@ courses/my-course/                 강의 (course)
 - **순서는 모두 상위 폴더의 `meta.ts`에 있는 배열이 정합니다.** 강의의 `chapters`, chapter의 `sections`, section의 `slides`입니다. 항목을 끼우거나 순서를 바꿀 때는 배열만 고치면 되고 폴더 이름을 바꾸지 않아도 됩니다.
 - 폴더 이름의 번호(`ch.1_`, `sec.1_`, `sl.1_`)는 **정리용이며 순서를 정하지 않습니다.** `ch.intro`처럼 번호 없이 써도 되고 접두사 없이 `intro`로 써도 됩니다. 화면에는 접두사와 번호를 뗀 이름이 보입니다. (URL 해시는 폴더 이름 그대로입니다.)
 - 화면의 `SECTION 1` 같은 번호는 폴더 번호가 아니라 chapter 안에서의 section 순서입니다.
+- **chapter의 앞머리와 마무리 슬라이드**: 대제목, 목차처럼 어느 section에도 속하지 않는 슬라이드는 chapter 폴더 바로 아래에 두고 chapter `meta.ts`의 `head`(section 앞)나 `tail`(section 뒤)에 적습니다. 번호는 `head` → section → `tail` 순서로 chapter 안에서 이어서 매깁니다. `SECTION n` 번호와 목차(`Toc`)는 section만 셉니다.
 
 ### 6-3. meta.ts 예시
 
@@ -168,7 +173,9 @@ import type { ChapterMeta } from "@/types";
 
 export default {
   title: "1장 시작하기",
+  head: ["sl.1_title", "sl.2_toc"],                  // section 앞의 슬라이드 (선택)
   sections: ["sec.1_variable", "sec.2_function"],   // section 표시 순서
+  tail: ["sl.9_progress"],                           // section 뒤의 슬라이드 (선택)
 } satisfies ChapterMeta;
 ```
 
@@ -182,7 +189,7 @@ export default {
 } satisfies SectionMeta;
 ```
 
-**숨김 슬라이드**: `slides`의 항목을 `{ id, hidden: true }`로 쓰면 숨김입니다. **미리보기에서는 숨김 슬라이드도 보이고**(사이드바에 "숨김" 표시, 이전/다음에도 포함) HTML, PPTX, PDF로 내보낼 때만 빠집니다(내보내기는 아직 없습니다).
+**숨김 슬라이드**: `slides`의 항목을 `{ id, hidden: true }`로 쓰면 숨김입니다. **미리보기에서는 숨김 슬라이드도 보이고**(사이드바에 "숨김" 표시, 이전/다음으로 오갈 수 있음) **번호는 매기지 않습니다**(하단은 `숨김 / 12`처럼 보이고 다른 슬라이드의 번호는 숨김을 건너뛰고 이어집니다). HTML, PPTX, PDF로 내보낼 때만 빠집니다(내보내기는 아직 없습니다).
 
 ### 6-4. 슬라이드 예시
 
@@ -286,10 +293,12 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
 ```
 
 - `Shape`와 `PromptBox`는 크기까지(`x, y, w, h`) 줘야 합니다. `Chip`은 `x, y`만 주면 폭이 글자에 맞춰집니다. `Text`와 `Image`는 `w`, `h`를 생략할 수 있습니다.
-- `Shape`의 주요 속성: `kind`(`rect`, `roundRect`, `ellipse`, `rightArrow`, `triangle`, `line`, `path`), `fill`, `line={{ color, width, dash }}`, `rotate`, `shadow`, `text`와 `textStyle`. `path`는 `path`와 `viewBox`도 필요합니다.
+- `Shape`의 주요 속성: `kind`(`rect`, `roundRect`, `ellipse`, `rightArrow`, `triangle`, `line`, `path`), `fill`, `line={{ color, width, dash }}`, `rotate`, `shadow`(그림자), `glow`(도형의 글로우, 네온), `text`와 `textStyle`. `path`는 `path`와 `viewBox`도 필요합니다. 글자의 글로우는 `textStyle={{ glow: { radius: 10, color: "rgba(0, 176, 240, 0.4)" } }}`처럼 줍니다.
 - `Text`의 주요 속성: `size`, `color`, `align`, `anchor`, `bold`, `fill`, `lineHeight`.
 - **색**은 직접 값(`#FF0000`, `rgba(0, 0, 0, 0.3)`)이나 마스터 토큰 이름(`primary`, `primary-dark`, `surface`, `text`, `muted`)을 쓸 수 있습니다.
 - 이미지는 강의 폴더의 이미지를 `import`해서 `src`에 줍니다. 도구는 아이콘 이미지를 제공하지 않습니다.
+- `Chip`과 `PromptBox`의 아이콘은 `icon`에 강의 폴더의 이미지를 주면 붙고, 주지 않으면 없습니다. 칩의 아이콘은 정사각형 칸 안에 비율을 지켜 맞춰집니다.
+- 문장 안의 뱃지(`badge()`)는 본문 글자의 중심선에 맞춰 그려집니다.
 - 칩과 프롬프트 상자의 **모양(색, 크기, 간격)은 마스터가 정합니다.**
 
 ### 7-3. 슬라이드 마스터
@@ -319,7 +328,7 @@ export { Bullets } from "./Bullets";           // 같은 이름은 이 강의의
 export { CodeChip } from "./CodeChip";         // 이 강의의 요소를 더한다
 ```
 
-슬라이드는 상대 경로로 가져옵니다. 슬라이드는 항상 `courses/{강의}/ch/sec/sl/index.tsx`에 있어서 모든 슬라이드에서 경로가 같습니다.
+슬라이드는 상대 경로로 가져옵니다. section 안의 슬라이드는 항상 `courses/{강의}/ch/sec/sl/index.tsx`에 있어서 경로가 `../../../elements`로 같고, **chapter 바로 아래의 슬라이드(`head`, `tail`)는 한 단계 짧은 `../../elements`**입니다.
 
 ```tsx
 import { Bullets, CodeChip, Slide, Title } from "../../../elements";   // 도구 요소와 강의 요소를 한 줄로
@@ -327,6 +336,7 @@ import { Bullets, CodeChip, Slide, Title } from "../../../elements";   // 도구
 
 - **어디서 가져오느냐가 우선순위를 정합니다.** `../../../elements`에서 가져오면 강의의 `Bullets`, `@/elements`에서 가져오면 도구의 `Bullets`입니다.
 - 요소를 감싸서 만들 때는 `slotKinds`를 원래 요소에서 그대로 알려 줘야 슬롯에 자동으로 들어갑니다(`CodeChip.slotKinds = Chip.slotKinds`).
+- 예: `courses/sample/elements/`에 아이콘이 정해진 칩(`ClaudeChip`, `TerminalChip`, `FileChip`)과 네온 효과가 있는 도장(`Stamp`)이 있습니다. 이미지는 `courses/sample/assets/`에 있습니다.
 - 강의 요소의 CSS는 클래스 이름에 강의 이름을 붙여 다른 강의와 겹치지 않게 하고, 색은 마스터의 CSS 변수를 읽으세요.
 
 ## 8. 용어
@@ -341,7 +351,8 @@ import { Bullets, CodeChip, Slide, Title } from "../../../elements";   // 도구
 | slide-master | 모든 슬라이드에 공통으로 적용되는 틀. PowerPoint의 슬라이드 마스터와 같은 개념 |
 | layout | slide-master 안의 영역 배치 틀 (대제목, 목차, 컨텐츠 등). 슬롯과 장식, 배경을 가짐 |
 | slot | layout이 정해 둔 자리 (제목, 부제, 본문, 자유, 목록). 슬라이드의 요소가 종류에 따라 들어감 |
-| 숨김 슬라이드 | 미리보기에서는 보이고 내보낼 때만 빠지는 슬라이드 |
+| 숨김 슬라이드 | 미리보기에서는 보이고 내보낼 때만 빠지는 슬라이드. 번호를 매기지 않음 |
+| head, tail | chapter 바로 아래에서 section의 앞(대제목, 목차)과 뒤(진행 현황 등)에 오는 슬라이드 |
 
 PowerPoint나 DOM에만 있는 개념은 `pptx layout`, `dom element`처럼 앞에 `pptx`, `dom`을 붙여 구분합니다. 전체 용어의 정의는 [`docs/glossary.md`](docs/glossary.md), 결정 내용은 [`docs/adr/`](docs/adr/)를 보세요.
 

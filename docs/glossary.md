@@ -17,7 +17,9 @@
 
 - **순서는 항상 상위 폴더의 `meta.ts` 배열이 정합니다.** 폴더 이름의 번호(`N`)는 정리용이며 순서의 기준이 아니고, 번호 없이(`ch.intro`) 또는 접두사 없이(`intro`) 써도 됩니다. 화면에는 접두사와 번호를 뗀 이름이 보입니다.
 - 화면의 section 번호(`SECTION 1`)는 chapter 안에서의 section 순서입니다. `SECTION`은 강의 `meta.ts`의 `sectionLabel`로 바꿀 수 있습니다(`UNIT`, `MODULE` 등).
-- **숨김 슬라이드**: section `meta.ts`의 `slides`에서 `{ id, hidden: true }`로 표시한 슬라이드. 미리보기에서는 보이고, 내보낼 때(HTML, PPTX, PDF)만 빠집니다. PowerPoint의 숨기기 슬라이드와 같은 개념입니다.
+- **숨김 슬라이드**: `slides`(또는 `head`, `tail`)에서 `{ id, hidden: true }`로 표시한 슬라이드. 미리보기에서는 보이고, 내보낼 때(HTML, PPTX, PDF)만 빠집니다. PowerPoint의 숨기기 슬라이드와 같은 개념이지만 **번호는 매기지 않습니다**(하단은 `숨김 / N`).
+- **head, tail**: chapter 바로 아래에서 section의 앞(`head`: 대제목, 목차)과 뒤(`tail`: 진행 현황 등)에 오는 슬라이드. chapter `meta.ts`에 적고 슬라이드 폴더는 chapter 폴더 바로 아래에 둡니다. section에 속하지 않으므로 `SECTION n`과 목차(`Toc`)에는 세지 않습니다.
+- **번호**: chapter 안에서 `head` → section → `tail` 순서로 1부터 이어서 매깁니다(숨김 제외). 뷰어의 사이드바와 하단(`n / N`)이 이 번호를 씁니다. 슬라이드 위에 그리는 페이지 번호는 쪽번호 layout을 만들 때 추가합니다.
 - **강의 전용 요소**: 특정 강의에서만 쓰는 요소. `courses/{강의}/elements/`에 두고, 도구의 요소를 다시 내보내면서 같은 이름은 강의 것이 우선합니다.
 
 ## 2. 슬라이드 마스터
@@ -31,6 +33,7 @@
 | **list 슬롯** | 같은 모양이 반복되는 줄(목차의 항목)을 한 번에 정하는 슬롯. `rows`, `pitch`, `columns`를 가짐 |
 | **쌓는 단계** | `background` < `layout`(장식) < `element`(슬라이드의 요소) 세 단계. 고정된 순서이고 한 단계는 다른 단계를 넘지 못함. 단계 안의 순서는 배열(작성) 순서이며 `z-index` 숫자를 소스에 쓰지 않음 |
 | **토큰 (tokens)** | 마스터가 정하는 CSS 변수 값(색, 크기, 간격 등). 요소는 변수만 읽음. 색을 쓸 때는 직접 값이나 토큰 이름(`primary` = `--color-primary`)을 쓸 수 있음 |
+| **글로우 (glow)** | 도형이나 글자 둘레로 빛이 번지는 효과(PowerPoint의 "네온"). 도형은 `Shape.glow`, 글자는 `TextStyle.glow`. 반경(px)과 알파를 포함한 색을 가짐 |
 | **at** | 요소의 위치. 슬라이드 기준 px의 `{ x, y, w, h }`. 있으면 슬롯 없이 그 자리에 놓이고, 쌓는 순서는 작성 순서 |
 | **마스터 id** | 마스터를 가리키는 이름. 마스터 폴더 이름과 같음 |
 
