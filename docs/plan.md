@@ -3,7 +3,7 @@
 이 문서는 [`docs/adr/[261007_004]_adr.md`](./adr/[261007_004]_adr.md)에서 확정한 결정을 어떻게 구현할지와 언제 끝난 것으로 볼지를 정한다. 결정의 이유는 ADR과 [노트 004](./notes/[261007_004]_note.md)를 본다. 구현하면서 계획이 바뀌면 이 문서를 먼저 고친다.
 
 - 작업 브랜치: `feature/slide-master`
-- 상태: 단계 1, 2, 3 구현 완료, 단계 4부터 남음
+- 상태: 단계 1, 2, 3, 4 구현 완료, 단계 5부터 남음
 
 ## 1. 목표와 범위
 
@@ -163,7 +163,7 @@ src/elements/
 - **`list` 슬롯은 아직 그리지 않는다**. `toc` layout의 항목 10줄은 단계 4의 `Toc` 요소가 채운다. 지금 `toc` layout에는 패널, 띠, 라벨만 보인다.
 - 컨텐츠 계열의 제목은 흰 글자 48px 굵게이고, 본문 불릿의 글자가 이전(44px)보다 커졌다(48px). 샘플 슬라이드의 모양이 바뀐 것은 ADR-10에서 예상한 변화이다.
 
-### 단계 4. 자유 배치 요소와 위젯
+### 단계 4. 자유 배치 요소와 위젯 (완료)
 
 **작업**
 - `Text`, `Shape`, `Image`(`at`, ADR-7의 속성). 색은 직접 값과 토큰 이름을 모두 받는다.
@@ -171,13 +171,26 @@ src/elements/
 - `Toc`: 현재 chapter의 section 목록으로 자동 채움. section이 슬롯의 줄 수보다 많으면 넘치는 항목은 표시하지 않고 콘솔 경고.
 - 샘플 `courses/sample/ch.3_master`를 추가해 네 layout과 위 요소를 모두 쓰는 슬라이드를 만든다.
 
-**완료 기준**
-- [ ] `Text`/`Shape`/`Image`가 `at`의 좌표에 놓이고, `at`이 없으면 슬롯으로 간다.
-- [ ] `Shape`의 `rect`, `roundRect`, `ellipse`, `rightArrow`, `triangle`, `line`, 자유형 `path`가 모두 그려지고, 채움, 선, 점선, 회전, 그림자, 안의 글자가 동작한다.
-- [ ] `Chip`의 폭이 글자 길이에 따라 달라지고(짧은 글자와 긴 글자 비교), 아이콘이 없어도 그려진다.
-- [ ] `PromptBox`를 두 가지 크기(399×171, 559×388)로 그리면 안쪽 배치가 박스 크기에 맞게 계산된다.
-- [ ] `Toc`가 section 목록과 같은 순서, 같은 제목으로 채워지고, 11개 section 이상일 때 11번째부터 표시하지 않고 경고한다.
-- [ ] `Toc`에 `items` 같은 직접 지정 속성이 없다(타입에서 막힘).
+**완료 기준** (Playwright MCP로 개발 서버의 브라우저에서 확인함)
+- [x] `Text`/`Shape`/`Image`가 `at`의 좌표에 놓이고(DOM에서 측정해 `at` 값과 대조), `at`이 없으면 슬롯으로 간다(`Chip`을 `at` 없이 본문 슬롯에 넣어 세로로 쌓이는 것을 확인: 간격 32px, 왼쪽 정렬).
+- [x] `Shape`의 `rect`, `roundRect`, `ellipse`, `rightArrow`, `triangle`, `line`, 자유형 `path`가 모두 그려지고, 채움, 선, 점선, 회전(35°), 그림자, 안의 글자가 동작한다. 스크린샷으로 확인했다.
+- [x] `Chip`의 폭이 글자 길이에 따라 달라지고(`/bg` 102.5px, `ctrl + x` 227px, `CLAUDE.md` 311px, 긴 명령어 512px, 높이는 모두 74px), 아이콘이 없어도 그려진다.
+- [x] `PromptBox`를 두 가지 크기(399×171, 559×281)로 그리면 아이콘은 가운데, 구분선은 양쪽 35px 안쪽, 본문은 구분선 아래로 상자 크기에 맞게 배치된다. 아이콘이 없으면 머리와 구분선이 없다.
+- [x] `Toc`가 section 목록과 같은 순서, 같은 제목으로 채워지고(`SECTION 1` / layout, `SECTION 2` / 자유 배치 요소, 줄 간격 76px), 줄 수보다 section이 많으면 넘치는 항목은 표시하지 않고 경고한다(임시로 `rows`를 1로 줄여 확인하고 되돌림. 11개 이상의 실제 section으로는 시험하지 않았다).
+- [x] `Toc`에 `items` 같은 직접 지정 속성이 없다(`<Toc items={...} />`가 타입 오류임을 `tsc`로 확인하고 임시 파일을 지움).
+- [x] 쌓는 순서가 작성 순서이다(element 단계의 자식 `z-index`가 100, 200, ..., 1200).
+- [x] 기존 슬롯 배치에 회귀가 없다(컨텐츠 layout의 제목, 본문 슬롯 위치가 그대로). 24장(샘플 18장 + sample2 6장) 모두 오류, 경고, 깨진 이미지가 없고 `typecheck`, `build`가 통과한다.
+
+**구현하며 정한 것과 알게 된 것**
+- **파일 구성**: `src/elements/`에 `free.tsx`(`Text`, `Shape`, `Image`), `widgets.tsx`(`Chip`, `PromptBox`, `Toc`), `at.ts`, `inlines.tsx`(`Inlines`를 `index.tsx`에서 분리해 순환 참조를 피함)를 만들었다. `@/elements`가 모두 다시 내보낸다.
+- **`at`의 타입**: `Text`, `Image`, `Chip`은 `at`이 선택이고 `w`, `h`도 선택이다. `Shape`와 `PromptBox`는 크기가 없으면 의미가 없어 `at`이 필수이고 `x, y, w, h`를 모두 줘야 한다(ADR-7의 "at은 선택"에서 벗어난 부분).
+- **쌓는 순서**: `at`이 있는 요소는 element 단계에서 `.free` 래퍼로 감싸 작성 순서의 `z-index`를 준다. 슬롯 컨테이너도 슬롯의 첫 요소의 작성 순서로 `z-index`를 받는다.
+- **`list` 슬롯**: `ListSlotBox`가 첫 줄 위에서 마지막 줄 아래까지의 영역을 만들고, `Toc`가 context로 슬롯을 읽어 줄을 그린다. `MasterFrame`이 `chapter`(`sectionLabel`, section 목록)를 받아 내려 준다. 번호 칸의 `SECTION 1`은 `sectionLabel`을 쓴다.
+- **선(`line`)**: 높이가 0이면 SVG의 `viewBox`가 유효하지 않아 그려지지 않았다. SVG의 크기를 최소 1로 두어 고쳤다.
+- **`Chip`, `PromptBox`의 값**: `default` 마스터의 `tokens`에 `--chip-*`, `--promptbox-*`로 두었다(PPTX의 값: 칩 높이 74px, 흰색 95% 바탕, 흰 테두리 3px, 반지름 12px, 글자 36px / 프롬프트 박스 `#0C0C0C`, 테두리 `#D77757`, 글자 `#FFC000`). `PromptBox`의 글자 크기는 PPTX에서 지정되어 있지 않아 기본 36px로 했다.
+- **아이콘**: 도구는 아이콘을 제공하지 않는다. 샘플의 아이콘(터미널, 파일, 별 모양)과 예시 이미지는 이 저장소에서 직접 그린 단순한 SVG이고 `courses/sample/assets/`에 있다. PPTX의 아이콘은 쓰지 않았다.
+- **샘플**: `courses/sample/ch.3_master`(section 2개, 슬라이드 7장)를 추가했다. 샘플이 11장에서 18장이 되었다.
+- **강의 전용 요소 확인은 단계 6**에서 한다.
 
 ### 단계 5. `sectionLabel` 적용
 

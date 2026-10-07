@@ -11,3 +11,19 @@ export function useMaster(): Master {
   }
   return master;
 }
+
+/** 지금 그리는 슬라이드가 속한 chapter의 정보. 목차 요소가 읽는다. */
+export interface ChapterInfo {
+  /** section을 부르는 이름(예: SECTION, UNIT) */
+  sectionLabel: string;
+  /** chapter의 section 목록(순서대로) */
+  sections: { id: string; title: string }[];
+}
+
+export const ChapterContext = createContext<ChapterInfo | null>(null);
+
+export function useChapter(): ChapterInfo {
+  const chapter = useContext(ChapterContext);
+  if (!chapter) throw new Error("[masters] chapter 정보가 없습니다. MasterFrame에 chapter를 넘겨야 목차를 채울 수 있습니다.");
+  return chapter;
+}

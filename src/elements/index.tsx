@@ -2,33 +2,16 @@ import type { ReactNode } from "react";
 import { DEFAULT_LAYOUT_ID } from "@/constants";
 import { useMaster } from "@/masters/context";
 import { Layers } from "@/masters/Layers";
-import type { Inline, Sentence } from "./inline";
-import { SlotBox, placeChildren, type PlacementProps } from "./slots";
+import { Inlines } from "./inlines";
+import type { Sentence } from "./inline";
+import { Placements, placeChildren, type PlacementProps } from "./slots";
 
+export * from "./at";
+export * from "./free";
 export * from "./inline";
-
-function InlineNode({ seg }: { seg: Inline }) {
-  if (typeof seg === "string") return <>{seg}</>;
-  switch (seg.kind) {
-    case "bold":
-      return <strong>{seg.text}</strong>;
-    case "code":
-      return <code>{seg.text}</code>;
-    case "badge":
-      return <span className={`badge badge--${seg.color}`}>{seg.text}</span>;
-  }
-}
-
-export function Inlines({ value }: { value: Sentence }) {
-  if (typeof value === "string") return <>{value}</>;
-  return (
-    <>
-      {value.map((seg, i) => (
-        <InlineNode key={i} seg={seg} />
-      ))}
-    </>
-  );
-}
+export * from "./inlines";
+export * from "./widgets";
+export type { PlacementProps } from "./slots";
 
 function Tier({ name, children }: { name: "background" | "layout" | "element"; children: ReactNode }) {
   return <div className={`tier tier--${name}`}>{children}</div>;
@@ -47,7 +30,7 @@ export function Slide({ layout = DEFAULT_LAYOUT_ID, children }: { layout?: strin
     );
   }
 
-  const placed = placeChildren(master.id, found, children);
+  const placements = placeChildren(master.id, found, children);
   return (
     <>
       <Tier name="background">
@@ -57,11 +40,7 @@ export function Slide({ layout = DEFAULT_LAYOUT_ID, children }: { layout?: strin
         <Layers layers={found.decorations} tokens={master.tokens} />
       </Tier>
       <Tier name="element">
-        {[...placed].map(([slot, nodes]) => (
-          <SlotBox key={slot.id} masterId={master.id} layoutId={found.id} slot={slot} tokens={master.tokens}>
-            {nodes}
-          </SlotBox>
-        ))}
+        <Placements masterId={master.id} layoutId={found.id} placements={placements} tokens={master.tokens} />
       </Tier>
     </>
   );

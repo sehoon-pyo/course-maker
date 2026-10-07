@@ -119,7 +119,13 @@ export function App() {
           <SlidePreviewArea>
             {master ? (
               <SlideErrorBoundary key={current.key}>
-                <MasterFrame master={master}>
+                <MasterFrame
+                  master={master}
+                  chapter={{
+                    sectionLabel: course.sectionLabel,
+                    sections: chapter.sections.map((s) => ({ id: s.id, title: s.title })),
+                  }}
+                >
                   <Component />
                 </MasterFrame>
               </SlideErrorBoundary>
