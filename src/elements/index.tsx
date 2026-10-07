@@ -26,7 +26,7 @@ export function Inlines({ value }: { value: Sentence }) {
   );
 }
 
-/** 슬라이드 한 장의 최상위 요소. 크기는 미리보기 스테이지(1920x1080)가 정한다. */
+/** 슬라이드 한 장의 최상위 요소. 크기는 1920x1080 고정이며, 슬라이드 미리보기 영역(slide-preview-area)이 창 크기에 맞춰 축소해서 보여 준다. */
 export function Slide({ children }: { children: ReactNode }) {
   return <div className="slide">{children}</div>;
 }

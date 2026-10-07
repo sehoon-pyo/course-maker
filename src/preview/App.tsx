@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { courses, findPath, slidesOfChapter, slidesOfCourse } from "@/courses";
 import { Sidebar } from "./Sidebar";
-import { Stage } from "./Stage";
+import { SlidePreviewArea } from "./SlidePreviewArea";
 import { TopBar } from "./TopBar";
 import { useHashRoute } from "./useHashRoute";
 
@@ -103,9 +103,9 @@ export function App() {
       <div className="body">
         {sidebarOpen && <Sidebar chapter={chapter} currentKey={current.key} onSelect={go} />}
         <main className="main">
-          <Stage>
+          <SlidePreviewArea>
             <Component />
-          </Stage>
+          </SlidePreviewArea>
           <footer className="controls">
             <button type="button" onClick={() => move(-1)} disabled={index === 0}>
               이전
