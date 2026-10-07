@@ -34,6 +34,6 @@ export function t(strings: TemplateStringsArray, ...values: Inline[]): Inline[] 
   return out;
 }
 
-export const badge =(text: string, color: BadgeColor): Badge => ({ kind: "badge", text, color });
+export const badge = (text: string, color: BadgeColor): Badge => ({ kind: "badge", text, color });
 export const bold = (text: string): Bold => ({ kind: "bold", text });
 export const code = (text: string): Code => ({ kind: "code", text });
