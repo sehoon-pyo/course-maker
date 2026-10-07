@@ -224,7 +224,7 @@ export default function VariableDefinition() {
 | slide-master | 모든 슬라이드에 공통으로 적용되는 틀. PowerPoint의 슬라이드 마스터와 같은 개념 (아직 구현되지 않음) |
 | layout | slide-master 안의 영역 배치 틀 (아직 구현되지 않음) |
 
-PowerPoint나 DOM에만 있는 개념은 `pptx layout`, `dom element`처럼 앞에 `pptx`, `dom`을 붙여 구분합니다. 자세한 결정 내용은 [`docs/adr/`](docs/adr/)를 보세요. (TODO: 용어사전 `docs/glossary.md`)
+PowerPoint나 DOM에만 있는 개념은 `pptx layout`, `dom element`처럼 앞에 `pptx`, `dom`을 붙여 구분합니다. 전체 용어의 정의는 [`docs/glossary.md`](docs/glossary.md), 결정 내용은 [`docs/adr/`](docs/adr/)를 보세요.
 
 ## 9. 폰트와 라이선스
 
