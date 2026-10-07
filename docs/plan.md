@@ -3,7 +3,7 @@
 이 문서는 [`docs/adr/[261007_004]_adr.md`](./adr/[261007_004]_adr.md)에서 확정한 결정을 어떻게 구현할지와 언제 끝난 것으로 볼지를 정한다. 결정의 이유는 ADR과 [노트 004](./notes/[261007_004]_note.md)를 본다. 구현하면서 계획이 바뀌면 이 문서를 먼저 고친다.
 
 - 작업 브랜치: `feature/slide-master`
-- 상태: 단계 1, 2, 3, 4 구현 완료, 단계 5부터 남음
+- 상태: 단계 1, 2, 3, 4, 5 구현 완료, 단계 6부터 남음
 
 ## 1. 목표와 범위
 
@@ -192,14 +192,21 @@ src/elements/
 - **샘플**: `courses/sample/ch.3_master`(section 2개, 슬라이드 7장)를 추가했다. 샘플이 11장에서 18장이 되었다.
 - **강의 전용 요소 확인은 단계 6**에서 한다.
 
-### 단계 5. `sectionLabel` 적용
+### 단계 5. `sectionLabel` 적용 (완료)
 
 **작업**
 - 사이드바의 section 제목, 상단 바 breadcrumb의 section, `Toc`의 항목에 `{sectionLabel} {번호}` 형식을 적용한다.
 - 샘플 하나(`sample2`)에 `sectionLabel: "UNIT"`을 지정해 확인한다.
 
-**완료 기준**
-- [ ] 지정하지 않은 강의(`sample`)는 `SECTION 1 …`, 지정한 강의(`sample2`)는 `UNIT 1 …`로 사이드바, breadcrumb, 목차에서 같게 보인다.
+**완료 기준** (Playwright MCP로 개발 서버의 브라우저에서 확인함)
+- [x] 지정하지 않은 강의(`sample`)는 `SECTION 1 …`, 지정한 강의(`sample2`)는 `UNIT 1 …`로 사이드바, 상단 바(breadcrumb)에서 보인다. 번호는 chapter마다 1부터 다시 시작한다(`sample2`의 2장 CSS는 `UNIT 1 선택자`).
+- [x] 목차까지 같은 값을 쓴다. `sample`의 `sectionLabel`을 임시로 `MODULE`로 바꿔 사이드바, breadcrumb, 목차의 번호 칸이 모두 `MODULE n`으로 바뀌는 것을 확인하고 되돌렸다. `sample2`에는 목차 슬라이드가 없어 `UNIT`의 목차 표시는 이 방법으로 대신 확인했다.
+- [x] 24장 모두 오류, 경고가 없고 `typecheck`, `build`가 통과한다.
+
+**구현하며 정한 것**
+- **표시 형식**: `{라벨} {번호}`를 번호표(`SECTION 1`)로 하고, 사이드바와 breadcrumb에서는 번호표 뒤에 제목을 붙인다(`SECTION 1 변수`). 사이드바에서는 번호표를 연한 회색으로 보인다. 번호는 폴더 이름의 번호가 아니라 chapter 안의 section 순서이다.
+- **공용 함수**: `src/sections.ts`의 `sectionTag(label, no)` 하나를 목차 요소, 사이드바, breadcrumb이 함께 쓴다. 다른 모듈에 의존하지 않게 따로 두었다(슬라이드 요소가 `courses.ts`를 가져오면 순환 참조가 된다).
+- `sample2/meta.ts`에 `sectionLabel: "UNIT"`을 남겼다.
 
 ### 단계 6. 강의 전용 마스터와 요소
 

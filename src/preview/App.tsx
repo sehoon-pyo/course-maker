@@ -3,6 +3,7 @@ import { courses, findPath, slidesOfChapter, slidesOfCourse } from "@/courses";
 import { MasterFrame } from "@/masters/MasterFrame";
 import { resolveMaster } from "@/masters/registry";
 import type { Master } from "@/masters/types";
+import { sectionTag } from "@/sections";
 import { Sidebar } from "./Sidebar";
 import { SlideErrorBoundary } from "./SlideErrorBoundary";
 import { SlidePreviewArea } from "./SlidePreviewArea";
@@ -78,7 +79,8 @@ export function App() {
   }
 
   const { Component } = current;
-  const crumbs = [path.chapter.title, path.section.title, path.slide.name];
+  const sectionNo = path.chapter.sections.indexOf(path.section) + 1;
+  const crumbs = [path.chapter.title, `${sectionTag(course.sectionLabel, sectionNo)} ${path.section.title}`, path.slide.name];
 
   // 마스터를 못 찾거나 올바르지 않으면 화면 전체가 멈추지 않게 슬라이드 자리에 오류를 보여 준다.
   let master: Master | undefined;
@@ -114,7 +116,7 @@ export function App() {
         </label>
       </TopBar>
       <div className="body">
-        {sidebarOpen && <Sidebar chapter={chapter} currentKey={current.key} onSelect={go} />}
+        {sidebarOpen && <Sidebar chapter={chapter} sectionLabel={course.sectionLabel} currentKey={current.key} onSelect={go} />}
         <main className="main">
           <SlidePreviewArea>
             {master ? (

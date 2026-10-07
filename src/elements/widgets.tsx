@@ -1,4 +1,5 @@
 import { useMaster, useChapter } from "@/masters/context";
+import { sectionTag } from "@/sections";
 import { ANCHOR, textStyle } from "@/masters/Layers";
 import { resolveColor } from "@/masters/color";
 import { atStyle, type At, type AtBox } from "./at";
@@ -85,7 +86,7 @@ export function Toc(_props: PlacementProps) {
   return (
     <>
       {chapter.sections.slice(0, slot.rows).map((section, row) => {
-        const texts = slot.columns.length >= 2 ? [`${chapter.sectionLabel} ${row + 1}`, section.title] : [section.title];
+        const texts = slot.columns.length >= 2 ? [sectionTag(chapter.sectionLabel, row + 1), section.title] : [section.title];
         return (
           <div key={section.id} className="toc-row" style={{ top: row * slot.pitch, height: slot.h }}>
             {slot.columns.map((column, i) => (

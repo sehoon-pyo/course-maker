@@ -136,6 +136,11 @@ body {
   font-size: 13px;
   color: #d1d5db;
 }
+.sidebar .section-tag {
+  margin-right: 4px;
+  color: #9ca3af;
+  font-weight: 400;
+}
 .sidebar ol {
   margin: 0;
   padding: 0;
