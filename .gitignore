@@ -13,3 +13,8 @@ dist/
 !.env.example
 
 coverage/
+
+# 강의는 강의별로 별도 git 저장소에서 관리한다. 도구 저장소에는 샘플만 포함한다.
+courses/*
+!courses/sample/
+!courses/sample2/

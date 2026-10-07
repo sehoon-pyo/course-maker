@@ -1,6 +1,6 @@
 import type { SectionMeta } from "@/types";
 
 export default {
-  title: "함수",
-  slides: ["sl.1_title", "sl.2_define", "sl.3_call"],
+  title: "선택자",
+  slides: ["sl.1_title", "sl.2_kinds"],
 } satisfies SectionMeta;
