@@ -1,4 +1,4 @@
-import { Shape, Slide, Text, Title } from "@/elements";
+import { Shape, Slide, Stamp, Text, Title } from "../../../elements";
 
 const text = {
   title: "글과 도형을 at으로 배치",
@@ -22,7 +22,7 @@ export default function ElementsShapes() {
       <Shape kind="rightArrow" at={{ x: 220, y: 640, w: 240, h: 100 }} fill="#FFC000" />
       <Shape kind="triangle" at={{ x: 500, y: 640, w: 120, h: 100 }} fill="primary-dark" />
       <Shape kind="line" at={{ x: 660, y: 690, w: 200, h: 0 }} line={{ color: "#222222", width: 4 }} />
-      <Shape kind="roundRect" at={{ x: 1000, y: 300, w: 240, h: 100 }} line={{ color: "#00B0F0", width: 4 }} rotate={35} text={text.stamp} textStyle={{ color: "#00B0F0", size: 40, bold: true }} />
+      <Stamp at={{ x: 1000, y: 300 }} value={text.stamp} />
       <Shape kind="rect" at={{ x: 1000, y: 520, w: 360, h: 200 }} fill="#ffffff" line={{ color: "surface", width: 2 }} shadow={{ dx: 12, dy: 12, blur: 30, color: "rgba(0, 0, 0, 0.3)" }} text={text.shadow} textStyle={{ size: 36 }} />
       <Shape
         kind="path"

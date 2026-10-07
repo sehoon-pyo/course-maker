@@ -1,5 +1,4 @@
-import { Chip, Paragraph, Slide, Title } from "@/elements";
-import terminal from "../../../assets/icon-terminal.svg";
+import { ClaudeChip, Paragraph, Slide, TerminalChip, Title } from "../../../elements";
 
 const text = {
   title: "슬롯 안에서 흐르는 요소",
@@ -12,8 +11,8 @@ export default function LayoutFlow() {
     <Slide>
       <Title value={text.title} />
       <Paragraph value={text.body} />
-      <Chip value={text.chips[0]} />
-      <Chip value={text.chips[1]} icon={terminal} />
+      <ClaudeChip value={text.chips[0]} />
+      <TerminalChip value={text.chips[1]} />
     </Slide>
   );
 }

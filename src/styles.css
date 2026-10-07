@@ -380,8 +380,11 @@ body {
   white-space: nowrap;
 }
 .el-chip-icon {
+  /* 아이콘은 정사각형 칸 안에 비율을 지켜 맞춘다(가로로 긴 claude 이미지도 칸을 넘지 않는다). */
+  flex: none;
+  width: var(--chip-icon-size);
   height: var(--chip-icon-size);
-  width: auto;
+  object-fit: contain;
 }
 
 /* PromptBox: 값은 마스터 tokens의 --promptbox-* */
