@@ -1,0 +1,19 @@
+.sample2-bullets {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sample2-bullets li {
+  position: relative;
+  margin-bottom: 20px;
+  padding-left: 1.4em;
+}
+.sample2-bullets li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+}
+.sample2-bullets li:last-child {
+  margin-bottom: 0;
+}

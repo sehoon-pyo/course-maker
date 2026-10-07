@@ -10,6 +10,24 @@ import type {
   Slot,
 } from "./types";
 
+/**
+ * 모든 마스터가 정해야 하는 CSS 변수. 도구의 기본 요소(제목, 문단, 불릿, 인라인 서식)와 슬롯이 읽는다.
+ * 빠지면 값이 조용히 비어 버리므로 마스터를 읽을 때 오류로 알린다.
+ * `--chip-*`, `--promptbox-*`는 해당 요소를 쓸 때만 필요해서 여기에 넣지 않는다.
+ */
+export const REQUIRED_TOKENS = [
+  "--color-text",
+  "--color-primary",
+  "--color-code-bg",
+  "--badge-green",
+  "--badge-red",
+  "--badge-blue",
+  "--badge-gray",
+  "--size-title",
+  "--size-body",
+  "--slot-gap",
+] as const;
+
 /** 마스터 파일의 `export default defineMaster({...})`. 타입 검사를 받기 위한 것이며 검증은 `buildMaster`가 한다. */
 export function defineMaster(def: MasterDef): MasterDef {
   return def;
@@ -140,6 +158,8 @@ export function buildMaster(id: string, source: MasterSource, def: MasterDef): M
   for (const key of Object.keys(def.tokens ?? {})) {
     if (!key.startsWith("--")) problems.push(`tokens: 키 "${key}"는 "--"로 시작해야 합니다.`);
   }
+  const missing = REQUIRED_TOKENS.filter((key) => !(key in (def.tokens ?? {})));
+  if (missing.length > 0) problems.push(`tokens: 슬라이드의 기본 요소가 읽는 토큰이 없습니다: ${missing.join(", ")}`);
 
   checkIds(background, "background 층", "master", problems);
   for (const l of background) checkLayer(l, "master의 background", problems);

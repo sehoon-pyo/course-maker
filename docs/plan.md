@@ -3,7 +3,7 @@
 이 문서는 [`docs/adr/[261007_004]_adr.md`](./adr/[261007_004]_adr.md)에서 확정한 결정을 어떻게 구현할지와 언제 끝난 것으로 볼지를 정한다. 결정의 이유는 ADR과 [노트 004](./notes/[261007_004]_note.md)를 본다. 구현하면서 계획이 바뀌면 이 문서를 먼저 고친다.
 
 - 작업 브랜치: `feature/slide-master`
-- 상태: 단계 1~6 구현 완료, 단계 7부터 남음
+- 상태: 단계 1~7 구현 완료, 단계 8(문서 갱신과 마무리)만 남음
 
 ## 1. 목표와 범위
 
@@ -236,18 +236,28 @@ src/elements/
 - **작업 중 실수**: 시험용 수정을 되돌리려고 `git checkout`을 썼는데, 그 파일(`sample/meta.ts`, `ch.3_master/meta.ts`)에는 아직 커밋하지 않은 정상 수정(배열 추가)도 있어서 함께 되돌아갔다. 의도한 값으로 다시 넣었고 `typecheck`로 확인했다. 이후 시험 수정은 같은 줄을 직접 되돌리는 방식으로 했다.
 - Windows에서는 개발 서버가 떠 있는 동안 폴더 이름을 바꿀 수 없어(`mv` 권한 오류), 번호 없는 이름은 폴더를 복사해서 시험했다.
 
-### 단계 7. 강의 전용 마스터와 요소
+### 단계 7. 강의 전용 마스터와 요소 (완료)
 
 **작업**
 - `courses/sample2/masters/plain/index.tsx`: layout `title`, `content`만 가진 작은 마스터(색과 장식이 `default`와 달라야 함). `sample2`의 `meta.ts`에 `master: "plain"`.
 - `courses/sample2/elements/index.ts`: `export * from "@/elements"`에 더해 강의 전용 요소 하나(예: 색과 아이콘을 바꾼 `Chip` 변형)와 같은 이름 하나(도구 요소를 덮어쓰는 것)를 내보낸다. `sample2`의 슬라이드 하나가 `../../../elements`에서 가져온다.
 - (선택) 같은 id `default`를 `courses/sample2/masters/default/`에 임시로 두고 강의 전용이 우선하는지 확인한 뒤 지운다.
 
-**완료 기준**
-- [ ] `sample2`가 `plain` 마스터로 그려지고, `sample`은 `default`로 그려진다(강의 전환 시 디자인이 바뀜).
-- [ ] 슬라이드가 `../../../elements`에서 도구 요소와 강의 전용 요소를 한 번에 가져오고 타입 검사를 통과한다.
-- [ ] 같은 이름이면 강의의 것이 쓰인다(ES 모듈의 `export *` 우선순위 동작을 이 프로젝트에서 확인).
-- [ ] 임시로 둔 `default` 중복 마스터에서 강의 전용이 선택됨을 확인하고 임시 파일을 지운다.
+**완료 기준** (Playwright MCP로 개발 서버의 브라우저에서 확인함. 임시 파일은 모두 지움)
+- [x] `sample2`가 `plain` 마스터로, `sample`이 `default`로 그려진다(`data-master`, 배경색, 슬롯 위치, 제목 색 확인. 25장이 `sample:default` 19장, `sample2:plain` 6장). `plain`은 `sample2`에서만 보이고 `sample`에서는 "찾을 수 없습니다" 오류와 함께 사용 가능한 목록이 나온다.
+- [x] 슬라이드가 `../../../elements`에서 도구 요소(`Slide`, `Title`, `t`, `code` 등)와 강의 전용 요소(`CodeChip`)를 한 줄로 가져오고 `tsc`를 통과한다.
+- [x] 같은 이름이면 강의의 것이 쓰인다. `export *`와 같은 이름의 명시적 `export { Bullets }`가 `tsc`에서 충돌 오류 없이 통과하고(TypeScript 7), 런타임(Vite 8)에서도 `../../../elements`에서 가져온 `sl.2_basic`은 강의의 `Bullets`(`sample2-bullets`, ▸ 표시)를, `@/elements`에서 가져온 `sl.2_class`는 도구의 `Bullets`(`el-bullets`)를 쓴다. 즉 **어디서 가져오느냐가 우선순위를 정한다.**
+- [x] 같은 id `default`를 `courses/sample2/masters/default/`에 임시로 두자 `resolveMaster("sample2", "default")`가 강의 전용(`#eeffee`)을, `resolveMaster("sample", "default")`가 도구 제공(`#ffffff`)을 돌려주었다. 임시 폴더는 지웠다.
+- [x] `CodeChip`이 흐름 배치(본문 슬롯 안, x96 y584)와 `at` 배치(x1300 y760) 모두 동작하고, 폭이 글자에 맞춰진다.
+- [x] 25장 모두 오류, 경고가 없다. `typecheck`, `build` 통과.
+
+**구현하며 정한 것과 알게 된 것**
+- **필수 토큰 검증(단계 2에서 미룬 질문)**: 도구의 기본 요소가 읽는 토큰 10개(`--color-text`, `--color-primary`, `--color-code-bg`, `--badge-green/red/blue/gray`, `--size-title`, `--size-body`, `--slot-gap`)가 빠지면 `buildMaster`가 빠진 목록과 함께 `MasterError`를 던진다(`REQUIRED_TOKENS`, `src/masters/define.ts`). `--chip-*`, `--promptbox-*`는 해당 요소를 쓸 때만 필요해서 검증하지 않는다. 빠뜨리면 그 요소의 모양이 비어 보일 뿐 오류는 나지 않는다.
+- **요소의 모양은 마스터가 정한다는 것이 눈에 보였다**: `plain`에 `--chip-*`가 없을 때 `CodeChip`은 알약 없이 아이콘과 글자만 나왔고, `plain`에 갈색 칩 토큰을 넣자 같은 요소가 알약 모양이 되었다.
+- **래퍼 요소**: `CodeChip`은 `Chip`을 감싼 래퍼라 `slotKinds`를 원래 요소(`Chip.slotKinds`)에서 그대로 다시 알려야 슬롯 자동 배치가 된다. `at`은 래퍼의 속성으로 읽히므로 따로 할 일이 없다.
+- **강의 요소의 CSS**: 강의의 요소는 자기 CSS 파일(`bullets.css`)을 불러올 수 있고, 클래스 이름을 `sample2-`로 구분해 다른 강의와 겹치지 않게 했다. 색은 마스터의 CSS 변수(`--color-primary`)를 읽는다.
+- **강의 폴더 구성**: `courses/sample2/masters/plain/`, `courses/sample2/elements/`(`index.ts`, `Bullets.tsx`, `CodeChip.tsx`, `bullets.css`), `courses/sample2/assets/icon-code.svg`(직접 그린 단순한 아이콘).
+- **`sample2`의 슬라이드는 하나(`sl.2_basic`)만** `../../../elements`에서 가져오게 바꿨고 나머지는 `@/elements`를 그대로 쓴다.
 
 ### 단계 8. 문서 갱신과 마무리
 
