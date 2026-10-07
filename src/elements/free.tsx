@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { resolveColor } from "@/masters/color";
 import { useMaster } from "@/masters/context";
 import { ANCHOR, textStyle } from "@/masters/Layers";
-import type { Shadow, TextStyle } from "@/masters/types";
+import type { Glow, Shadow, TextStyle } from "@/masters/types";
 import { atStyle, type At, type AtBox } from "./at";
 import type { Sentence } from "./inline";
 import { Inlines } from "./inlines";
@@ -67,6 +67,8 @@ interface ShapeBase extends PlacementProps {
   /** 도형의 중심을 기준으로 회전(도) */
   rotate?: number;
   shadow?: Shadow;
+  /** 도형의 글로우. 채움이 없는 도형은 테두리를 따라 번진다. */
+  glow?: Glow;
   /** 도형 안의 글자 */
   text?: Sentence;
   textStyle?: TextStyle;
@@ -106,7 +108,7 @@ function outline(p: ShapeProps) {
 
 export function Shape(props: ShapeProps) {
   const { tokens } = useMaster();
-  const { at, fill, line, rotate, shadow, text, textStyle: textProps } = props;
+  const { at, fill, line, rotate, shadow, glow, text, textStyle: textProps } = props;
   const stroke = line ? resolveColor(line.color, tokens) : undefined;
   const dash = line?.dash === "dash" ? `${line.width * 3} ${line.width}` : undefined;
   // 높이(또는 폭)가 0인 선은 viewBox가 유효하지 않아 그려지지 않으므로 svg의 크기는 최소 1로 둔다. 선은 svg 밖으로 그려도 보인다(overflow).
@@ -128,7 +130,12 @@ export function Shape(props: ShapeProps) {
         height={svgH}
         viewBox={viewBox}
         preserveAspectRatio="none"
-        style={{ overflow: "visible", display: "block" }}
+        style={{
+          overflow: "visible",
+          display: "block",
+          // 글로우는 도형(svg)에만 건다. 도형 안의 글자는 textStyle.glow가 따로 정한다.
+          filter: glow ? `drop-shadow(0 0 ${glow.radius}px ${resolveColor(glow.color, tokens)})` : undefined,
+        }}
         fill={resolveColor(fill, tokens) ?? "none"}
         stroke={stroke ?? "none"}
         strokeWidth={line?.width}

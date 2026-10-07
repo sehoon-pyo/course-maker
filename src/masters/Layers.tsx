@@ -14,6 +14,7 @@ export function textStyle(s: TextStyle, tokens: Record<string, string>): CSSProp
     color: resolveColor(s.color, tokens),
     textAlign: s.align,
     fontWeight: s.bold === undefined ? undefined : s.bold ? 700 : 400,
+    textShadow: s.glow ? `0 0 ${s.glow.radius}px ${resolveColor(s.glow.color, tokens)}` : undefined,
   };
 }
 

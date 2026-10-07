@@ -8,6 +8,12 @@ export interface Rect {
 
 export type TextAlign = "left" | "center" | "right";
 
+/** 빛이 번지는 효과(PowerPoint의 "네온"). 도형과 글자에 쓴다. 반경은 px, 색은 알파를 포함한 값이거나 토큰 이름이다. */
+export interface Glow {
+  radius: number;
+  color: string;
+}
+
 export interface TextStyle {
   /** px */
   size?: number;
@@ -17,6 +23,8 @@ export interface TextStyle {
   /** 세로 정렬. 슬롯과 층의 박스 안에서의 위치 */
   anchor?: "top" | "middle" | "bottom";
   bold?: boolean;
+  /** 글자의 글로우 */
+  glow?: Glow;
 }
 
 /* ---------- 층 (background와 layout의 장식) ---------- */
