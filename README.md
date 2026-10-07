@@ -73,7 +73,7 @@ course-maker/
 │  ├─ sample2/             예제 강의 (도구에 포함, 별도 저장소 아님)
 │  └─ my-course/           ← ★ 내 강의 (현재 프로젝트는 이 폴더를 무시함)
 │     ├─ .git/             이 폴더에서 `git init` 한 별도 저장소
-│     ├─ meta.ts           강의 제목, 쓸 슬라이드 마스터 id (`master`, 없으면 default)
+│     ├─ meta.ts           강의 제목, chapter 순서(`chapters`), 쓸 슬라이드 마스터 id (`master`, 없으면 default), section 이름(`sectionLabel`)
 │     ├─ masters/          이 강의 전용 슬라이드 마스터 (선택, 아직 구현되지 않음)
 │     └─ ...               chapter, section, slide 구조는 아래 6번에 써 있음
 │
@@ -129,20 +129,41 @@ git init
 
 ```
 courses/my-course/                 강의 (course)
-├─ meta.ts                         강의 제목
+├─ meta.ts                         강의 제목과 chapter 순서
 └─ ch.1_intro/                     chapter (배포 파일 하나가 될 단위)
-   ├─ meta.ts                      chapter 제목
+   ├─ meta.ts                      chapter 제목과 section 순서
    └─ sec.1_variable/              section (수업 주제 단위)
       ├─ meta.ts                   section 제목과 슬라이드 순서
       └─ sl.1_title/               슬라이드 한 장
          └─ index.tsx
 ```
 
-- `ch.1_`, `sec.1_`, `sl.1_` 앞의 번호는 chapter와 section의 순서를 정합니다.
-- **슬라이드의 순서는 section의 `meta.ts`에 있는 `slides` 배열이 정합니다.**
-- 슬라이드 폴더 이름은 `sl.N_이름` 형식입니다. 앞의 `ch.N_`, `sec.N_`과 같은 규칙이며, 슬라이드의 순서는 폴더 이름의 번호가 아니라 section `meta.ts`의 `slides` 배열이 정합니다.
+- **순서는 모두 상위 폴더의 `meta.ts`에 있는 배열이 정합니다.** 강의의 `chapters`, chapter의 `sections`, section의 `slides`입니다. 항목을 끼우거나 순서를 바꿀 때는 배열만 고치면 되고 폴더 이름을 바꾸지 않아도 됩니다.
+- 폴더 이름의 번호(`ch.1_`, `sec.1_`, `sl.1_`)는 **정리용이며 순서를 정하지 않습니다.** `ch.intro`처럼 번호 없이 써도 되고 접두사 없이 `intro`로 써도 됩니다. 화면에는 접두사와 번호를 뗀 이름이 보입니다. (URL 해시는 폴더 이름 그대로입니다.)
+- 화면의 `SECTION 1` 같은 번호는 폴더 번호가 아니라 chapter 안에서의 section 순서입니다.
 
 ### 6-3. meta.ts 예시
+
+```ts
+// courses/my-course/meta.ts
+import type { CourseMeta } from "@/types";
+
+export default {
+  title: "내 강의",
+  chapters: ["ch.1_intro", "ch.2_control"],     // chapter 표시 순서
+  // sectionLabel: "UNIT",                      // section을 부르는 이름 (없으면 SECTION)
+} satisfies CourseMeta;
+```
+
+```ts
+// courses/my-course/ch.1_intro/meta.ts
+import type { ChapterMeta } from "@/types";
+
+export default {
+  title: "1장 시작하기",
+  sections: ["sec.1_variable", "sec.2_function"],   // section 표시 순서
+} satisfies ChapterMeta;
+```
 
 ```ts
 // courses/my-course/ch.1_intro/sec.1_variable/meta.ts
@@ -150,11 +171,11 @@ import type { SectionMeta } from "@/types";
 
 export default {
   title: "변수",
-  slides: ["sl.1_title", "sl.2_definition"],   // 표시 순서
+  slides: ["sl.1_title", "sl.2_definition", { id: "sl.3_extra", hidden: true }],   // 표시 순서
 } satisfies SectionMeta;
 ```
 
-강의와 chapter의 `meta.ts`에는 `title`만 있으면 됩니다.
+**숨김 슬라이드**: `slides`의 항목을 `{ id, hidden: true }`로 쓰면 숨김입니다. **미리보기에서는 숨김 슬라이드도 보이고**(사이드바에 "숨김" 표시, 이전/다음에도 포함) HTML, PPTX, PDF로 내보낼 때만 빠집니다(내보내기는 아직 없습니다).
 
 ### 6-4. 슬라이드 예시
 
@@ -181,7 +202,7 @@ export default function VariableDefinition() {
 }
 ```
 
-새 슬라이드를 만들면 section의 `meta.ts`의 `slides`에도 폴더 이름을 추가해야 목차에 나타납니다. 폴더는 있는데 `slides`에 없거나, `slides`에는 있는데 폴더가 없으면 브라우저 콘솔에 경고가 나옵니다.
+새 슬라이드를 만들면 section의 `meta.ts`의 `slides`에도 폴더 이름을 추가해야 목차에 나타납니다. chapter와 section도 마찬가지로 상위 `meta.ts`의 `chapters`, `sections`에 추가합니다. 폴더는 있는데 배열에 없거나, 배열에는 있는데 폴더가 없거나, 배열에 같은 이름이 둘이면 브라우저 콘솔에 경고가 나옵니다(앞의 두 경우 그 항목은 표시되지 않습니다).
 
 ## 7. 슬라이드 작성 가이드
 

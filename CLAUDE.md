@@ -47,8 +47,9 @@ course-maker/
 ```
 
 - 경로 별칭은 `@/`(= `src/`)이다.
-- course, chapter, section 폴더에는 `meta.ts`가 있다(`title`). section의 `meta.ts`에는 `slides`(슬라이드 폴더 이름 배열)도 있다.
-- **chapter와 section의 순서는 폴더 이름의 번호가, slide의 순서는 section `meta.ts`의 `slides` 배열이 정한다.** 슬라이드를 추가하면 폴더와 `slides` 배열을 둘 다 고친다.
+- course, chapter, section 폴더에는 `meta.ts`가 있다(`title`와 하위 폴더 이름의 배열: course는 `chapters`, chapter는 `sections`, section은 `slides`).
+- **순서는 모두 상위 `meta.ts`의 배열이 정한다. 폴더 이름의 번호(`ch.1_` 등)는 정리용이며 순서의 기준이 아니다**(번호 없이 `ch.intro`, 접두사 없이 `intro`도 된다). chapter, section, slide를 추가하면 폴더와 상위 배열을 둘 다 고친다. 어긋나면 콘솔에 경고가 나오고 배열에 없는 폴더는 표시되지 않는다.
+- **숨김 슬라이드**는 section `meta.ts`의 `slides`에서 `{ id, hidden: true }`로 쓴다. 미리보기에서는 보이고 내보낼 때만 빠진다.
 - **`courses/`에서 이 저장소가 추적하는 것은 `sample`, `sample2`뿐**이다. 나머지는 강의별 별도 git 저장소이므로 이 저장소에 커밋하지 않는다.
 - 슬라이드 마스터는 정해 둔 구조만 있고 코드는 없다(`docs/adr/[261007_003]_adr.md` ADR-3). 마스터는 course 단위로 하나만 고르고, id는 ① `courses/{강의}/masters/` → ② `src/masters/` 순서로 찾는다.
 
