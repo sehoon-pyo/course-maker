@@ -324,6 +324,11 @@ body {
   font-size: 0.8em;
   font-weight: 700;
   line-height: 1.5;
+  /*
+   * 기준선에 앉으면 본문 글자의 중심선보다 약 4px(본문 48px일 때) 아래로 처진다.
+   * 한글의 중심선에 맞추되(0.11em이면 정확히 맞음) 숫자와 영문 소문자가 섞인 줄에서도 어색하지 않게 0.10em으로 올린다(시험해서 정함).
+   */
+  vertical-align: 0.1em;
 }
 .badge--green {
   background: var(--badge-green);
