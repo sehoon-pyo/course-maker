@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { courses, findPath, slidesOfChapter, slidesOfCourse } from "@/courses";
+import { MasterFrame } from "@/masters/MasterFrame";
+import { resolveMaster } from "@/masters/registry";
+import type { Master } from "@/masters/types";
 import { Sidebar } from "./Sidebar";
+import { SlideErrorBoundary } from "./SlideErrorBoundary";
 import { SlidePreviewArea } from "./SlidePreviewArea";
 import { TopBar } from "./TopBar";
 import { useHashRoute } from "./useHashRoute";
@@ -76,6 +80,15 @@ export function App() {
   const { Component } = current;
   const crumbs = [path.chapter.title, path.section.title, path.slide.name];
 
+  // 마스터를 못 찾거나 올바르지 않으면 화면 전체가 멈추지 않게 슬라이드 자리에 오류를 보여 준다.
+  let master: Master | undefined;
+  let masterError: string | undefined;
+  try {
+    master = resolveMaster(course.id, course.master);
+  } catch (e) {
+    masterError = e instanceof Error ? e.message : String(e);
+  }
+
   return (
     <div className="preview">
       <TopBar sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} crumbs={crumbs}>
@@ -104,7 +117,15 @@ export function App() {
         {sidebarOpen && <Sidebar chapter={chapter} currentKey={current.key} onSelect={go} />}
         <main className="main">
           <SlidePreviewArea>
-            <Component />
+            {master ? (
+              <SlideErrorBoundary key={current.key}>
+                <MasterFrame master={master}>
+                  <Component />
+                </MasterFrame>
+              </SlideErrorBoundary>
+            ) : (
+              <pre className="slide-error">{masterError}</pre>
+            )}
           </SlidePreviewArea>
           <footer className="controls">
             <button type="button" onClick={() => move(-1)} disabled={index === 0}>

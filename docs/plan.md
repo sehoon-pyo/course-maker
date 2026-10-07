@@ -3,7 +3,7 @@
 이 문서는 [`docs/adr/[261007_004]_adr.md`](./adr/[261007_004]_adr.md)에서 확정한 결정을 어떻게 구현할지와 언제 끝난 것으로 볼지를 정한다. 결정의 이유는 ADR과 [노트 004](./notes/[261007_004]_note.md)를 본다. 구현하면서 계획이 바뀌면 이 문서를 먼저 고친다.
 
 - 작업 브랜치: `feature/slide-master`
-- 상태: 단계 1 구현 완료, 단계 2부터 남음
+- 상태: 단계 1, 2 구현 완료, 단계 3부터 남음
 
 ## 1. 목표와 범위
 
@@ -102,7 +102,7 @@ src/elements/
 - `import.meta.glob`에 `import: "default"`를 쓰면 `default` export가 없는 마스터 파일 하나 때문에 레지스트리 전체가 읽히지 않고 `SyntaxError`가 난다. 모듈 전체를 받아 `.default`를 직접 읽도록 했다.
 - 아직 `default` 마스터가 없어서(단계 3) 지금은 `resolveMaster("sample")`가 "사용 가능한 마스터: 없음" 오류를 낸다. `App`이 마스터를 부르는 것은 단계 2이다.
 
-### 단계 2. 렌더링 경로
+### 단계 2. 렌더링 경로 (완료)
 
 **작업**
 - `MasterFrame`, `context.ts`, `Layers.tsx`(color, image, shape, text) 작성.
@@ -112,12 +112,25 @@ src/elements/
 - `styles.css`의 슬라이드 디자인 값은 CSS 변수 참조로만 남긴다. 값 정의는 마스터의 `tokens`로 옮기고, `@font-face`와 미리보기 UI 스타일은 그대로 둔다.
 - 세 단계 컨테이너의 쌓임 맥락과 `z-index`(단계 고정, 단계 안은 배열 순서 × 100)를 적용한다.
 
-**완료 기준**
-- [ ] `.slide` 안에 `background`, `layout`, `element` 단계 컨테이너가 이 순서로 있고, 각각 `isolation: isolate`이다.
-- [ ] `element` 단계의 요소에 아주 큰 `z-index`를 줘도 `layout` 단계 아래로 내려가거나 위로 올라가지 못하지 않는다(단계를 넘지 못함을 DOM에서 확인).
-- [ ] 슬롯에 들어간 요소는 슬롯의 `x, y, w, h`에 놓인다(계산된 위치를 슬롯 값과 비교).
-- [ ] 없는 layout 이름, 마스터 밖의 `Slide`가 각각 명확한 오류를 낸다.
-- [ ] 미리보기의 확대 축소에서 슬라이드의 모든 단계가 함께 줄고 늘어난다(화면 확인).
+**완료 기준** (Playwright MCP로 개발 서버의 브라우저에서 확인함)
+- [x] `.slide` 안에 `background`, `layout`, `element` 단계 컨테이너가 이 순서로 있고, 각각 `isolation: isolate`이다(`z-index` 1, 2, 3).
+- [x] 단계를 넘지 못한다. 배경 단계 안에 `z-index: 2147483647`인 요소를 제목 위치에 넣어도 `element` 단계의 제목이 위에 있다(`elementFromPoint`).
+- [x] 슬롯에 들어간 요소는 슬롯의 `x, y, w, h`에 놓인다(슬롯 컨테이너의 위치와 크기가 선언한 값과 같음).
+- [x] 없는 layout 이름, 없는 슬롯 id, 마스터 밖의 `Slide`, 없는 마스터를 지정한 강의가 각각 명확한 오류를 슬라이드 자리에 보여 주고, 사이드바와 이동은 계속 동작한다.
+- [x] 미리보기의 확대 축소(배율 0.691 → 0.298)에서 세 단계와 슬롯이 슬라이드 좌표로는 같은 위치이다.
+- [x] 회귀 없음: 코드를 고치기 전과 후에 17장 모두 `.el-title`, `.el-paragraph`, `.el-bullets`, `li`의 위치, 크기, 글자 크기, 굵기, 색, 줄 높이를 측정해 비교했고 67개 항목이 모두 같다. 화면도 눈으로 확인했다.
+- [x] 17장을 모두 훑는 동안 콘솔 오류와 경고가 없다. `npm run typecheck`, `npm run build` 통과.
+
+**구현하며 정한 것과 알게 된 것**
+- **임시 `default` 마스터**: `App`이 마스터를 부르려면 `default`가 있어야 해서, 지금의 슬라이드 모양(흰 배경, 제목 위치 x96 y96, 본문 y239)을 그대로 옮긴 `content` layout 하나짜리 `src/masters/default/index.tsx`를 만들었다. 단계 3에서 PPTX의 값으로 바꾼다.
+- **자동 매핑**: 요소는 정적 속성 `slotKinds`로 들어갈 슬롯 종류를 알린다(`Title`: title / `Paragraph`: body, subtitle, free / `Bullets`: body, free). `slot` 속성으로 슬롯 id를 직접 지정할 수 있다. 맞는 슬롯이 없으면 경고하고 그리지 않는다.
+- **색 토큰 규칙**: 색 값이 `primary`처럼 토큰 이름이면 `--color-primary`로 해석한다(`src/masters/color.ts`). 마스터가 `tokens`에 `--color-primary`를 가졌을 때만 토큰으로 본다.
+- **글자 속성에 `anchor`(세로 정렬) 추가**: PPTX의 제목 슬롯이 세로 가운데 정렬이라 `TextStyle`에 넣었다.
+- **오류 경계**: `SlideErrorBoundary`를 추가해 슬라이드를 그리다 난 오류가 화면 전체를 멈추지 않게 했다.
+- **넘침 경고는 `scrollHeight`로 재면 오탐이 난다**. 글꼴의 글자 영역(76px 제목에서 102px)이 줄 높이(95px)보다 커서, 맞는 제목도 넘친다고 나왔다. 자식 요소의 박스로 재도록 바꿨고, 일부러 넘치게 한 본문만 경고하는 것을 확인했다.
+- **flex 슬롯에서 불릿 마지막 항목의 아래 여백이 목록 높이에 포함되어** 20px 달라져서, 마지막 항목의 여백을 0으로 했다.
+- **슬라이드 디자인 값 이동**: `styles.css`의 `:root` 슬라이드 토큰(색, 크기, 뱃지 색, 슬라이드 배경, 패딩)을 지우고 마스터의 `tokens`로 옮겼다. 요소는 변수만 읽는다. 마스터가 필요한 토큰(`--color-text`, `--color-primary`, `--color-code-bg`, `--badge-*`, `--size-title`, `--size-body`, `--slot-gap`)을 빠뜨리면 CSS 변수가 비어 값이 적용되지 않는다. 필요한 토큰을 검증할지는 단계 6의 강의 전용 마스터를 만들 때 정한다.
+- 핫 리로드 중에 일부 모듈만 갱신되면 옛 `App`이 새 `Slide`를 그려 "마스터 밖" 오류가 한 번 났다. 페이지를 새로 불러오면 사라지는 개발 중 현상이다.
 
 ### 단계 3. `default` 마스터
 

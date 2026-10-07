@@ -14,6 +14,8 @@ export interface TextStyle {
   /** 직접 값(`#RRGGBB`) 또는 마스터 토큰 이름. 토큰 해석은 렌더링 단계에서 한다. */
   color?: string;
   align?: TextAlign;
+  /** 세로 정렬. 슬롯과 층의 박스 안에서의 위치 */
+  anchor?: "top" | "middle" | "bottom";
   bold?: boolean;
 }
 
