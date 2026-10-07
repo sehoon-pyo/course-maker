@@ -9,9 +9,13 @@
 | 용어 | 뜻 | 폴더 이름 | 비고 |
 |---|---|---|---|
 | **course** | 하나의 전체 강의. 최상단 단위 | `courses/{강의}/` | 강의마다 별도 git 저장소 |
-| **chapter** | 실제 파일로 배포하는 단위 | `ch.N_{이름}/` | 이름은 가칭. 번호 `N`이 순서 |
-| **section** | 수업 주제 단위 | `sec.N_{이름}/` | PowerPoint의 구역(Section)과 같은 개념. 번호 `N`이 순서 |
-| **slide** | 슬라이드 한 장. 파일 하나(`index.tsx`). **크기는 1920×1080px 고정(16:9)**이며 HTML, PPTX, PDF 모든 출력에서 같음 | `sl.N_{이름}/` | 순서는 폴더 이름의 번호가 아니라 section `meta.ts`의 `slides` 배열이 정함 |
+| **chapter** | 실제 파일로 배포하는 단위 | `ch.N_{이름}/` | 이름은 가칭. 순서는 강의 `meta.ts`의 `chapters` 배열이 정함 |
+| **section** | 수업 주제 단위 | `sec.N_{이름}/` | PowerPoint의 구역(Section)과 같은 개념. 순서는 chapter `meta.ts`의 `sections` 배열이 정함 |
+| **slide** | 슬라이드 한 장. 파일 하나(`index.tsx`). **크기는 1920×1080px 고정(16:9)**이며 HTML, PPTX, PDF 모든 출력에서 같음 | `sl.N_{이름}/` | 순서는 section `meta.ts`의 `slides` 배열이 정함 |
+
+- **순서는 항상 상위 폴더의 `meta.ts` 배열이 정합니다.** 폴더 이름의 번호(`N`)는 정리용이며 순서의 기준이 아니고, 번호 없이(`ch.intro`) 또는 접두사 없이(`intro`) 써도 됩니다. 화면에는 접두사와 번호를 뗀 이름이 보입니다.
+- 화면의 section 번호(`SECTION 1`)는 chapter 안에서의 section 순서입니다.
+- **숨김 슬라이드**: section `meta.ts`의 `slides`에서 `{ id, hidden: true }`로 표시한 슬라이드. 미리보기에서는 보이고, 내보낼 때(HTML, PPTX, PDF)만 빠집니다. PowerPoint의 숨기기 슬라이드와 같은 개념입니다.
 | **element** | 슬라이드를 구성하는 요소 (제목, 불릿, 그림, 표, 뱃지 등) | | `group`으로 여러 개를 묶을 수 있음 |
 | **group** | 여러 element를 묶은 것 | | PPT의 그룹 도형과 1:1 대응 |
 
@@ -34,7 +38,7 @@
 
 | 용어 | 뜻 |
 |---|---|
-| **meta.ts** | course, chapter, section 폴더에 있는 정보 파일. `title`을 가지며, section의 `meta.ts`는 `slides`(슬라이드 폴더 이름을 표시 순서대로 나열한 배열)도 가짐 |
+| **meta.ts** | course, chapter, section 폴더에 있는 정보 파일. `title`과, 하위 폴더 이름을 표시 순서대로 나열한 배열(course는 `chapters`, chapter는 `sections`, section은 `slides`)을 가짐. course의 `meta.ts`는 `master`, `sectionLabel`도 가질 수 있음 |
 | **text 객체** | 슬라이드 파일 맨 위에 모아 둔 문구. 문자열, `t` 템플릿, `badge()` 같은 헬퍼 호출만 넣고 로직은 넣지 않음 |
 | **인라인 서식** | 한 문장 안에서 서식이 바뀌는 조각. `t` 템플릿으로 씀 (`t`타입은 ${badge("동적", "green")}으로 결정`) |
 | **t** (태그드 템플릿) | 문장을 한 줄로 쓰고 `${ }`에 인라인 요소를 넣으면, 글 순서대로 끼워 넣어 문자열과 인라인 요소를 섞은 배열로 바꿔 주는 함수. 이 배열을 렌더러가 읽어 그림 |

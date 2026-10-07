@@ -145,6 +145,7 @@ export function App() {
             <button type="button" onClick={() => move(1)} disabled={index === courseSlides.length - 1}>
               다음
             </button>
+            {current.hidden && <span className="hidden-note">숨김 슬라이드 · 내보낼 때는 빠집니다</span>}
           </footer>
         </main>
       </div>

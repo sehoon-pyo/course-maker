@@ -1,7 +1,7 @@
 import type { ChapterNode } from "@/courses";
 import { sectionTag } from "@/sections";
 
-/** 선택된 chapter의 목차 (section → slide). 현재 슬라이드를 강조한다. */
+/** 선택된 chapter의 목차 (section → slide). 현재 슬라이드를 강조하고, 숨김 슬라이드는 표시해서 보여 준다. */
 export function Sidebar({
   chapter,
   sectionLabel,
@@ -29,11 +29,12 @@ export function Sidebar({
               <li key={slide.key}>
                 <button
                   type="button"
-                  className={slide.key === currentKey ? "active" : undefined}
+                  className={[slide.key === currentKey ? "active" : "", slide.hidden ? "hidden-slide" : ""].filter(Boolean).join(" ") || undefined}
                   onClick={() => onSelect(slide.key)}
                 >
                   <span className="no">{i + 1}</span>
                   {slide.name}
+                  {slide.hidden && <span className="hidden-tag">숨김</span>}
                 </button>
               </li>
             ))}
