@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { DEFAULT_MASTER_ID, DEFAULT_SECTION_LABEL } from "@/constants";
 import type { ChapterMeta, CourseMeta, SectionMeta } from "@/types";
 
 /**
@@ -32,6 +33,10 @@ export interface ChapterNode {
 export interface CourseNode {
   id: string;
   title: string;
+  /** 쓸 마스터 id. meta.ts에 없으면 `default`. */
+  master: string;
+  /** section을 부르는 이름. meta.ts에 없으면 `SECTION`. */
+  sectionLabel: string;
   chapters: ChapterNode[];
 }
 
@@ -94,7 +99,13 @@ export const courses: CourseNode[] = Object.entries(courseMetas).map(([coursePat
     })
     .sort(byNo);
 
-  return { id: courseId, title: courseMeta.title, chapters };
+  return {
+    id: courseId,
+    title: courseMeta.title,
+    master: courseMeta.master ?? DEFAULT_MASTER_ID,
+    sectionLabel: courseMeta.sectionLabel ?? DEFAULT_SECTION_LABEL,
+    chapters,
+  };
 });
 
 export interface SlidePath {

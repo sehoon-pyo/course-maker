@@ -1,6 +1,10 @@
 /** course/meta.ts */
 export interface CourseMeta {
   title: string;
+  /** 쓸 슬라이드 마스터 id. 없으면 `default`. */
+  master?: string;
+  /** section을 부르는 이름(예: `SECTION`, `UNIT`, `MODULE`). 없으면 `SECTION`. */
+  sectionLabel?: string;
 }
 
 /** course/ch.N_이름/meta.ts */
