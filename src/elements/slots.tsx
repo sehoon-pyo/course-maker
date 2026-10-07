@@ -44,7 +44,8 @@ export function placeChildren(masterId: string, layout: Layout, children: ReactN
     }
 
     if (!slot) {
-      console.warn(`[masters] 마스터 "${masterId}"의 layout "${layout.id}"에 이 요소가 들어갈 슬롯이 없어 그리지 않습니다:`, child);
+      const name = isValidElement(child) ? (typeof child.type === "function" ? child.type.name : String(child.type)) : String(child);
+      console.warn(`[masters] 마스터 "${masterId}"의 layout "${layout.id}"에 ${name} 요소가 들어갈 슬롯이 없어 그리지 않습니다.`);
       continue;
     }
     placed.set(slot, [...(placed.get(slot) ?? []), child]);

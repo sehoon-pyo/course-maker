@@ -7,7 +7,7 @@ const text = {
 
 export default function VariableTitle() {
   return (
-    <Slide>
+    <Slide layout="title">
       <Title value={text.title} />
       <Paragraph value={text.subtitle} />
     </Slide>

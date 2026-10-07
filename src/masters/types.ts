@@ -41,6 +41,7 @@ export interface ImageLayer extends LayerBase, Rect {
 export interface Shadow {
   dx: number;
   dy: number;
+  /** 번짐 반경(PPTX의 blurRad와 같은 뜻). 렌더링할 때 CSS drop-shadow의 표준편차(반경의 절반)로 바꾼다. */
   blur: number;
   color: string;
 }
@@ -83,6 +84,8 @@ export interface ListColumn extends TextStyle {
   /** 슬라이드 기준 px */
   x: number;
   w: number;
+  /** 칸을 채우는 색(직접 값 또는 토큰 이름). 목차의 번호 칸처럼 바탕이 있는 경우 */
+  fill?: string;
 }
 
 /**

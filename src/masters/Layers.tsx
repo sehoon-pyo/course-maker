@@ -34,7 +34,7 @@ function LayerNode({ layer, tokens, z }: { layer: Layer; tokens: Record<string, 
             ...box(layer),
             zIndex: z,
             overflow: "visible",
-            filter: s ? `drop-shadow(${s.dx}px ${s.dy}px ${s.blur}px ${resolveColor(s.color, tokens)})` : undefined,
+            filter: s ? `drop-shadow(${s.dx}px ${s.dy}px ${s.blur / 2}px ${resolveColor(s.color, tokens)})` : undefined,
           }}
         >
           <path d={layer.path} fill={resolveColor(layer.fill, tokens)} />
