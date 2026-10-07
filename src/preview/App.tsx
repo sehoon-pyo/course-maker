@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { courses, findPath, slidesOfChapter, slidesOfCourse } from "@/courses";
+import { courses, findPath, numberingOf, slidesOfChapter, slidesOfCourse } from "@/courses";
 import { MasterFrame } from "@/masters/MasterFrame";
 import { resolveMaster } from "@/masters/registry";
 import type { Master } from "@/masters/types";
@@ -38,12 +38,28 @@ export function App() {
   const path = found ?? (current ? findPath(current.key) : undefined);
   const course = path?.course;
   const chapter = path?.chapter;
-  const courseSlides = course ? slidesOfCourse(course) : [];
-  const index = current ? courseSlides.indexOf(current) : -1;
+  // 이전/다음과 번호는 chapter 기준이다. chapter가 파일 하나가 되는 단위이기 때문이다.
+  const chapterSlides = chapter ? slidesOfChapter(chapter) : [];
+  const index = current ? chapterSlides.indexOf(current) : -1;
+  const chapterIndex = course && chapter ? course.chapters.indexOf(chapter) : -1;
 
   const move = (delta: number) => {
-    const next = courseSlides[index + delta];
+    const next = chapterSlides[index + delta];
     if (next) go(next.key);
+  };
+
+  /** 이전/다음 chapter의 첫 슬라이드. 슬라이드가 없는 chapter는 건너뛴다. */
+  const targetChapterSlide = (delta: number) => {
+    if (!course) return undefined;
+    for (let i = chapterIndex + delta; i >= 0 && i < course.chapters.length; i += delta) {
+      const first = slidesOfChapter(course.chapters[i])[0];
+      if (first) return first;
+    }
+    return undefined;
+  };
+  const moveChapter = (delta: number) => {
+    const target = targetChapterSlide(delta);
+    if (target) go(target.key);
   };
 
   const selectCourse = (courseId: string) => {
@@ -66,9 +82,19 @@ export function App() {
   };
 
   useEffect(() => {
+    // ←, →, PageUp, PageDown은 이전/다음 슬라이드, Ctrl + ←, Ctrl + →는 이전/다음 chapter
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === "PageDown") move(1);
-      if (e.key === "ArrowLeft" || e.key === "PageUp") move(-1);
+      if (e.altKey || e.metaKey) return;
+      const delta = e.key === "ArrowRight" || e.key === "PageDown" ? 1 : e.key === "ArrowLeft" || e.key === "PageUp" ? -1 : 0;
+      if (delta === 0) return;
+      if (e.ctrlKey) {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          moveChapter(delta);
+        }
+        return;
+      }
+      move(delta);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -79,8 +105,15 @@ export function App() {
   }
 
   const { Component } = current;
-  const sectionNo = path.chapter.sections.indexOf(path.section) + 1;
-  const crumbs = [path.chapter.title, `${sectionTag(course.sectionLabel, sectionNo)} ${path.section.title}`, path.slide.name];
+  // chapter 바로 아래의 슬라이드(head, tail)는 section이 없어서 위치 표시에 section이 빠진다.
+  const section = path.section;
+  const crumbs = [
+    chapter.title,
+    ...(section ? [`${sectionTag(course.sectionLabel, chapter.sections.indexOf(section) + 1)} ${section.title}`] : []),
+    path.slide.name,
+  ];
+  const numbering = numberingOf(chapter);
+  const currentNo = numbering.numbers.get(current.key);
 
   // 마스터를 못 찾거나 올바르지 않으면 화면 전체가 멈추지 않게 슬라이드 자리에 오류를 보여 준다.
   let master: Master | undefined;
@@ -96,7 +129,13 @@ export function App() {
       <TopBar sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} crumbs={crumbs}>
         <label className="course-select">
           <span>강의</span>
-          <select value={course.id} onChange={(e) => selectCourse(e.target.value)}>
+          <select
+            value={course.id}
+            onChange={(e) => {
+              selectCourse(e.target.value);
+              e.target.blur();
+            }}
+          >
             {courses.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.title}
@@ -106,7 +145,13 @@ export function App() {
         </label>
         <label className="course-select">
           <span>chapter</span>
-          <select value={chapter.id} onChange={(e) => selectChapter(e.target.value)}>
+          <select
+            value={chapter.id}
+            onChange={(e) => {
+              selectChapter(e.target.value);
+              e.target.blur();
+            }}
+          >
             {course.chapters.map((ch) => (
               <option key={ch.id} value={ch.id}>
                 {ch.title}
@@ -136,16 +181,21 @@ export function App() {
             )}
           </SlidePreviewArea>
           <footer className="controls">
-            <button type="button" onClick={() => move(-1)} disabled={index === 0}>
-              이전
+            <button type="button" onClick={() => moveChapter(-1)} disabled={!targetChapterSlide(-1)} title="이전 chapter의 첫 슬라이드 (Ctrl + ←)">
+              &lt;&lt; 이전 챕터
             </button>
-            <span>
-              {index + 1} / {courseSlides.length}
+            <button type="button" onClick={() => move(-1)} disabled={index <= 0} title="이전 슬라이드 (←)">
+              &lt; 이전
+            </button>
+            <span className="counter">
+              {current.hidden ? "숨김" : currentNo} / {numbering.total}
             </span>
-            <button type="button" onClick={() => move(1)} disabled={index === courseSlides.length - 1}>
-              다음
+            <button type="button" onClick={() => move(1)} disabled={index === chapterSlides.length - 1} title="다음 슬라이드 (→)">
+              다음 &gt;
             </button>
-            {current.hidden && <span className="hidden-note">숨김 슬라이드 · 내보낼 때는 빠집니다</span>}
+            <button type="button" onClick={() => moveChapter(1)} disabled={!targetChapterSlide(1)} title="다음 chapter의 첫 슬라이드 (Ctrl + →)">
+              다음 챕터 &gt;&gt;
+            </button>
           </footer>
         </main>
       </div>

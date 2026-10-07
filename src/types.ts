@@ -12,8 +12,15 @@ export interface CourseMeta {
 /** course/{chapter}/meta.ts */
 export interface ChapterMeta {
   title: string;
+  /**
+   * section 앞에 오는 슬라이드(대제목, 목차 등). 슬라이드 폴더는 chapter 폴더 바로 아래에 둔다.
+   * 항목의 형식은 section의 `slides`와 같다. 없으면 비어 있다.
+   */
+  head?: SlideEntry[];
   /** section 폴더 이름을 표시 순서대로 나열한다. 순서의 기준은 이 배열이다. */
   sections: string[];
+  /** section 뒤에 오는 슬라이드(요약, 진행 현황 등). `head`와 같은 형식이다. 없으면 비어 있다. */
+  tail?: SlideEntry[];
 }
 
 /** course/{chapter}/{section}/meta.ts */
