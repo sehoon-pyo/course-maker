@@ -35,6 +35,8 @@ export default defineMaster({
 
   layouts: {
     title: {
+      // master의 background에서 같은 id(base)만 대체한다. 지정하지 않은 layout(content)은 master의 것을 그대로 쓴다.
+      background: [{ id: "base", type: "color", value: "#f3e6d4" }],
       decorations: [{ id: "bar", type: "shape", x: 860, y: 330, w: 200, h: 8, viewBox: { w: 200, h: 8 }, path: "M0 0 H200 V8 H0 Z", fill: "primary" }],
       slots: [
         { id: "title", type: "title", x: 160, y: 380, w: 1600, h: 200, size: 112, align: "center", anchor: "middle" },

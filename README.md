@@ -17,10 +17,15 @@
 | 미리보기 창 (목차, 강의/chapter 선택, 이전/다음, 방향키 이동) | 사용 가능 |
 | 파일을 고치면 미리보기에 바로 반영 | 사용 가능 |
 | 슬라이드 요소: 제목, 문단, 불릿, 인라인 서식(뱃지, 굵게, 코드) | 사용 가능 |
+| 슬라이드 마스터와 layout (대제목, 목차, 컨텐츠, 제목만 있는 컨텐츠), 강의 전용 마스터 | 사용 가능 |
+| 위치를 정해 놓는 요소: 글, 도형, 이미지, 칩, 프롬프트 상자 | 사용 가능 |
+| 목차 (chapter의 section으로 자동으로 채움) | 사용 가능 |
+| 강의 전용 요소 (`courses/{강의}/elements/`) | 사용 가능 |
+| 숨김 슬라이드 (미리보기에서는 보이고 내보낼 때 제외) | 미리보기만 (내보내기는 아직 없음) |
+| 표, 요소 묶기(group), 자동 배치(Row/Column), 날짜/바닥글/슬라이드 번호 | 아직 없음 |
 | 단일 HTML 파일로 내보내기 | 아직 없음 |
-| PPTX로 내보내기 | 아직 없음 |
+| PPTX로 내보내기 (슬라이드 마스터까지 PowerPoint 마스터로 내보낼 예정) | 아직 없음 |
 | PDF로 내보내기 | 아직 없음 |
-| 슬라이드 마스터, 레이아웃 | 아직 없음 |
 
 아직 개발 중인 버전입니다. **도구가 바뀌면 이미 만든 강의가 동작하지 않을 수 있습니다.** 정식 버전이 나오면 메신저로 알려 드립니다.
 
@@ -58,9 +63,9 @@ npm run dev
 ```
 course-maker/
 ├─ src/                    도구의 소스 (미리보기 앱)
-│  ├─ elements/            슬라이드에서 쓰는 요소(Title, Bullets 등)와 인라인 서식
+│  ├─ elements/            슬라이드에서 쓰는 요소(Title, Bullets, Shape, Chip, Toc 등)와 인라인 서식
 │  ├─ preview/             미리보기 창 (사이드바, 상단 바, 슬라이드 표시)
-│  ├─ masters/             도구가 제공하는 슬라이드 마스터 (아직 구현되지 않음)
+│  ├─ masters/             슬라이드 마스터를 정의, 검증, 조회, 그리는 코드와 도구가 제공하는 마스터
 │  │  ├─ default/          기본 마스터. 폴더 이름이 마스터 id
 │  │  └─ ...               마스터를 추가하려면 폴더를 추가
 │  ├─ courses.ts           courses/ 폴더를 읽어 목차 트리를 만듦
@@ -74,7 +79,9 @@ course-maker/
 │  └─ my-course/           ← ★ 내 강의 (현재 프로젝트는 이 폴더를 무시함)
 │     ├─ .git/             이 폴더에서 `git init` 한 별도 저장소
 │     ├─ meta.ts           강의 제목, chapter 순서(`chapters`), 쓸 슬라이드 마스터 id (`master`, 없으면 default), section 이름(`sectionLabel`)
-│     ├─ masters/          이 강의 전용 슬라이드 마스터 (선택, 아직 구현되지 않음)
+│     ├─ masters/          이 강의 전용 슬라이드 마스터 (선택)
+│     ├─ elements/         이 강의 전용 요소 (선택). 도구의 요소를 다시 내보내고 이 강의의 요소를 더함
+│     ├─ assets/           이 강의의 이미지(아이콘 등). 슬라이드와 요소가 가져다 씀
 │     └─ ...               chapter, section, slide 구조는 아래 6번에 써 있음
 │
 ├─ assets/fonts/           NanumSquare R, B
@@ -87,7 +94,7 @@ course-maker/
 
 위 그림의 `courses/my-course/` 안쪽(chapter, section, slide)의 자세한 폴더 구조는 **아래 [6. 내 강의 만들기](#6-내-강의-만들기)에 써 있습니다.**
 
-**슬라이드 마스터의 위치** (아직 구현되지 않았고, 정해 둔 구조입니다)
+**슬라이드 마스터의 위치** (자세한 설명은 [7-3](#7-3-슬라이드-마스터))
 
 - 도구가 제공하는 마스터: `src/masters/{마스터 id}/`
 - 강의 전용 마스터: `courses/{강의}/masters/{마스터 id}/`
@@ -214,10 +221,18 @@ export default function VariableDefinition() {
 
 | 요소 | 용도 |
 |---|---|
-| `Slide` | 슬라이드 한 장의 바깥 틀 |
+| `Slide` | 슬라이드 한 장의 바깥 틀. `layout`으로 layout을 고른다(생략하면 `content`) |
 | `Title` | 제목 |
-| `Paragraph` | 문단 |
+| `Paragraph` | 문단 (대제목 layout에서는 부제) |
 | `Bullets` | 불릿 목록 |
+| `Text` | 위치를 정해 놓는 글 |
+| `Shape` | 도형 (사각형, 둥근 사각형, 타원, 화살표, 삼각형, 선, 자유형 경로) |
+| `Image` | 이미지 |
+| `Chip` | 아이콘과 글자가 들어가는 알약 모양 칩 (단축키, 명령어 표시). 폭은 글자에 맞춰짐 |
+| `PromptBox` | 프롬프트를 보여 주는 어두운 상자 |
+| `Toc` | 목차. 지금 chapter의 section 제목으로 **자동으로** 채워짐 (항목을 직접 줄 수 없음) |
+
+`Title`, `Paragraph`, `Bullets`, `Toc`는 layout의 슬롯에 자동으로 들어가고, 위치를 정해 놓는 요소(`Text`, `Shape`, `Image`, `Chip`, `PromptBox`)는 `at`으로 위치를 줍니다(아래 7-2).
 
 **한 문장 안에서 서식을 섞기**: 템플릿 문자열 `t`로 문장을 한 줄로 쓰고, 서식이 필요한 곳에만 `${ }`로 아래 헬퍼를 넣습니다.
 
@@ -237,6 +252,83 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
 
 **글꼴**은 NanumSquare의 R(보통)과 B(굵게)만 씁니다. 슬라이드 크기는 16:9(1920×1080)입니다.
 
+### 7-1. layout 고르기
+
+`<Slide layout="...">`으로 layout을 고릅니다. 생략하면 `content`입니다. 기본 마스터(`default`)의 layout은 다음과 같습니다.
+
+| layout | 용도 | 들어가는 요소 |
+|---|---|---|
+| `title` | 대제목 | `Title`, `Paragraph`(부제) |
+| `content` | 제목과 본문 | `Title`, `Paragraph`, `Bullets` 등 |
+| `title-only` | 제목만 있고 본문은 자유롭게 | `Title`, 그리고 `at`으로 놓는 요소 |
+| `toc` | 목차 | `Toc` |
+
+```tsx
+<Slide layout="toc">
+  <Toc />
+</Slide>
+```
+
+없는 layout 이름을 쓰면 사용 가능한 layout 목록과 함께 오류가 슬라이드 자리에 나옵니다. 같은 슬롯에 요소가 여럿이면 세로로 쌓이고, 슬롯을 내용이 넘치면 그대로 두고 콘솔에 경고합니다.
+
+### 7-2. 위치를 정해 놓기 (`at`)
+
+`at={{ x, y, w, h }}`는 슬라이드 기준 px(1920×1080)입니다. `at`이 있는 요소는 슬롯과 상관없이 그 자리에 놓이고, **쌓는 순서는 작성 순서**입니다(나중에 쓴 것이 위).
+
+```tsx
+<Slide layout="title-only">
+  <Title value={text.title} />
+  <Text at={{ x: 100, y: 230, w: 760 }} size={40} value={text.note} />
+  <Shape kind="roundRect" at={{ x: 100, y: 320, w: 300, h: 140 }} fill="primary" text={text.label} textStyle={{ color: "#ffffff" }} />
+  <Chip at={{ x: 100, y: 500 }} value={text.command} />
+  <PromptBox at={{ x: 500, y: 320, w: 559, h: 281 }} value={text.prompt} />
+</Slide>
+```
+
+- `Shape`와 `PromptBox`는 크기까지(`x, y, w, h`) 줘야 합니다. `Chip`은 `x, y`만 주면 폭이 글자에 맞춰집니다. `Text`와 `Image`는 `w`, `h`를 생략할 수 있습니다.
+- `Shape`의 주요 속성: `kind`(`rect`, `roundRect`, `ellipse`, `rightArrow`, `triangle`, `line`, `path`), `fill`, `line={{ color, width, dash }}`, `rotate`, `shadow`, `text`와 `textStyle`. `path`는 `path`와 `viewBox`도 필요합니다.
+- `Text`의 주요 속성: `size`, `color`, `align`, `anchor`, `bold`, `fill`, `lineHeight`.
+- **색**은 직접 값(`#FF0000`, `rgba(0, 0, 0, 0.3)`)이나 마스터 토큰 이름(`primary`, `primary-dark`, `surface`, `text`, `muted`)을 쓸 수 있습니다.
+- 이미지는 강의 폴더의 이미지를 `import`해서 `src`에 줍니다. 도구는 아이콘 이미지를 제공하지 않습니다.
+- 칩과 프롬프트 상자의 **모양(색, 크기, 간격)은 마스터가 정합니다.**
+
+### 7-3. 슬라이드 마스터
+
+마스터는 슬라이드의 **디자인**(배경, layout, 색, 크기, 요소의 모양)을 한곳에서 정합니다. PowerPoint의 슬라이드 마스터와 같은 개념이고, 나중에 PPTX로 내보낼 때 진짜 PowerPoint 슬라이드 마스터로 만들 예정입니다.
+
+- **고르는 법**: 강의 `meta.ts`의 `master`에 마스터 id를 씁니다. 없으면 `default`입니다. 강의 하나는 마스터 하나만 씁니다.
+- **찾는 곳**: ① `courses/{강의}/masters/{id}/index.tsx`(강의 전용) → ② `src/masters/{id}/index.tsx`(도구 제공). 같은 id가 양쪽에 있으면 강의 전용이 우선합니다. 없으면 사용 가능한 마스터 목록과 함께 오류가 나옵니다. `_`로 시작하는 폴더는 마스터로 등록하지 않습니다.
+- **구성**: `defineMaster({ tokens, background, layouts })`가 만든 값을 내보냅니다.
+  - `tokens`: CSS 변수 값. 아래 필수 토큰을 모두 정해야 합니다.
+  - `background`: 아래에서 위로 쌓이는 층(`color`, `image`, `shape`, `text`)의 배열. 각 층에 `id`가 있고 순서는 배열 순서입니다.
+  - `layouts`: layout id를 키로 하는 객체. layout마다 `slots`(제목, 부제, 본문, 자유, 목록 슬롯의 `x, y, w, h`와 글자 속성), `decorations`(그 layout에만 있는 장식), `background`(선택)를 가집니다.
+- **배경 상속**: layout의 `background`를 지정하지 않으면 master의 것을 그대로 씁니다. 지정하면 master의 층에서 **같은 `id`는 그 자리에서 대체**하고, 새 `id`는 맨 위에 추가하고, `{ id, remove: true }`는 층을 뺍니다.
+- **쌓는 단계**: background < layout(장식) < element(슬라이드의 요소)로 고정이고, 한 단계는 다른 단계를 넘지 못합니다. 단계 안의 순서는 배열(작성) 순서이고 `z-index` 숫자를 따로 쓰지 않습니다.
+- **필수 토큰**: `--color-text`, `--color-primary`, `--color-code-bg`, `--badge-green`, `--badge-red`, `--badge-blue`, `--badge-gray`, `--size-title`, `--size-body`, `--slot-gap`. 빠지면 빠진 목록과 함께 오류가 납니다. 칩을 쓰면 `--chip-*`, 프롬프트 상자를 쓰면 `--promptbox-*`도 정합니다(예시는 `src/masters/default/index.tsx`).
+- 예시: 도구의 기본 마스터는 `src/masters/default/`, 강의 전용 마스터는 `courses/sample2/masters/plain/`입니다.
+- 슬라이드 파일은 마스터를 직접 가져오지 않습니다. `Slide`가 강의의 마스터를 알아서 적용합니다.
+
+### 7-4. 강의 전용 요소
+
+강의에서만 쓰는 요소(특정 아이콘이 붙은 칩, 모양을 바꾼 불릿 등)는 `courses/{강의}/elements/`에 만듭니다. 도구의 `Chip`, `Shape`, `Text`를 조합해서 만들 수 있고, 이미지는 `courses/{강의}/assets/`에 둡니다.
+
+```ts
+// courses/sample2/elements/index.ts
+export * from "@/elements";                    // 도구의 요소를 모두 다시 내보내고
+export { Bullets } from "./Bullets";           // 같은 이름은 이 강의의 것이 우선
+export { CodeChip } from "./CodeChip";         // 이 강의의 요소를 더한다
+```
+
+슬라이드는 상대 경로로 가져옵니다. 슬라이드는 항상 `courses/{강의}/ch/sec/sl/index.tsx`에 있어서 모든 슬라이드에서 경로가 같습니다.
+
+```tsx
+import { Bullets, CodeChip, Slide, Title } from "../../../elements";   // 도구 요소와 강의 요소를 한 줄로
+```
+
+- **어디서 가져오느냐가 우선순위를 정합니다.** `../../../elements`에서 가져오면 강의의 `Bullets`, `@/elements`에서 가져오면 도구의 `Bullets`입니다.
+- 요소를 감싸서 만들 때는 `slotKinds`를 원래 요소에서 그대로 알려 줘야 슬롯에 자동으로 들어갑니다(`CodeChip.slotKinds = Chip.slotKinds`).
+- 강의 요소의 CSS는 클래스 이름에 강의 이름을 붙여 다른 강의와 겹치지 않게 하고, 색은 마스터의 CSS 변수를 읽으세요.
+
 ## 8. 용어
 
 | 용어 | 뜻 |
@@ -245,9 +337,11 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
 | chapter | 실제 파일로 배포하는 단위 (이름은 가칭) |
 | section | 수업 주제 단위. PowerPoint의 구역(Section)과 같은 개념 |
 | slide | 슬라이드 한 장 |
-| element | 슬라이드를 구성하는 요소 (제목, 불릿, 그림, 표 등). 여러 개를 묶은 group도 가능 |
-| slide-master | 모든 슬라이드에 공통으로 적용되는 틀. PowerPoint의 슬라이드 마스터와 같은 개념 (아직 구현되지 않음) |
-| layout | slide-master 안의 영역 배치 틀 (아직 구현되지 않음) |
+| element | 슬라이드를 구성하는 요소 (제목, 불릿, 도형, 그림 등). 여러 개를 묶은 group은 아직 없음 |
+| slide-master | 모든 슬라이드에 공통으로 적용되는 틀. PowerPoint의 슬라이드 마스터와 같은 개념 |
+| layout | slide-master 안의 영역 배치 틀 (대제목, 목차, 컨텐츠 등). 슬롯과 장식, 배경을 가짐 |
+| slot | layout이 정해 둔 자리 (제목, 부제, 본문, 자유, 목록). 슬라이드의 요소가 종류에 따라 들어감 |
+| 숨김 슬라이드 | 미리보기에서는 보이고 내보낼 때만 빠지는 슬라이드 |
 
 PowerPoint나 DOM에만 있는 개념은 `pptx layout`, `dom element`처럼 앞에 `pptx`, `dom`을 붙여 구분합니다. 전체 용어의 정의는 [`docs/glossary.md`](docs/glossary.md), 결정 내용은 [`docs/adr/`](docs/adr/)를 보세요.
 
@@ -262,5 +356,6 @@ PowerPoint나 DOM에만 있는 개념은 `pptx layout`, `dom element`처럼 앞�
 - 단일 HTML 파일로 내보내기 (강의 chapter 하나가 파일 하나)
 - PPTX로 내보내기
 - PDF로 내보내기
-- 슬라이드 마스터와 레이아웃
-- 표, 그림 등 슬라이드 요소 추가
+- 표, 요소 묶기(group), 자동 배치(Row/Column) 등 슬라이드 요소 추가
+- 날짜, 바닥글, 슬라이드 번호
+- 내보낼 때 PowerPoint 슬라이드 마스터로 만들기 (마스터, layout, 슬롯을 PowerPoint의 마스터와 플레이스홀더로)

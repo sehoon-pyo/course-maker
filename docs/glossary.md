@@ -12,25 +12,29 @@
 | **chapter** | 실제 파일로 배포하는 단위 | `ch.N_{이름}/` | 이름은 가칭. 순서는 강의 `meta.ts`의 `chapters` 배열이 정함 |
 | **section** | 수업 주제 단위 | `sec.N_{이름}/` | PowerPoint의 구역(Section)과 같은 개념. 순서는 chapter `meta.ts`의 `sections` 배열이 정함 |
 | **slide** | 슬라이드 한 장. 파일 하나(`index.tsx`). **크기는 1920×1080px 고정(16:9)**이며 HTML, PPTX, PDF 모든 출력에서 같음 | `sl.N_{이름}/` | 순서는 section `meta.ts`의 `slides` 배열이 정함 |
+| **element** | 슬라이드를 구성하는 요소 (제목, 불릿, 도형, 그림, 칩, 뱃지 등) | | `group`으로 여러 개를 묶을 수 있음(group은 아직 없음) |
+| **group** | 여러 element를 묶은 것 (아직 구현되지 않음) | | PPT의 그룹 도형과 1:1 대응 |
 
 - **순서는 항상 상위 폴더의 `meta.ts` 배열이 정합니다.** 폴더 이름의 번호(`N`)는 정리용이며 순서의 기준이 아니고, 번호 없이(`ch.intro`) 또는 접두사 없이(`intro`) 써도 됩니다. 화면에는 접두사와 번호를 뗀 이름이 보입니다.
-- 화면의 section 번호(`SECTION 1`)는 chapter 안에서의 section 순서입니다.
+- 화면의 section 번호(`SECTION 1`)는 chapter 안에서의 section 순서입니다. `SECTION`은 강의 `meta.ts`의 `sectionLabel`로 바꿀 수 있습니다(`UNIT`, `MODULE` 등).
 - **숨김 슬라이드**: section `meta.ts`의 `slides`에서 `{ id, hidden: true }`로 표시한 슬라이드. 미리보기에서는 보이고, 내보낼 때(HTML, PPTX, PDF)만 빠집니다. PowerPoint의 숨기기 슬라이드와 같은 개념입니다.
-| **element** | 슬라이드를 구성하는 요소 (제목, 불릿, 그림, 표, 뱃지 등) | | `group`으로 여러 개를 묶을 수 있음 |
-| **group** | 여러 element를 묶은 것 | | PPT의 그룹 도형과 1:1 대응 |
+- **강의 전용 요소**: 특정 강의에서만 쓰는 요소. `courses/{강의}/elements/`에 두고, 도구의 요소를 다시 내보내면서 같은 이름은 강의 것이 우선합니다.
 
 ## 2. 슬라이드 마스터
 
-아직 구현되지 않았고, 정해 둔 구조입니다.
-
 | 용어 | 뜻 |
 |---|---|
-| **slide-master** | 모든 슬라이드에 공통으로 적용되는 틀. **PowerPoint의 슬라이드 마스터와 같은 개념**. 안에 `background`와 `layout`이 들어 있음 |
-| **background** | 슬라이드 배경(색, 이미지, 장식). master에 기본값이 있고, `layout`마다 가질 수 있음 |
-| **layout** | 영역을 나누는 배치 틀 (제목+본문, 2단 등). 종류는 아직 정하지 않음 |
+| **slide-master** | 모든 슬라이드에 공통으로 적용되는 틀. **PowerPoint의 슬라이드 마스터와 같은 개념**. 슬라이드의 디자인(배경, layout, 색, 크기, 요소의 모양)을 한곳에서 정함. `defineMaster`로 정의하고 안에 `tokens`, `background`, `layouts`가 들어 있음 |
+| **background** | 아래에서 위로 쌓이는 **층(layer)의 배열**. 층은 `color`, `image`, `shape`, `text` 중 하나이고 `id`를 가짐. master에 기본값이 있고, `layout`마다 가질 수 있음 |
+| **layout** | 영역을 나누는 배치 틀. `default` 마스터는 `title`(대제목), `content`(제목과 본문), `title-only`(제목만 있는 컨텐츠), `toc`(목차). 슬롯, 장식, 배경(선택)을 가짐 |
+| **slot** | layout이 정해 둔 자리. 종류는 `title`, `subtitle`, `body`, `free`, `list`이고 슬라이드 크기(1920×1080) 기준 px의 `x, y, w, h`를 가짐. 슬라이드의 요소가 종류에 따라 자동으로 들어감 |
+| **list 슬롯** | 같은 모양이 반복되는 줄(목차의 항목)을 한 번에 정하는 슬롯. `rows`, `pitch`, `columns`를 가짐 |
+| **쌓는 단계** | `background` < `layout`(장식) < `element`(슬라이드의 요소) 세 단계. 고정된 순서이고 한 단계는 다른 단계를 넘지 못함. 단계 안의 순서는 배열(작성) 순서이며 `z-index` 숫자를 소스에 쓰지 않음 |
+| **토큰 (tokens)** | 마스터가 정하는 CSS 변수 값(색, 크기, 간격 등). 요소는 변수만 읽음. 색을 쓸 때는 직접 값이나 토큰 이름(`primary` = `--color-primary`)을 쓸 수 있음 |
+| **at** | 요소의 위치. 슬라이드 기준 px의 `{ x, y, w, h }`. 있으면 슬롯 없이 그 자리에 놓이고, 쌓는 순서는 작성 순서 |
 | **마스터 id** | 마스터를 가리키는 이름. 마스터 폴더 이름과 같음 |
 
-- `layout`의 `background`는 기본적으로 master의 `background`를 **상속**하고, 필요할 때만 layout에서 지정합니다.
+- `layout`의 `background`는 기본적으로 master의 `background`를 **상속**하고, 필요할 때만 layout에서 지정합니다. 지정하면 **같은 `id`의 층은 그 자리에서 대체**하고, 새 `id`는 위에 추가하고, `{ id, remove: true }`는 층을 뺍니다.
 - **마스터는 course 단위로 고릅니다.** 강의 `meta.ts`의 `master`로 지정하고, 없으면 `default`입니다.
 - 마스터 id를 찾는 순서는 ① `courses/{강의}/masters/{id}/`(강의 전용) → ② `src/masters/{id}/`(도구 제공)이며, 같은 id가 양쪽에 있으면 강의 전용이 우선합니다.
 
