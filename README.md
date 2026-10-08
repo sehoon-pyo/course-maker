@@ -50,7 +50,7 @@ npm install
 npm run dev
 ```
 
-이 저장소는 **비공개(private)**입니다. 사용 승인을 받아 저장소에 초대된 GitHub 계정으로 로그인한 상태에서만 `git clone`이 됩니다. 초대받지 않았다면 저장소 주소가 `404`로 보입니다.
+도구를 업데이트하려면 `course-maker` 폴더에서 `git pull`을 합니다. 강의는 도구와 별도의 저장소(`courses/내강의/`)라 영향을 받지 않지만, 도구가 바뀌면 강의를 고쳐야 할 수 있습니다. 필요한 수정은 해당 ADR의 "강의에 필요한 수정"에 적어 둡니다.
 
 터미널에 나오는 주소(기본값 `http://localhost:5173/`)를 브라우저에서 열면 샘플 강의가 보입니다.
 
@@ -357,12 +357,9 @@ import { Bullets, CodeChip, Slide, Title } from "../../../elements";   // 도구
 
 PowerPoint나 DOM에만 있는 개념은 `pptx layout`, `dom element`처럼 앞에 `pptx`, `dom`을 붙여 구분합니다. 전체 용어의 정의는 [`docs/glossary.md`](docs/glossary.md), 결정 내용은 [`docs/adr/`](docs/adr/)를 보세요.
 
-## 9. 폰트와 라이선스
+## 9. 폰트
 
 **폰트**: 슬라이드에는 네이버의 NanumSquare(R, B)를 씁니다. 파일은 `assets/fonts/`에 있습니다. 이 폰트의 배포처와 이용 조건은 [네이버 한글한글 아름답게 - 나눔글꼴](https://hangeul.naver.com/fonts/search?f=nanum)의 안내를 따릅니다.
-
-**이 프로젝트의 사용 조건**: 저작권자가 **사용을 승인한 사람만** 사용할 수 있습니다. 승인 없이 복사, 수정, 배포, 사용할 수 없습니다.
-
 ## 10. 로드맵
 
 - 단일 HTML 파일로 내보내기 (강의 chapter 하나가 파일 하나)
