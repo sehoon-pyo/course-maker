@@ -52,7 +52,7 @@ export function resolveMaster(courseId: string, masterId: string = DEFAULT_MASTE
       ...[...toolEntries.keys()].map((id) => `${id}(도구 제공)`),
     ];
     throw new Error(
-      `[masters] 마스터 "${masterId}"를 찾을 수 없습니다(강의: ${courseId}). 사용 가능한 마스터: ${available.join(", ") || "없음"}`,
+      `[masters] 마스터 "${masterId}"를 찾을 수 없습니다(강의: ${courseId}). 사용 가능한 마스터: ${available.join(", ") || "없음"}. 마스터 폴더의 위치(courses/${courseId}/masters/${masterId}/index.tsx)를 확인하세요.`,
     );
   }
   if (!entry.def) {
