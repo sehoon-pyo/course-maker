@@ -88,6 +88,7 @@ course-maker/
 │
 ├─ assets/fonts/           NanumSquare R, B
 ├─ docs/
+│  ├─ github.md            GitHub 이슈와 프로젝트 운영 방법
 │  ├─ notes/               논의 기록
 │  └─ adr/                 결정 기록
 ├─ CLAUDE.md               AI 도구가 읽는 프로젝트 안내
