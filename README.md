@@ -68,8 +68,7 @@ course-maker/
 │  ├─ elements/            슬라이드에서 쓰는 요소(Title, Bullets, Shape, Chip, Toc 등)와 인라인 서식
 │  ├─ preview/             미리보기 창 (사이드바, 상단 바, 슬라이드 표시)
 │  ├─ masters/             슬라이드 마스터를 정의, 검증, 조회, 그리는 코드와 도구가 제공하는 마스터
-│  │  ├─ default/          기본 마스터. 폴더 이름이 마스터 id
-│  │  └─ ...               마스터를 추가하려면 폴더를 추가
+│  │                        도구가 제공하는 마스터는 없고, 마스터는 각 강의의 `masters/{id}/`에 둡니다
 │  ├─ courses.ts           courses/ 폴더를 읽어 목차 트리를 만듦
 │  ├─ types.ts             meta.ts의 타입
 │  ├─ constants.ts         슬라이드 크기 (1920×1080)
@@ -314,8 +313,8 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
   - `layouts`: layout id를 키로 하는 객체. layout마다 `slots`(제목, 부제, 본문, 자유, 목록 슬롯의 `x, y, w, h`와 글자 속성), `decorations`(그 layout에만 있는 장식), `background`(선택)를 가집니다.
 - **배경 상속**: layout의 `background`를 지정하지 않으면 master의 것을 그대로 씁니다. 지정하면 master의 층에서 **같은 `id`는 그 자리에서 대체**하고, 새 `id`는 맨 위에 추가하고, `{ id, remove: true }`는 층을 뺍니다.
 - **쌓는 단계**: background < layout(장식) < element(슬라이드의 요소)로 고정이고, 한 단계는 다른 단계를 넘지 못합니다. 단계 안의 순서는 배열(작성) 순서이고 `z-index` 숫자를 따로 쓰지 않습니다.
-- **필수 토큰**: `--color-text`, `--color-primary`, `--color-code-bg`, `--badge-green`, `--badge-red`, `--badge-blue`, `--badge-gray`, `--size-title`, `--size-body`, `--slot-gap`. 빠지면 빠진 목록과 함께 오류가 납니다. 칩을 쓰면 `--chip-*`, 프롬프트 상자를 쓰면 `--promptbox-*`도 정합니다(예시는 `src/masters/default/index.tsx`).
-- 예시: 도구의 기본 마스터는 `src/masters/default/`, 강의 전용 마스터는 `courses/sample2/masters/plain/`입니다.
+- **필수 토큰**: `--color-text`, `--color-primary`, `--color-code-bg`, `--badge-green`, `--badge-red`, `--badge-blue`, `--badge-gray`, `--size-title`, `--size-body`, `--slot-gap`. 빠지면 빠진 목록과 함께 오류가 납니다. 칩을 쓰면 `--chip-*`, 프롬프트 상자를 쓰면 `--promptbox-*`도 정합니다(예시는 `courses/sample/masters/default/index.tsx`).
+- 예시: 기본 마스터는 `courses/sample/masters/default/`, 다른 모양의 마스터는 `courses/sample2/masters/plain/`입니다.
 - 슬라이드 파일은 마스터를 직접 가져오지 않습니다. `Slide`가 강의의 마스터를 알아서 적용합니다.
 
 ### 7-4. 강의 전용 요소

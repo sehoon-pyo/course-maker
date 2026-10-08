@@ -3,7 +3,7 @@ import type { Layer, TextSlot } from "@/masters/types";
 import logo from "./assets/logo.svg";
 
 /**
- * default 마스터. 기존 PPTX(2_Agent_View_기반_병렬_개발_r8.pptx)의 마스터와 layout 4개를 1920x1080px로 옮긴 것이다.
+ * 기본 마스터. 기존 PPTX(2_Agent_View_기반_병렬_개발_r8.pptx)의 마스터와 layout 4개를 1920x1080px로 옮긴 것이다.
  * 좌표는 PPTX의 EMU를 6350으로 나눈 값(1px = 0.5pt)이다. 도형 경로는 PPTX의 자유형 값 그대로이다.
  * 디자인 값(색, 크기, 간격)은 tokens가 정하고, 층과 슬롯은 토큰 이름(primary 등)으로 가져다 쓴다.
  */

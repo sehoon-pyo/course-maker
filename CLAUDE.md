@@ -25,8 +25,7 @@ course-maker/
 │  ├─ elements/            슬라이드에서 쓰는 요소와 인라인 서식 (index: Slide, Title 등 / free: Text, Shape, Image / widgets: Chip, PromptBox, Toc / slots: 슬롯 배치)
 │  ├─ preview/             미리보기 창 (사이드바, 상단 바, 슬라이드 표시, 오류 경계)
 │  ├─ masters/             슬라이드 마스터 (types, define: 검증과 상속, registry: 등록과 조회, MasterFrame, Layers)
-│  │  ├─ default/          기본 마스터. 폴더 이름이 마스터 id
-│  │  └─ ...               마스터를 추가하려면 폴더를 추가 (`_`로 시작하는 폴더는 등록하지 않음)
+│  │                        도구가 제공하는 마스터는 없다. 마스터는 각 강의의 `masters/{id}/`에 둔다 (`src/masters/{id}/`에 두면 모든 강의가 쓰는 마스터로 읽힘, `_`로 시작하는 폴더는 등록하지 않음)
 │  ├─ courses.ts           courses/ 폴더를 읽어 목차 트리를 만듦 (순서는 meta의 배열)
 │  ├─ sections.ts          section 번호표(`SECTION 1`) 형식. 목차, 사이드바, 상단 바가 같이 씀
 │  ├─ types.ts             meta.ts의 타입
