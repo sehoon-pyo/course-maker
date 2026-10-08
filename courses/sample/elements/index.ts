@@ -4,5 +4,4 @@ export * from "@/elements";
 
 export { ClaudeChip } from "./ClaudeChip";
 export { FileChip } from "./FileChip";
-export { Stamp } from "./Stamp";
 export { TerminalChip } from "./TerminalChip";
