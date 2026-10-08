@@ -5,7 +5,7 @@
 - 저장소: `sehoon-pyo/course-maker` (공개)
 - 프로젝트: 사용자 계정의 `course-maker` (#1, 비공개), https://github.com/users/sehoon-pyo/projects/1
 - 이 문서의 명령어는 `gh`(GitHub CLI)를 쓴다. 문법은 PowerShell과 bash에서 모두 같고, 여러 줄 본문만 다르다(5번 참고).
-- 확인한 것: 2026-10-08 기준 이슈, PR, 마일스톤은 0건이고 라벨은 GitHub 기본 10개뿐이다. 프로젝트는 항목이 0개이다. 아래의 라벨, 마일스톤, 템플릿은 **제안**이며 아직 만들지 않았다.
+- 확인한 것: 2026-10-08 기준 라벨 10개, 마일스톤 5개, `.github/` 양식을 이 문서대로 만들었고, 프로젝트(#1)는 저장소에 링크되어 있다. 이슈는 0건이다. 프로젝트의 `Status`는 `Todo / In Progress / Done`이다(6번).
 
 ## 1. 역할 분담
 
@@ -210,15 +210,27 @@ gh issue reopen 12
 
 ### 6-1. 구성
 
-- 프로젝트 하나(`course-maker`, #1)에 열 네 개 이하로 시작한다. 새 프로젝트를 만들면 `Status` 필드에 `Todo`, `In Progress`, `Done`이 기본으로 있다. 이것을 그대로 쓴다.
-- 필드는 필요할 때 추가한다. 후보는 `Area`(단일 선택)와 `Size`(S/M/L)이다. 라벨의 `area:`와 겹치므로, 보드에서 영역별로 묶어 볼 필요가 생길 때만 추가한다.
+- 프로젝트 하나(`course-maker`, #1)를 쓰고, 저장소에 이미 링크되어 있다. 새 프로젝트의 `Status` 기본 옵션은 `Backlog / Ready / In progress / In review / Done`이므로, 웹 UI에서 이름을 바꾸고 지워 `Todo`(`Backlog`의 이름 변경), `In Progress`(`In progress`의 이름 변경), `Done` 세 개로 줄였다(2026-10-08). 옵션을 지우고 새로 만들면 항목의 값과 워크플로 연결이 끊길 수 있어 이름 변경 방식으로 했다.
+- `Priority`(P0~P2)와 `Size`(XS~XL), `Milestone` 등은 프로젝트에 기본으로 있다. `Area` 필드는 라벨의 `area:`와 겹치므로 보드에서 영역별로 묶어 볼 필요가 생길 때만 추가한다.
 - 보기(View)는 두 개를 만든다.
   - **Board**: `Status`별 칸반
   - **마일스톤별 표**: 마일스톤으로 묶은 Table
 
 보기와 `Status` 옵션 편집, 내장 자동화(workflow)는 웹 UI에서 설정한다. `gh`에는 이를 바꾸는 명령이 있는지 **확인하지 못했다**.
 
-- 권장 자동화: 이슈가 닫히면 `Done`으로 이동, 저장소의 새 이슈를 프로젝트에 자동 추가(Auto-add).
+- 켜져 있는 자동화 7개(2026-10-08 웹에서 확인):
+
+| 워크플로 | 동작 |
+|---|---|
+| Auto-add to project | 저장소 `course-maker`의 열린 이슈와 PR(`is:issue,pr is:open`)을 보드에 추가 |
+| Item added to project | 추가된 항목의 `Status`를 `Todo`로 |
+| Pull request linked to issue | `Status`를 `In Progress`로 |
+| Item closed, Pull request merged | `Status`를 `Done`으로 |
+| Auto-close issue | `Status`가 `Done`이 되면 이슈를 닫음 |
+| Auto-add sub-issues to project | 하위 이슈를 보드에 추가 |
+
+- 꺼져 있는 것: `Auto-archive items`, `Code changes requested`, `Code review approved`, `Item reopened`. 다시 연 이슈는 `Done`에 남으므로 필요해지면 `Item reopened`를 `Todo`로 켠다.
+- `Auto-add`의 필터가 `is:open`이라 이미 닫힌 이슈는 올라오지 않는다.
 - 웹 UI 위치: 프로젝트 오른쪽 위 `···` → `Workflows`.
 
 ### 6-2. 명령어
@@ -234,7 +246,7 @@ gh project list --owner sehoon-pyo
 gh project view 1 --owner sehoon-pyo
 gh project field-list 1 --owner sehoon-pyo
 
-# 저장소에 프로젝트를 링크 (저장소의 Projects 탭에 보인다)
+# 저장소에 프로젝트를 링크 (지금은 이미 링크되어 있어 다시 할 필요 없다. 저장소의 Projects 탭에 보인다)
 gh project link 1 --owner sehoon-pyo --repo sehoon-pyo/course-maker
 
 # 이슈를 프로젝트에 추가
@@ -243,8 +255,8 @@ gh project item-add 1 --owner sehoon-pyo --url https://github.com/sehoon-pyo/cou
 # 항목 목록
 gh project item-list 1 --owner sehoon-pyo
 
-# 필드 추가 예 (Size)
-gh project field-create 1 --owner sehoon-pyo --name "Size" --data-type SINGLE_SELECT --single-select-options "S,M,L"
+# 필드 추가 예 (Area). Size, Priority는 이미 있다
+gh project field-create 1 --owner sehoon-pyo --name "Area" --data-type SINGLE_SELECT --single-select-options "preview,elements,masters,export,docs"
 ```
 
 - 이슈를 만들면서 바로 추가하는 방법: `gh issue create ... --project "course-maker"`. 사용자 소유 프로젝트는 제목으로 지정한다. `gh issue create --help`에 `--project <제목>` 옵션이 있는 것은 확인했지만(gh 2.100.0), 사용자 소유 프로젝트에서 실제로 동작하는지는 **시험하지 못했다**. 안 되면 만든 뒤 `item-add`를 쓴다. 이 옵션도 `project` 권한이 필요하다.
@@ -274,9 +286,9 @@ Closes #
 
 테스트와 린트가 없으므로 확인 항목은 타입 검사, 빌드, 미리보기 확인이다.
 
-## 8. 저장소에 넣을 파일 (아직 없음)
+## 8. 저장소에 넣을 파일
 
-아래 파일을 `.github/`에 두면 GitHub 웹에서 이슈를 만들 때 양식이 뜬다. 현재 `.github/` 폴더가 없다.
+아래 파일을 `.github/`에 두면 GitHub 웹에서 이슈를 만들 때 양식이 뜬다(2026-10-08 만들었다). 양식의 `name`은 **3글자 이상**이어야 한다. 짧으면 GitHub가 양식을 인식하지 못하고 빈 이슈 화면만 나온다("기능", "버그"가 그랬다).
 
 ```
 .github/
@@ -290,7 +302,7 @@ Closes #
 ### `feature.yml`
 
 ```yaml
-name: 기능
+name: 기능 요청
 description: 새 기능이나 요소 추가
 labels: ["feat"]
 body:
@@ -327,7 +339,7 @@ body:
 ### `bug.yml`
 
 ```yaml
-name: 버그
+name: 버그 제보
 description: 동작이 잘못됨
 labels: ["bug"]
 body:
@@ -386,8 +398,8 @@ blank_issues_enabled: true
 
 ## 10. 시작 순서
 
-1. `gh auth refresh -h github.com -s project`로 프로젝트 권한을 추가한다(3, 6번 명령에 필요).
-2. 라벨과 마일스톤을 만든다(3, 4번).
-3. `.github/` 양식을 추가한다(8번). PR로 올린다.
-4. 노트 `[261008_003]`의 항목을 이슈로 옮긴다(5-5).
-5. 프로젝트를 저장소에 링크하고 이슈를 추가한다. 웹 UI에서 자동화를 켠다(6번).
+1. `gh auth refresh -h github.com -s project`로 프로젝트 권한을 추가한다(6번 명령에 필요). 완료
+2. 라벨과 마일스톤을 만든다(3, 4번). 완료
+3. `.github/` 양식을 추가한다(8번). PR로 올린다. 완료
+4. 프로젝트의 링크와 자동화를 확인한다(6번). 완료
+5. 노트 `[261008_003]`의 항목을 이슈로 옮긴다(5-5). 아직 하지 않았다.
