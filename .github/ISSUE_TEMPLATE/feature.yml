@@ -1,4 +1,4 @@
-name: 기능
+name: 기능 요청
 description: 새 기능이나 요소 추가
 labels: ["feat"]
 body:

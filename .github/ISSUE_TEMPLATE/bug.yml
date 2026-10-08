@@ -1,4 +1,4 @@
-name: 버그
+name: 버그 제보
 description: 동작이 잘못됨
 labels: ["bug"]
 body:
