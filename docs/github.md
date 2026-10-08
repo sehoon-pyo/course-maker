@@ -87,14 +87,14 @@ gh label create "area:docs"     --color bfdadc --description "문서, 용어"
 | `단일 HTML export` | 단일 HTML 파일로 내보내기 |
 | `PPTX export` | PPTX로 내보내기, PowerPoint 슬라이드 마스터로 만들기 |
 | `PDF export` | PDF로 내보내기 |
-| `슬라이드 요소 확장` | 표, group, 자동 배치(Row/Column) |
+| `표 요소` | 표 |
 | `날짜, 바닥글, 번호` | 날짜, 바닥글, 슬라이드 번호 |
 
 ```bash
 gh api repos/{owner}/{repo}/milestones -f title="단일 HTML export" -f description="강의 chapter 하나가 파일 하나인 단일 HTML 내보내기"
 gh api repos/{owner}/{repo}/milestones -f title="PPTX export"
 gh api repos/{owner}/{repo}/milestones -f title="PDF export"
-gh api repos/{owner}/{repo}/milestones -f title="슬라이드 요소 확장"
+gh api repos/{owner}/{repo}/milestones -f title="표 요소"
 gh api repos/{owner}/{repo}/milestones -f title="날짜, 바닥글, 번호"
 
 # 확인
@@ -166,13 +166,13 @@ gh issue create \
   --title "표 요소 추가" \
   --body-file body.md \
   --label feat --label area:elements \
-  --milestone "슬라이드 요소 확장"
+  --milestone "표 요소"
 ```
 
 PowerShell은 줄 이음이 백틱(`` ` ``)이다. 한 줄로 써도 된다.
 
 ```powershell
-gh issue create --title "표 요소 추가" --body-file body.md --label feat --label "area:elements" --milestone "슬라이드 요소 확장"
+gh issue create --title "표 요소 추가" --body-file body.md --label feat --label "area:elements" --milestone "표 요소"
 ```
 
 짧은 본문은 PowerShell의 single-quoted here-string으로 넘길 수 있다. 닫는 `'@`는 줄 맨 앞에 와야 한다.
@@ -369,8 +369,7 @@ body:
 blank_issues_enabled: true
 ```
 
-양식 없이 만드는 이슈도 허용한다. 양식을 강제하려면 `false`로 바꾼다. 이 저장소는 사용 조건상 승인한 사람만 쓰는 도구라, 외부 이슈는 허용한다(9번 참고).
-
+양식 없이 만드는 이슈도 허용한다. 양식을 강제하려면 `false`로 바꾼다.
 ### `pull_request_template.md`
 
 7번의 PR 양식을 그대로 쓴다.

@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>남은 미결 한꺼번에 브리핑</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --fg: #1b2330; --muted: #5d6877; --line: #dde2ea;
+    --primary: #164194; --ok-bg: #e4f3ea; --ok-fg: #1d5a35; --warn-bg: #fff4de; --warn-fg: #7a4b00;
+    --code-bg: #eceff4; --input-bg: #ffffff;
+    --font-body: "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: Consolas, "Cascadia Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11151c; --surface: #1a212c; --fg: #e6eaf0; --muted: #9aa5b5; --line: #2c3645;
+      --primary: #5b86d6; --ok-bg: #16352a; --ok-fg: #9fd9b5; --warn-bg: #3a2e12; --warn-fg: #f2cf8a;
+      --code-bg: #232c3a; --input-bg: #11151c; color-scheme: dark; }
+  }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.7;
+    margin: 0; padding-inline: 16px; padding-block: 40px 96px; }
+  main { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+  h1 { font-size: 1.75rem; line-height: 1.3; margin: 0; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  p { margin: 0; }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.06em; color: var(--muted); }
+  .lead { color: var(--muted); margin-top: 8px; }
+  .verdict { background: var(--warn-bg); color: var(--warn-fg); padding: 14px 16px; border-radius: 8px; }
+  .cap { font-size: 0.85rem; color: var(--muted); }
+  .group > p.cap { margin-bottom: 14px; }
+  .group { display: flex; flex-direction: column; }
+  .asks { display: flex; flex-direction: column; gap: 16px; }
+  .ask { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--primary); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .ask h3 { margin: 0; font-size: 1rem; }
+  .ask h3 .no { font-family: var(--font-mono); color: var(--primary); margin-right: 6px; }
+  .facts { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; font-size: 0.92rem; }
+  .tag { display: inline-block; padding: 0 7px; border-radius: 999px; font-size: 0.74rem; background: var(--ok-bg); color: var(--ok-fg); margin-right: 4px; white-space: nowrap; }
+  .tag.warn { background: var(--warn-bg); color: var(--warn-fg); }
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  .choices label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .choices input { margin-top: 6px; }
+  .rec-mark { color: var(--primary); font-size: 0.8rem; margin-left: 6px; }
+  .why { font-size: 0.88rem; color: var(--muted); }
+  textarea { width: 100%; box-sizing: border-box; min-height: 56px; resize: vertical; padding: 10px 12px; font: inherit; font-size: 0.93rem;
+    color: var(--fg); background: var(--input-bg); border: 1px solid var(--line); border-radius: 8px; }
+  textarea:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .bar { position: sticky; bottom: 0; background: var(--bg); border-top: 1px solid var(--line); padding: 12px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button { font: inherit; font-size: 0.93rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--primary); background: var(--primary); color: #fff; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--primary); }
+  #status { font-size: 0.85rem; color: var(--muted); }
+  #progress { font-size: 0.85rem; color: var(--muted); margin-left: auto; }
+  #fallback { display: none; min-height: 140px; }
+  .todo { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .todo ul { margin: 8px 0 0; padding-left: 1.2em; font-size: 0.92rem; }
+  footer { color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">노트 261008_003 · 남은 미결 전체</div>
+    <h1>남은 미결, 한 번에 정하기</h1>
+    <p class="lead">노트에서 아직 정하지 않은 것과 앞에서 정하면서 남긴 후속 질문을 모았습니다. 항목마다 고를 수 있고, 권고가 있는 곳에는 표시했습니다. 다 고르지 않아도 되고, 고른 것만 복사해서 붙여 주시면 됩니다.</p>
+  </header>
+
+  <section class="verdict">
+    <p><strong>먼저 알아 두실 점.</strong> 항목 대부분은 코드로 직접 확인할 수 있는 사실이라 권고에 근거를 달았습니다. 근거가 약한 항목은 "확인하지 못함"으로 표시했고, 사용자의 판단이 필요한 항목(<code>31-3</code> 사용 조건)은 권고 없이 두었습니다. 권고만 따르면 거의 모든 항목이 "현상 유지 또는 작은 문서 변경"입니다.</p>
+  </section>
+
+  <div id="groups"></div>
+
+  <section class="todo">
+    <h2>결정이 아닌, 직접 해 주셔야 하는 것</h2>
+    <p class="cap">노트 4번 "사람이 눈으로 확인할 것"은 제가 대신할 수 없는 확인입니다.</p>
+    <ul>
+      <li>sample의 기존 17장 색, 띠, 글자 크기 변화와 <code>ch.3_master</code>, 숨김 슬라이드의 모양</li>
+      <li>네 layout이 기존 PPTX와 비슷한 인상인지, 로고, <code>PromptBox</code>, <code>Chip</code>의 모양</li>
+      <li>글로우의 번짐, 터미널과 파일 svg, 뱃지 정렬 0.10em, <code>tail</code> 슬라이드(<code>sl.9_progress</code>)</li>
+      <li>이번에 옮긴 <code>Stamp</code>가 이전과 같이 보이는지 (<code>ch.3_master</code>의 도형 슬라이드와 진행 현황 슬라이드)</li>
+    </ul>
+  </section>
+
+  <div class="bar">
+    <button type="button" id="copy">답변 복사</button>
+    <button type="button" id="clear" class="ghost">입력 지우기</button>
+    <span id="status" role="status"></span>
+    <span id="progress"></span>
+  </div>
+  <textarea id="fallback" readonly aria-label="복사할 텍스트"></textarea>
+
+  <footer>course-maker <code>docs/261008_004-master-elements</code> 브랜치에서 노트 [261008_003]의 남은 미결을 정하기 위해 만든 브리핑입니다. 입력은 이 브라우저에만 저장됩니다.</footer>
+</main>
+
+<script>
+  // 항목 데이터: facts는 [상태, 내용], 상태는 "확인함" 또는 "확인하지 못함"
+  const V = "확인함", U = "확인하지 못함";
+  const GROUPS = [
+    { title: "A. 구조와 운영", note: "노트 3번의 남은 항목입니다.", items: [
+      { id: "26", title: "폴더 이름의 접두사(ch., sec., sl.)를 권장할지",
+        facts: [[V, "순서는 상위 meta.ts의 배열이 정하고 폴더 번호는 정리용이다 (CLAUDE.md)."], [V, "접두사 없이 intro 같은 이름도 읽힌다고 문서에 적혀 있다. 이번에 접두사 없는 이름으로 직접 시험하지는 않았다."], [V, "sample과 문서의 예시는 모두 접두사를 쓴다."]],
+        opts: [["A", "접두사(번호)를 권장한다"], ["B", "접두사 없는 이름을 권장한다"], ["C", "둘 다 허용하고 권장하지 않는다 (지금 상태)", true]],
+        why: "순서가 배열이라 번호를 맞출 필요가 없고, 어느 쪽이 낫다는 근거도 없습니다. 파일 탐색기에서 순서가 보이는 쪽을 원하면 A입니다." },
+      { id: "27", title: "slides 항목에 hidden 외의 속성(예: 발표자 메모)을 둘지",
+        facts: [[V, "항목 형식은 string | { id, hidden? } 이다 (src/types.ts)."], [V, "객체 형식이라 속성을 더하는 것은 나중에도 가능하다."], [U, "발표자 메모가 필요한 강의가 있는지는 알 수 없다."]],
+        opts: [["A", "지금은 필요 없으므로 삭제한다 (필요해지면 새 항목)", true], ["B", "유지하고 발표자 메모 등을 설계한다"]],
+        why: "23번, 24번처럼 필요한 사례가 없는 것은 지우는 방침과 같습니다." },
+      { id: "28", title: "줄바꿈(LF/CRLF) 정리: .gitattributes를 둘지",
+        facts: [[V, ".gitattributes가 없다."], [V, "이 PC의 core.autocrlf가 true이고, 커밋할 때마다 \"LF will be replaced by CRLF\" 경고가 나온다."], [V, "노트의 기록: 저장소(index)는 모두 LF이고 작업 폴더는 115개 중 91개가 CRLF (오늘 다시 세지는 않았다)."], [U, "적용하면 작업 폴더의 파일이 한 번 LF로 바뀌어 git에는 변경으로 보일 수 있다. 실제로 시험하지는 않았다."]],
+        opts: [["A", "두지 않는다 (지금 상태)"], ["B", "* text=auto (저장소는 LF, 작업 폴더는 각자 OS 기본)"], ["C", "* text=auto eol=lf (저장소도 작업 폴더도 LF)", true]],
+        why: "fork로 여러 사람이 쓰면 OS가 달라 줄바꿈이 섞이기 쉽습니다. C는 경고가 사라지고 모두 같은 줄바꿈이 됩니다. 적용 뒤 git add --renormalize . 가 한 번 필요합니다." },
+      { id: "30", title: "Vite가 IPv6(::1)로만 열리는 현상",
+        facts: [[V, "vite.config.ts에 server 설정이 없다."], [V, "README는 localhost 주소(http://localhost:5173/)로 접속하라고 안내한다."], [U, "127.0.0.1로 접속이 안 되는 현상은 노트의 기록이고, 오늘 다시 재현하지 않았다. --host 127.0.0.1 시험도 한 적이 없다."]],
+        opts: [["A", "localhost로 접속하면 되므로 문제로 보지 않고 닫는다", true], ["B", "server.host를 시험해서 IPv4도 열리게 한다"]],
+        why: "사용자는 localhost로 접속하고 있고 영향이 없습니다. 127.0.0.1이 필요한 도구(브라우저 자동화 등)를 쓰게 되면 그때 시험해도 됩니다." },
+    ]},
+    { title: "B. 앞에서 정하면서 남긴 후속 질문", note: "20, 21, 22, 24, 25번의 미정 부분입니다.", items: [
+      { id: "20-1", title: "20번 번호 슬롯: 슬라이드에서 번호를 빼는 방법",
+        facts: [[V, "지금 Slide는 layout 하나만 속성으로 받는다 (src/elements/index.tsx)."], [V, "숨김은 slides 항목({ id, hidden: true })에 쓴다."]],
+        opts: [["A", "<Slide number={false}> 처럼 슬라이드 속성으로 뺀다", true], ["B", "section meta.ts의 slides 항목 속성으로 뺀다"], ["C", "빼는 기능을 두지 않는다 (layout이 정하면 항상 표시)"]],
+        why: "번호는 슬라이드 모양에 관한 것이라 슬라이드 파일에 두는 편이 읽기 쉽습니다. B는 hidden과 한곳에서 관리되지만 27번과 겹칩니다." },
+      { id: "20-2", title: "20번 번호 슬롯: 어느 layout에 포함할지",
+        facts: [[V, "layout은 title, content, title-only, toc 4개이다."], [V, "기존 PPTX는 컨텐츠 layout에 번호 슬롯이 있었다는 기록이 있다."], [U, "기존 PPTX의 나머지 layout에 있었는지는 기록에 없다."]],
+        opts: [["A", "content, title-only에 포함 (title, toc 제외)", true], ["B", "모든 layout에 포함"], ["C", "content에만 포함 (기존 PPTX와 같게)"]],
+        why: "대제목과 목차 슬라이드에는 보통 번호를 두지 않습니다. 근거가 기록이 아니라 일반적인 관례라서 약합니다." },
+      { id: "20-3", title: "20번 번호 슬롯: 숨김 슬라이드 위에서는 어떻게 보일지",
+        facts: [[V, "숨김 슬라이드는 번호가 없고, 미리보기 하단은 \"숨김 / N\" 이다 (ADR 261008_002)."]],
+        opts: [["A", "번호 슬롯을 비운다", true], ["B", "슬롯에 \"숨김\"이라고 표시한다"]],
+        why: "숨김 슬라이드는 내보낼 때 빠지는 슬라이드라 번호가 의미가 없습니다. 미리보기 하단이 이미 \"숨김\"을 알려 줍니다." },
+      { id: "21", title: "21번: 깨지는 변경을 ADR에 \"강의에 필요한 수정\"으로 적는 규칙을 둘지",
+        facts: [[V, "ADR 261008_001이 이미 기존 강의의 meta.ts에 chapters, sections를 추가해야 한다고 적은 사례가 있다."], [V, "fork 방식에서는 사용자가 도구를 업데이트할 때 이 설명을 보고 강의를 고친다."]],
+        opts: [["A", "규칙을 둔다 (CLAUDE.md 문서 규칙에 한 줄 추가)", true], ["B", "두지 않는다"]],
+        why: "비용이 한 줄이고, 사용자가 업데이트할 때 무엇을 고쳐야 하는지 알 수 있는 유일한 기록이 됩니다." },
+      { id: "22", title: "22번: 화면 편집 기능을 마일스톤에 언제 올릴지",
+        facts: [[V, "docs/github.md의 마일스톤 표와 README 10번 로드맵에 아직 없다."], [V, "두 문서는 서로 맞추게 되어 있다."]],
+        opts: [["A", "지금 두 문서에 함께 추가한다", true], ["B", "ADR을 쓸 때 한꺼번에 추가한다"]],
+        why: "두 줄 추가라 지금 해도 부담이 없습니다." },
+      { id: "24", title: "24번: 표만 남은 마일스톤 \"슬라이드 요소 확장\"의 이름",
+        facts: [[V, "group과 자동 배치를 지워서 이 마일스톤에는 표 하나만 남았다 (docs/github.md)."]],
+        opts: [["A", "이름을 그대로 둔다 (이후 요소도 담을 수 있음)", true], ["B", "\"표 요소\"로 바꾼다"]],
+        why: "요소 추가는 앞으로도 생길 수 있어 포괄적인 이름이 재사용됩니다." },
+      { id: "25", title: "25번: Stamp의 색을 마스터 tokens로 올릴지",
+        facts: [[V, "기본 색(#00B0F0, 글로우 rgba 값)이 요소 안에 직접 값으로 있다."], [V, "color 속성으로 슬라이드에서 바꿀 수 있다."], [V, "프로젝트 규칙은 색을 마스터 tokens로 정하는 것이다 (CLAUDE.md)."]],
+        opts: [["A", "요소 안 기본값을 유지한다", true], ["B", "--stamp-* 토큰으로 올린다"]],
+        why: "쓰임이 한정되어 있어 토큰까지 두면 마스터마다 값을 정해야 하는 부담이 늘어납니다." },
+    ]},
+    { title: "C. 저장소 구조 (fork 방식)", note: "31번, 32번의 미정 부분입니다. 코드를 바꾸는 항목이 섞여 있습니다.", items: [
+      { id: "31-1", title: "31번: fork와 template 중 무엇으로 안내할지",
+        facts: [[V, "fork는 원본(upstream)과 이력이 이어져 업데이트를 합칠 수 있다."], [V, "template(Use this template)은 이력이 끊긴 새 저장소를 만든다."], [U, "도구를 쓰는 사람이 몇 명이고 업데이트를 원하는지는 알 수 없다."]],
+        opts: [["A", "fork", true], ["B", "template"]],
+        why: "업데이트를 받을 수 있게 하자는 방향이었으므로 fork입니다." },
+      { id: "31-2", title: "31번: .gitignore의 courses/* 규칙",
+        facts: [[V, "지금은 courses/* 를 무시하고 sample, sample2만 추적한다."], [V, "그래서 courses/default-course는 추적되지 않고, fork에 따라오지 않는다."], [V, "fork 방식에서는 사용자의 강의도 같은 저장소에 커밋해야 한다."]],
+        opts: [["A", "courses/* 규칙을 지운다 (sample, sample2, default-course 모두 추적)", true], ["B", "규칙을 유지한다 (강의는 별도 저장소로 두는 지금 방식)"]],
+        why: "fork로 바꾼 취지와 맞는 것은 A입니다. B는 fork 방식과 충돌합니다." },
+      { id: "31-3", title: "31번: 사용 조건(\"승인한 사람만 사용\")과 fork의 관계",
+        facts: [[V, "README 9번: 저작권자가 사용을 승인한 사람만 사용할 수 있고, 승인 없이 복사, 수정, 배포할 수 없다."], [U, "fork가 이 조건과 충돌하는지, 폰트 파일 동봉이 문제가 되는지는 제가 판단할 수 없다."]],
+        opts: [["A", "조건을 수정해서 fork를 허용한다"], ["B", "조건은 유지하고, 승인한 사람만 fork할 수 있게 비공개 저장소로 운영한다"]],
+        why: "권고하지 않습니다. 저작권자와 폰트 이용 조건에 관한 판단이라 사용자가 정할 일입니다. 메모에 적어 주세요." },
+      { id: "31-4", title: "31번: 도구 업데이트(upstream)를 받는 방법 안내를 어디에 둘지",
+        facts: [[V, "지금 README에는 없다."], [V, "방법은 git remote add upstream, git fetch upstream, git merge upstream/main 이다."], [U, "사용자가 도구 파일을 고친 경우의 충돌 해결은 안내하지 않았다."]],
+        opts: [["A", "README에 \"도구 업데이트 받기\" 절을 추가한다", true], ["B", "docs/에 별도 문서를 만든다"], ["C", "안내하지 않는다"]],
+        why: "README가 처음 보는 곳이라 가장 찾기 쉽습니다." },
+      { id: "32-1", title: "32번: 새 강의를 시작하는 방법",
+        facts: [[V, "courses/default-course/ 에 빈 틀(마스터, 장 1개, 슬라이드 2장)이 있다."], [V, "마스터는 강의마다 복사본을 갖는 구조이다."]],
+        opts: [["A", "default-course 폴더를 복사해서 시작한다고 문서로 안내한다", true], ["B", "복사 명령(npm script)을 추가한다"]],
+        why: "폴더 복사는 도구 변경 없이 바로 됩니다. 스크립트는 사용자가 늘어난 뒤에 만들어도 됩니다." },
+      { id: "32-2", title: "32번: 강의에 마스터가 없을 때의 오류 안내",
+        facts: [[V, "지금 메시지는 \"마스터를 찾을 수 없습니다. 사용 가능한 마스터: …\" 이고 해결 방법은 적혀 있지 않다 (src/masters/registry.ts)."], [V, "도구가 마스터를 제공하지 않으므로 새 강의가 마스터 없이 시작하면 이 오류를 만난다."]],
+        opts: [["A", "메시지에 \"courses/default-course/masters/default 를 복사하세요\" 안내를 추가한다 (코드 변경 작음)", true], ["B", "메시지를 그대로 둔다"]],
+        why: "처음 쓰는 사람이 오류를 보고 바로 해결할 수 있어야 합니다." },
+    ]},
+    { title: "D. 정리", note: "문서 정리 방식입니다.", items: [
+      { id: "5", title: "노트 5번 \"문서에 남은 옛 서술\" 목록",
+        facts: [[V, "ADR과 이전 노트의 옛 서술을 목록으로만 두고 있다 (기록은 고치지 않는 규칙)."], [V, "해당 ADR들은 상태 줄이 최신이라 읽는 사람이 오해하기 어렵다고 노트에 적혀 있다."]],
+        opts: [["A", "목록을 삭제한다 (ADR과 이전 노트는 그대로)", true], ["B", "목록을 유지한다"], ["C", "각 ADR 상태 줄에 최신 표시를 덧붙인다 (규칙의 예외)"]],
+        why: "23번처럼 계속 언급되는 것을 줄이는 방침과 맞습니다." },
+      { id: "ADR", title: "결정을 ADR로 옮기는 방식",
+        facts: [[V, "ADR은 지금 6개이고, 노트 1~2번과 이번에 정한 결정은 아직 ADR로 옮기지 않았다."], [V, "제안하는 묶음: ① export(1~13번), ② 마스터와 요소(14~20, 22, 24, 25번), ③ 저장소 구조(21, 31, 32번), ④ 운영(26~28, 30번)."]],
+        opts: [["A", "위처럼 주제별로 4개를 쓴다", true], ["B", "하나로 쓴다"], ["C", "지금은 쓰지 않는다"]],
+        why: "하나로 쓰면 이후에 일부만 대체하기 어렵습니다. 대체 관계는 ADR 단위로 표시되기 때문입니다." },
+    ]},
+  ];
+
+  const KEY = "briefing-261008_004";
+  const state = { choice: {}, memo: {} };
+  try { Object.assign(state, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+  state.choice = state.choice || {}; state.memo = state.memo || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const all = [];
+
+  const root = document.getElementById("groups");
+  root.innerHTML = GROUPS.map((g) => `
+    <section class="group">
+      <h2>${esc(g.title)}</h2>
+      <p class="cap">${esc(g.note)}</p>
+      <div class="asks">${g.items.map((it) => { all.push(it); return `
+        <div class="ask" data-id="${esc(it.id)}">
+          <h3><span class="no">${esc(it.id)}</span>${esc(it.title)}</h3>
+          <ul class="facts">${it.facts.map(([s, t]) => `<li><span class="tag ${s === "확인함" ? "" : "warn"}">${s}</span>${esc(t)}</li>`).join("")}</ul>
+          <div class="choices">${it.opts.map(([k, label, rec]) => `
+            <label><input type="radio" name="q-${esc(it.id)}" value="${esc(k)}"><span><b>${esc(k)}</b> ${esc(label)}${rec ? '<span class="rec-mark">권고</span>' : ""}</span></label>`).join("")}
+          </div>
+          <p class="why">${esc(it.why)}</p>
+          <textarea data-memo="${esc(it.id)}" aria-label="${esc(it.id)}번 메모" placeholder="메모 (선택)"></textarea>
+        </div>`; }).join("")}</div>
+    </section>`).join("");
+
+  const progress = document.getElementById("progress");
+  const updateProgress = () => { progress.textContent = `선택 ${Object.keys(state.choice).length} / ${all.length}`; };
+
+  root.querySelectorAll('input[type="radio"]').forEach((r) => {
+    const id = r.closest(".ask").dataset.id;
+    if (state.choice[id] === r.value) r.checked = true;
+    r.addEventListener("change", () => { state.choice[id] = r.value; save(); updateProgress(); });
+  });
+  root.querySelectorAll("textarea[data-memo]").forEach((t) => {
+    const id = t.dataset.memo;
+    if (state.memo[id]) t.value = state.memo[id];
+    t.addEventListener("input", () => { state.memo[id] = t.value; save(); });
+  });
+  updateProgress();
+
+  function buildText() {
+    const lines = ["[브리핑 답변: 남은 미결]"];
+    all.forEach((it) => {
+      const choice = state.choice[it.id];
+      const memo = (state.memo[it.id] || "").trim();
+      if (!choice && !memo) return;
+      lines.push(`- ${it.id}. ${it.title}`);
+      if (choice) lines.push(`  선택: ${choice}`);
+      if (memo) lines.push(`  메모: ${memo.replace(/\n/g, "\n    ")}`);
+    });
+    if (lines.length === 1) lines.push("(입력한 내용이 없습니다)");
+    return lines.join("\n");
+  }
+
+  const status = document.getElementById("status");
+  const fallback = document.getElementById("fallback");
+  document.getElementById("copy").addEventListener("click", async () => {
+    const text = buildText();
+    try {
+      await navigator.clipboard.writeText(text);
+      status.textContent = "복사했습니다.";
+      fallback.style.display = "none";
+    } catch (e) {
+      // 클립보드가 막힌 경우: 직접 선택해서 복사할 수 있게 보여 준다
+      fallback.value = text;
+      fallback.style.display = "block";
+      fallback.select();
+      status.textContent = "자동 복사가 막혀 아래 칸에 보여 드렸습니다. 선택해서 복사해 주세요.";
+    }
+  });
+  document.getElementById("clear").addEventListener("click", () => {
+    state.choice = {}; state.memo = {}; save();
+    root.querySelectorAll('input[type="radio"]').forEach((r) => (r.checked = false));
+    root.querySelectorAll("textarea[data-memo]").forEach((t) => (t.value = ""));
+    fallback.style.display = "none";
+    status.textContent = "지웠습니다.";
+    updateProgress();
+  });
+</script>
+</body>
+</html>

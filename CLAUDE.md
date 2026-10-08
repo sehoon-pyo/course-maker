@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 슬라이드를 TSX로 작성하고 브라우저 미리보기 창에서 확인한다. AI(Claude Code 등)가 로컬의 TSX를 직접 고치는 것이 기본 사용 방식이다.
 - **원본(SSOT)은 슬라이드의 TSX**이다. HTML(최종 강의자료), PPTX(납품자료), PDF(수강생 배포용)는 모두 출력물이며, 직접 고치지 않고 원본에서 다시 생성한다.
 - 기술 스택은 Vite + React + TypeScript이다. Node.js는 `^20.19.0 || >=22.12.0`.
-- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Toc`), 강의 전용 요소, 인라인 서식, 숨김 슬라이드(미리보기)이다. **단일 HTML/PPTX/PDF export, 표, group, 자동 배치(Row/Column), 날짜/바닥글/슬라이드 번호는 아직 없다.** 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
+- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`, `Toc`), 강의 전용 요소, 인라인 서식, 숨김 슬라이드(미리보기)이다. **단일 HTML/PPTX/PDF export, 표, 날짜/바닥글/슬라이드 번호는 아직 없다.** 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
 
 ## 명령어
 - `npm run dev`: 개발 서버 (미리보기 창, 기본 `http://localhost:5173/`)
@@ -22,11 +22,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 course-maker/
 ├─ src/                    도구의 소스 (미리보기 앱)
-│  ├─ elements/            슬라이드에서 쓰는 요소와 인라인 서식 (index: Slide, Title 등 / free: Text, Shape, Image / widgets: Chip, PromptBox, Toc / slots: 슬롯 배치)
+│  ├─ elements/            슬라이드에서 쓰는 요소와 인라인 서식 (index: Slide, Title 등 / free: Text, Shape, Image, Stamp / widgets: Chip, PromptBox, Toc / slots: 슬롯 배치)
 │  ├─ preview/             미리보기 창 (사이드바, 상단 바, 슬라이드 표시, 오류 경계)
 │  ├─ masters/             슬라이드 마스터 (types, define: 검증과 상속, registry: 등록과 조회, MasterFrame, Layers)
-│  │  ├─ default/          기본 마스터. 폴더 이름이 마스터 id
-│  │  └─ ...               마스터를 추가하려면 폴더를 추가 (`_`로 시작하는 폴더는 등록하지 않음)
+│  │                        도구가 제공하는 마스터는 없다. 마스터는 각 강의의 `masters/{id}/`에 둔다 (`src/masters/{id}/`에 두면 모든 강의가 쓰는 마스터로 읽힘, `_`로 시작하는 폴더는 등록하지 않음)
 │  ├─ courses.ts           courses/ 폴더를 읽어 목차 트리를 만듦 (순서는 meta의 배열)
 │  ├─ sections.ts          section 번호표(`SECTION 1`) 형식. 목차, 사이드바, 상단 바가 같이 씀
 │  ├─ types.ts             meta.ts의 타입
@@ -45,7 +44,7 @@ course-maker/
 │     └─ ch.N_이름/sec.N_이름/sl.N_이름/index.tsx
 │
 ├─ assets/fonts/           NanumSquare R, B
-├─ docs/                   glossary.md, github.md(이슈와 프로젝트 운영), notes/(논의 기록), adr/(결정 기록)
+├─ docs/                   glossary.md, github.md(이슈와 프로젝트 운영), notes/(논의 기록), adr/(결정 기록), briefing/(브리핑 HTML)
 └─ index.html, package.json, tsconfig.json, vite.config.ts
 ```
 
@@ -56,7 +55,7 @@ course-maker/
 - **번호와 이동**(`docs/adr/[261008_002]_adr.md`): 번호는 chapter 안에서 `head` → section → `tail` 순서로 이어서 매기고 숨김 슬라이드는 번호가 없다(하단은 `숨김 / N`). 하단 버튼은 `<< 이전 챕터`, `< 이전`, `다음 >`, `다음 챕터 >>`이고 `<`, `>`는 chapter 끝에서 멈춘다. 키는 `←`, `→`(슬라이드), `Ctrl + ←`, `Ctrl + →`(chapter)이다. 슬라이드 위에 그리는 페이지 번호는 쪽번호 layout을 만들 때 추가한다.
 - **숨김 슬라이드**는 `slides`(또는 `head`, `tail`)에서 `{ id, hidden: true }`로 쓴다. 미리보기에서는 보이고 내보낼 때만 빠진다.
 - **`courses/`에서 이 저장소가 추적하는 것은 `sample`, `sample2`뿐**이다. 나머지는 강의별 별도 git 저장소이므로 이 저장소에 커밋하지 않는다.
-- **슬라이드 마스터**(`docs/adr/[261007_004]_adr.md`): 마스터는 course 단위로 하나만 고르고(`meta.ts`의 `master`, 없으면 `default`), id는 ① `courses/{강의}/masters/` → ② `src/masters/` 순서로 찾는다. 마스터는 `defineMaster({ tokens, background, layouts })`가 만든 데이터이고, 슬라이드의 디자인(배경, layout, 색, 크기, 요소의 모양)은 `styles.css`가 아니라 마스터가 정한다. 마스터는 `tokens` 10개를 반드시 정해야 한다(`REQUIRED_TOKENS`, `src/masters/define.ts`). `extendMaster`는 아직 없다.
+- **슬라이드 마스터**(`docs/adr/[261007_004]_adr.md`): 마스터는 course 단위로 하나만 고르고(`meta.ts`의 `master`, 없으면 `default`), id는 ① `courses/{강의}/masters/` → ② `src/masters/` 순서로 찾는다. 마스터는 `defineMaster({ tokens, background, layouts })`가 만든 데이터이고, 슬라이드의 디자인(배경, layout, 색, 크기, 요소의 모양)은 `styles.css`가 아니라 마스터가 정한다. 마스터는 `tokens` 10개를 반드시 정해야 한다(`REQUIRED_TOKENS`, `src/masters/define.ts`). 마스터끼리의 상속(`extendMaster`)은 두지 않는다.
 - **그리는 순서**: `MasterFrame`이 마스터와 chapter 정보를 context로 내리고, `Slide`가 layout을 골라 background < layout(장식) < element 세 단계를 쌓임 맥락을 분리해 그린다. 단계 안의 순서는 배열(작성) 순서이고 소스에 `z-index` 숫자를 쓰지 않는다. 층, 슬롯, 요소에는 `id`를 둔다.
 - **강의 전용 요소**: section 안의 슬라이드는 `../../../elements`, chapter 바로 아래의 슬라이드(`head`, `tail`)는 `../../elements`(강의의 `elements/index.ts`)에서 가져오면 도구 요소와 강의 요소를 한 줄로 쓰고, 같은 이름은 강의 것이 우선한다. `@/elements`에서 가져오면 도구의 것이다. 래퍼 요소는 `slotKinds`를 원래 요소에서 다시 알려야 한다. 도구는 아이콘 이미지를 제공하지 않는다(강의의 `assets/`).
 
@@ -65,7 +64,7 @@ course-maker/
 - 문구는 파일 맨 위 `text` 객체에 모으고, 그 안에는 문자열, `t` 템플릿, `badge()` 같은 헬퍼 호출만 넣는다. 슬라이드에 조건문이나 반복문 같은 로직을 넣지 않는다.
 - 문장 안에서 서식이 섞이면 `t` 태그드 템플릿으로 쓴다(``t`타입은 ${badge("동적", "green")}이다` ``). 서식이 없으면 일반 문자열로 쓴다. 배열 방식은 쓰지 않는다.
 - 폰트는 NanumSquare R(400), B(700)만 쓰고 가짜 굵게를 쓰지 않는다. 색, 크기, 여백은 마스터의 `tokens`(CSS 변수)로 정의하고 요소의 CSS는 변수만 읽는다. Tailwind 같은 utility class는 쓰지 않는다.
-- `<Slide layout="...">`으로 layout을 고른다(`title`, `content`(기본), `title-only`, `toc`). `Title`, `Paragraph`, `Bullets`, `Toc`는 슬롯에 자동으로 들어가고, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`는 `at={{ x, y, w, h }}`(슬라이드 기준 px)로 위치를 준다. `Shape`와 `PromptBox`는 크기까지, `Chip`은 `x, y`만 준다. 색은 직접 값이나 토큰 이름(`primary` 등)을 쓴다.
+- `<Slide layout="...">`으로 layout을 고른다(`title`, `content`(기본), `title-only`, `toc`). `Title`, `Paragraph`, `Bullets`, `Toc`는 슬롯에 자동으로 들어가고, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`는 `at={{ x, y, w, h }}`(슬라이드 기준 px)로 위치를 준다. `Shape`와 `PromptBox`는 크기까지, `Chip`과 `Stamp`는 `x, y`만 준다. 색은 직접 값이나 토큰 이름(`primary` 등)을 쓴다.
 - `Toc`는 항목을 직접 받지 않고 chapter의 section으로 자동으로 채운다.
 - `Chip`과 `PromptBox`의 아이콘은 `icon`으로 받는다(없어도 됨). 아이콘이 정해진 칩은 도구가 아니라 그 강의의 `elements/`에 만든다(예: `courses/sample/elements/`의 `ClaudeChip`, `TerminalChip`, `FileChip`). 칩의 아이콘은 정사각형 칸 안에 비율을 지켜 맞춰진다.
 - 글로우(네온)는 `Shape`의 `glow`(도형)와 `textStyle.glow`(글자)이다. 문장 안의 뱃지는 `.badge`의 `vertical-align`으로 본문 글자의 중심선에 맞춘다.
@@ -75,7 +74,9 @@ course-maker/
 - 논의는 `docs/notes/[YYMMDD_NNN]_note.md`, 결정된 사항만 `docs/adr/[YYMMDD_NNN]_adr.md`에 쓴다. 번호는 날짜 기준이고 같은 날 새 문서는 `NNN`을 1씩 올린다.
 - 이전 결정을 바꾸면 이전 ADR의 상태 줄에 대체 관계를 표시한다. 이전 기록의 서술은 고치지 않는다.
 - 구조, 용어, 규칙이 바뀌면 `README.md`, `docs/glossary.md`, 이 파일을 함께 맞춘다.
+- 도구의 변경이 기존 강의를 깨뜨리면 그 ADR에 "강의에 필요한 수정"을 적는다. 도구는 업데이트되고 강의는 별도 저장소라 따로 고쳐야 하므로, 업데이트한 사람이 이 설명을 보고 강의를 고친다.
 - 문서는 한글로 쓴다. 용어사전에는 쓰지 않는 용어를 적지 않는다.
+- **브리핑**: 사용자가 브리핑을 요청하면 채팅 텍스트로만 답하지 않고 HTML 문서를 만든다. `docs/briefing/`에 저장하고 브라우저로 띄운다. 파일 이름은 `[YYMMDD_NNN]_주제.html`처럼 날짜와 번호를 앞에 둔다. 내용은 확인한 것과 확인하지 못한 것을 나누어 쓴다. 미결 항목마다 선택지(라디오)와 메모 입력란을 두고, 입력은 `localStorage`에 저장하며, 전체를 한 덩어리 텍스트로 복사하는 버튼을 둔다(사용자가 그 텍스트를 붙여 넣어 답한다).
 
 ## 규칙
 - 커밋 메시지(제목과 본문)는 한글로 작성한다. 코드 식별자와 기술 용어는 원형을 유지한다.
