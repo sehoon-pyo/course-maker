@@ -45,7 +45,7 @@ course-maker/
 │     └─ ch.N_이름/sec.N_이름/sl.N_이름/index.tsx
 │
 ├─ assets/fonts/           NanumSquare R, B
-├─ docs/                   glossary.md, notes/(논의 기록), adr/(결정 기록)
+├─ docs/                   glossary.md, github.md(이슈와 프로젝트 운영), notes/(논의 기록), adr/(결정 기록)
 └─ index.html, package.json, tsconfig.json, vite.config.ts
 ```
 
