@@ -1,0 +1,32 @@
+name: 기능
+description: 새 기능이나 요소 추가
+labels: ["feat"]
+body:
+  - type: textarea
+    id: background
+    attributes:
+      label: 배경
+      description: 왜 필요한지
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 원하는 동작
+      description: 강의 작성자가 어떻게 쓰게 되는지. TSX 사용 예시가 있으면 함께
+    validations:
+      required: true
+  - type: textarea
+    id: docs
+    attributes:
+      label: 관련 문서
+      description: docs/notes, docs/adr의 경로와 항목
+  - type: textarea
+    id: done
+    attributes:
+      label: 완료 조건
+      value: |
+        - [ ] 구현
+        - [ ] npm run typecheck 통과
+        - [ ] sample 강의에서 미리보기로 확인
+        - [ ] README, glossary.md, CLAUDE.md 갱신 (해당하면)
