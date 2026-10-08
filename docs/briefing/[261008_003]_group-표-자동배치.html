@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>group, 표, 자동 배치 브리핑</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --fg: #1b2330; --muted: #5d6877; --line: #dde2ea;
+    --primary: #164194; --ok-bg: #e4f3ea; --ok-fg: #1d5a35; --warn-bg: #fff4de; --warn-fg: #7a4b00;
+    --code-bg: #eceff4; --input-bg: #ffffff;
+    --font-body: "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: Consolas, "Cascadia Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11151c; --surface: #1a212c; --fg: #e6eaf0; --muted: #9aa5b5; --line: #2c3645;
+      --primary: #5b86d6; --ok-bg: #16352a; --ok-fg: #9fd9b5; --warn-bg: #3a2e12; --warn-fg: #f2cf8a;
+      --code-bg: #232c3a; --input-bg: #11151c; color-scheme: dark; }
+  }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.7;
+    margin: 0; padding-inline: 16px; padding-block: 40px 64px; }
+  main { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+  h1 { font-size: 1.75rem; line-height: 1.3; margin: 0; }
+  h2 { font-size: 1.15rem; margin: 0 0 12px; }
+  p { margin: 0; } p + p { margin-top: 10px; }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.06em; color: var(--muted); }
+  .lead { color: var(--muted); margin-top: 8px; }
+  .verdict { background: var(--warn-bg); color: var(--warn-fg); padding: 14px 16px; border-radius: 8px; }
+  .cap { font-size: 0.85rem; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font-weight: 500; color: var(--muted); font-size: 0.82rem; }
+  .tbl { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+  .tbl table { min-width: 600px; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.78rem; background: var(--ok-bg); color: var(--ok-fg); white-space: nowrap; }
+  .tag.warn { background: var(--warn-bg); color: var(--warn-fg); }
+  .ask { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--primary); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .ask h3 { margin: 0; font-size: 1rem; }
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  .choices label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .choices input { margin-top: 6px; }
+  .rec-mark { color: var(--primary); font-size: 0.8rem; margin-left: 6px; }
+  textarea { width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; padding: 10px 12px; font: inherit; font-size: 0.93rem;
+    color: var(--fg); background: var(--input-bg); border: 1px solid var(--line); border-radius: 8px; }
+  textarea:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .asks { display: flex; flex-direction: column; gap: 14px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button { font: inherit; font-size: 0.93rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--primary); background: var(--primary); color: #fff; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--primary); }
+  #status { font-size: 0.85rem; color: var(--muted); }
+  #fallback { display: none; }
+  footer { color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">노트 261008_003 · 항목 24</div>
+    <h1>group, 표, 자동 배치</h1>
+    <p class="lead">슬라이드 요소로 아직 없는 세 가지입니다. 하나로 묶인 항목이라 각각 따로 정해야 합니다.</p>
+  </header>
+
+  <section class="verdict">
+    <p><strong>결론부터.</strong> 세 가지 모두 구현되어 있지 않고, 지금 샘플 슬라이드는 이것 없이 만들어져 있습니다. 필요한지는 실제 강의에서 이 모양이 얼마나 나오는지에 달려 있는데, 그 빈도는 제가 알 수 없습니다. 표는 PPTX와 직접 대응해서 마일스톤에 두는 것을 권하고, group과 자동 배치는 필요한 사례가 나올 때까지 지우는 쪽을 권합니다. 이 두 가지는 근거가 약하니 사용자의 판단이 더 중요합니다.</p>
+  </section>
+
+  <section>
+    <h2>지금 상태</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>항목</th><th>지금 슬라이드에서 하는 방법</th><th>기록된 근거</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>group</b><br><span class="cap">여러 요소를 묶어 함께 옮김</span></td>
+            <td>모든 요소의 위치를 슬라이드 기준 좌표(<code>at={{ x, y, w, h }}</code>)로 따로 준다. 도형 안의 글자는 <code>Shape</code>의 <code>text</code> 속성으로 한 요소에 넣는다.</td>
+            <td>ADR 261007_004 ADR-7: "그룹 기준 상대 좌표, 도형과 그 위의 문구를 함께 옮기는 용도"로 정의, 이번에 하지 않음. 용어사전은 PPT 그룹 도형과 1:1 대응이라고 적음.</td>
+          </tr>
+          <tr>
+            <td><b>표</b></td>
+            <td>없다. 직접 만들려면 <code>Text</code>와 <code>Shape</code>를 칸마다 좌표로 배치해야 한다.</td>
+            <td>노트 [261007_001]: HTML <code>table</code>이 PPTX <code>a:tbl</code>과 구조가 직접 대응하고 <code>colspan</code>, <code>rowspan</code>도 <code>gridSpan</code>, <code>rowSpan</code>에 대응한다고 적음.</td>
+          </tr>
+          <tr>
+            <td><b>자동 배치</b><br><span class="cap"><code>Row</code>, <code>Column</code></span></td>
+            <td>슬롯 안에서만 요소가 세로로 쌓이고 간격은 <code>--slot-gap</code>이 정한다(<code>src/styles.css:264</code>). 자유 배치 요소는 모두 절대 좌표.</td>
+            <td>ADR 261007_004 ADR-7: 이번에 하지 않음. PPTX는 모든 도형에 좌표가 필요해서 자동 배치는 export 때 브라우저가 계산한 위치를 읽어야 함(ADR 261007_001).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cap" style="margin-top:10px">관련 마일스톤: <code>슬라이드 요소 확장</code>(표, group, 자동 배치)이 <code>docs/github.md</code>에 이미 있습니다.</p>
+  </section>
+
+  <section>
+    <h2>확인된 것과 확인하지 못한 것</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>내용</th><th>상태</th><th>근거</th></tr></thead>
+        <tbody>
+          <tr><td>세 가지 모두 구현되어 있지 않다</td><td><span class="tag">확인함</span></td><td>CLAUDE.md, README, 용어사전의 "아직 없음"</td></tr>
+          <tr><td>기존 PPTX 77장 중 67장이 본문을 슬라이드에 직접 놓아 만들었다</td><td><span class="tag">확인함</span></td><td>노트 [261007_004] 149행. 자유 배치가 실제 쓰임이라는 근거이지만 표나 묶음이 몇 장에 있는지는 아님</td></tr>
+          <tr><td>기존 PPTX에 표가 몇 장에 쓰였는가</td><td><span class="tag warn">확인하지 못함</span></td><td>기록에 없음</td></tr>
+          <tr><td>기존 PPTX에서 그룹으로 묶인 도형이 어떤 경우인가</td><td><span class="tag warn">일부만 확인</span></td><td>프롬프트 박스 3장(17, 60, 66번)과 목차 라벨이 그룹. 이 둘은 이미 <code>PromptBox</code>와 layout 장식으로 처리됨</td></tr>
+          <tr><td>앞으로 만들 강의에서 표가 필요한가</td><td><span class="tag warn">알 수 없음</span></td><td>사용자가 아는 정보</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>답하는 칸</h2>
+    <p class="cap" style="margin-bottom:10px">"유지"는 마일스톤 <code>슬라이드 요소 확장</code>에 남기는 것이고, "삭제"는 23번처럼 노트와 로드맵에서 지우는 것입니다.</p>
+    <div class="asks">
+      <div class="ask" data-id="24-표" data-title="24-1. 표">
+        <h3>표</h3>
+        <div class="choices">
+          <label><input type="radio" name="q-table" value="유지"><span><b>유지</b> 마일스톤에 둔다 <span class="rec-mark">권고</span></span></label>
+          <label><input type="radio" name="q-table" value="삭제"><span><b>삭제</b> 지금은 필요 없다</span></label>
+          <label><input type="radio" name="q-table" value="먼저"><span><b>먼저 만든다</b> 다음 작업으로 올린다</span></label>
+        </div>
+        <textarea data-memo="24-표" aria-label="표에 대한 메모" placeholder="메모 (어떤 강의에서 어떤 표가 필요한지 등)"></textarea>
+      </div>
+      <div class="ask" data-id="24-group" data-title="24-2. group">
+        <h3>group</h3>
+        <div class="choices">
+          <label><input type="radio" name="q-group" value="삭제"><span><b>삭제</b> 필요한 사례가 나올 때 다시 연다 <span class="rec-mark">권고</span></span></label>
+          <label><input type="radio" name="q-group" value="유지"><span><b>유지</b> 마일스톤에 둔다</span></label>
+          <label><input type="radio" name="q-group" value="먼저"><span><b>먼저 만든다</b></span></label>
+        </div>
+        <textarea data-memo="24-group" aria-label="group에 대한 메모" placeholder="메모"></textarea>
+      </div>
+      <div class="ask" data-id="24-자동배치" data-title="24-3. 자동 배치 (Row/Column)">
+        <h3>자동 배치 (<code>Row</code>/<code>Column</code>)</h3>
+        <div class="choices">
+          <label><input type="radio" name="q-auto" value="삭제"><span><b>삭제</b> 필요한 사례가 나올 때 다시 연다 <span class="rec-mark">권고</span></span></label>
+          <label><input type="radio" name="q-auto" value="유지"><span><b>유지</b> 마일스톤에 둔다</span></label>
+          <label><input type="radio" name="q-auto" value="먼저"><span><b>먼저 만든다</b></span></label>
+        </div>
+        <textarea data-memo="24-자동배치" aria-label="자동 배치에 대한 메모" placeholder="메모"></textarea>
+      </div>
+      <div class="ask" data-id="공통" data-title="공통 메모">
+        <label for="memoAll" class="cap">이 브리핑에 대한 그 밖의 의견</label>
+        <textarea id="memoAll" data-memo="공통" placeholder="여기에 입력"></textarea>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top:14px">
+      <button type="button" id="copy">답변 복사</button>
+      <button type="button" id="clear" class="ghost">입력 지우기</button>
+      <span id="status" role="status"></span>
+    </div>
+    <textarea id="fallback" readonly aria-label="복사할 텍스트" style="margin-top:10px"></textarea>
+    <p class="cap" style="margin-top:8px">복사한 내용을 대화창에 붙여 넣으면 됩니다. 입력은 이 브라우저에만 저장되고 파일에는 쓰이지 않습니다.</p>
+  </section>
+
+  <footer>course-maker <code>docs/261008_004-master-elements</code> 브랜치에서 노트 [261008_003]의 항목 24를 정하기 위해 만든 브리핑입니다.</footer>
+</main>
+
+<script>
+  // 입력 저장: localStorage가 막히면 저장 없이도 동작한다
+  const KEY = "briefing-261008_003";
+  const state = { choice: {}, memo: {} };
+  try { Object.assign(state, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+  state.choice = state.choice || {}; state.memo = state.memo || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+  document.querySelectorAll('input[type="radio"]').forEach((r) => {
+    const id = r.closest(".ask").dataset.id;
+    if (state.choice[id] === r.value) r.checked = true;
+    r.addEventListener("change", () => { state.choice[id] = r.value; save(); });
+  });
+  document.querySelectorAll("textarea[data-memo]").forEach((t) => {
+    const id = t.dataset.memo;
+    if (state.memo[id]) t.value = state.memo[id];
+    t.addEventListener("input", () => { state.memo[id] = t.value; save(); });
+  });
+
+  function buildText() {
+    const lines = ["[브리핑 답변: group, 표, 자동 배치]"];
+    document.querySelectorAll(".ask").forEach((ask) => {
+      const id = ask.dataset.id;
+      const choice = state.choice[id];
+      const memo = (state.memo[id] || "").trim();
+      if (!choice && !memo) return;
+      lines.push(`- ${ask.dataset.title}`);
+      if (choice) lines.push(`  선택: ${choice}`);
+      if (memo) lines.push(`  메모: ${memo.replace(/\n/g, "\n    ")}`);
+    });
+    if (lines.length === 1) lines.push("(입력한 내용이 없습니다)");
+    return lines.join("\n");
+  }
+
+  const status = document.getElementById("status");
+  const fallback = document.getElementById("fallback");
+  document.getElementById("copy").addEventListener("click", async () => {
+    const text = buildText();
+    try {
+      await navigator.clipboard.writeText(text);
+      status.textContent = "복사했습니다.";
+      fallback.style.display = "none";
+    } catch (e) {
+      // 클립보드가 막힌 경우: 직접 선택해서 복사할 수 있게 보여 준다
+      fallback.value = text;
+      fallback.style.display = "block";
+      fallback.select();
+      status.textContent = "자동 복사가 막혀 아래 칸에 보여 드렸습니다. 선택해서 복사해 주세요.";
+    }
+  });
+  document.getElementById("clear").addEventListener("click", () => {
+    state.choice = {}; state.memo = {}; save();
+    document.querySelectorAll('input[type="radio"]').forEach((r) => (r.checked = false));
+    document.querySelectorAll("textarea[data-memo]").forEach((t) => (t.value = ""));
+    fallback.style.display = "none";
+    status.textContent = "지웠습니다.";
+  });
+</script>
+</body>
+</html>

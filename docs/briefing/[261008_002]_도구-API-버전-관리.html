@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도구 API 버전 관리 브리핑</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --fg: #1b2330; --muted: #5d6877; --line: #dde2ea;
+    --primary: #164194; --ok-bg: #e4f3ea; --ok-fg: #1d5a35; --warn-bg: #fff4de; --warn-fg: #7a4b00;
+    --code-bg: #eceff4; --input-bg: #ffffff;
+    --font-body: "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: Consolas, "Cascadia Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11151c; --surface: #1a212c; --fg: #e6eaf0; --muted: #9aa5b5; --line: #2c3645;
+      --primary: #5b86d6; --ok-bg: #16352a; --ok-fg: #9fd9b5; --warn-bg: #3a2e12; --warn-fg: #f2cf8a;
+      --code-bg: #232c3a; --input-bg: #11151c; color-scheme: dark; }
+  }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.7;
+    margin: 0; padding-inline: 16px; padding-block: 40px 64px; }
+  main { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+  h1 { font-size: 1.75rem; line-height: 1.3; margin: 0; }
+  h2 { font-size: 1.15rem; margin: 0 0 12px; }
+  p { margin: 0; } p + p { margin-top: 10px; }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.06em; color: var(--muted); }
+  .lead { color: var(--muted); margin-top: 8px; }
+  .verdict { background: var(--warn-bg); color: var(--warn-fg); padding: 14px 16px; border-radius: 8px; }
+  .cap { font-size: 0.85rem; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font-weight: 500; color: var(--muted); font-size: 0.82rem; }
+  .tbl { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+  .tbl table { min-width: 560px; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.78rem; background: var(--ok-bg); color: var(--ok-fg); white-space: nowrap; }
+  .tag.warn { background: var(--warn-bg); color: var(--warn-fg); }
+  ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+
+  /* 답하는 칸: 선택지 + 메모. 값은 localStorage에 저장하고 맨 아래 버튼으로 한 번에 복사한다 */
+  .ask { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--primary); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .ask h3 { margin: 0; font-size: 1rem; }
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  .choices label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .choices input { margin-top: 6px; }
+  .rec-mark { color: var(--primary); font-size: 0.8rem; margin-left: 6px; }
+  textarea { width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; padding: 10px 12px; font: inherit; font-size: 0.93rem;
+    color: var(--fg); background: var(--input-bg); border: 1px solid var(--line); border-radius: 8px; }
+  textarea:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button { font: inherit; font-size: 0.93rem; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--primary); background: var(--primary); color: #fff; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--primary); }
+  #status { font-size: 0.85rem; color: var(--muted); }
+  #fallback { display: none; }
+  footer { color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">노트 261008_003 · 항목 21</div>
+    <h1>도구 API 버전 관리</h1>
+    <p class="lead">도구를 고쳤을 때 강의 저장소가 깨지는 문제를 어떻게 다룰지 정하는 항목입니다. 지금은 "강의가 늘어 문제가 보일 때 정한다"로 보류되어 있습니다.</p>
+  </header>
+
+  <section class="verdict">
+    <p><strong>결론부터.</strong> 이미 한 번 깨지는 변경이 있었지만(아래), 강의 저장소가 이 도구와 같은 사람이 쓰는 로컬 저장소라 지금 버전 관리 체계를 만들 비용이 더 큽니다. 보류를 유지하되 "깨지는 변경은 ADR에 적는다"는 최소 규칙만 두는 안을 권합니다.</p>
+  </section>
+
+  <section>
+    <h2>왜 문제가 되는가</h2>
+    <p>강의는 도구와 별도의 git 저장소(<code>courses/내강의/</code>)에 있고, 그 안의 코드가 도구에 의존합니다. 도구가 바뀌면 강의가 깨질 수 있다는 점은 ADR 261007_003과 261008_001에 이미 주의로 적혀 있습니다.</p>
+    <div class="tbl" style="margin-top:12px">
+      <table>
+        <thead><tr><th>강의가 의존하는 것</th><th>바뀌면 깨지는 예</th></tr></thead>
+        <tbody>
+          <tr><td><code>@/elements</code>의 요소와 속성</td><td>속성 이름을 바꾸거나 없애면 슬라이드 TSX가 타입 오류</td></tr>
+          <tr><td>강의 전용 마스터의 <code>defineMaster</code>와 <code>tokens</code></td><td>필수 토큰(<code>REQUIRED_TOKENS</code>, 10개)을 늘리면 기존 마스터가 오류를 냄</td></tr>
+          <tr><td><code>meta.ts</code>의 모양(<code>chapters</code>, <code>sections</code>, <code>slides</code>, <code>head</code>, <code>tail</code>)</td><td>항목 형식이 바뀌면 목차가 비거나 경고</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>확인된 것과 확인되지 못한 것</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>내용</th><th>상태</th><th>근거</th></tr></thead>
+        <tbody>
+          <tr><td>실제로 깨지는 변경이 이미 있었다</td><td><span class="tag">확인함</span></td><td>ADR 261008_001: 기존 강의의 <code>meta.ts</code>는 <code>chapters</code>, <code>sections</code>를 추가해야 읽힘</td></tr>
+          <tr><td>이 저장소가 추적하는 강의는 sample과 sample2뿐</td><td><span class="tag">확인함</span></td><td><code>courses/</code> 폴더 목록, CLAUDE.md</td></tr>
+          <tr><td>버전 표시가 없다</td><td><span class="tag">확인함</span></td><td><code>package.json</code>의 version이 <code>0.0.0</code>, git 태그 없음</td></tr>
+          <tr><td>도구를 쓰는 다른 사람이나 강의 저장소의 수</td><td><span class="tag warn">확인하지 못함</span></td><td>이 저장소 밖(별도 저장소)이라 볼 수 없음. 말씀해 주셔야 함</td></tr>
+          <tr><td>변경 이력(CHANGELOG)을 따로 두는지</td><td><span class="tag warn">확인하지 못함</span></td><td>이번에 찾아보지 않음. ADR이 사실상 변경 기록 역할을 함</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>선택지</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th></th><th>하는 일</th><th>비용과 효과</th></tr></thead>
+        <tbody>
+          <tr><td><b>A</b></td><td>보류를 유지하고, 깨지는 변경은 ADR에 "강의에 필요한 수정"으로 적는다.</td><td>새로 만들 것이 없음. 강의 수정 방법이 ADR에 남아 사람이 따라 고칠 수 있음.</td></tr>
+          <tr><td><b>B</b></td><td>도구에 버전(<code>package.json</code>)을 올리고 깨지는 변경마다 올림. 변경 이력 파일을 둔다.</td><td>어느 도구 버전에서 무엇이 깨졌는지 한 곳에서 보임. 올리고 쓰는 수고가 계속 듦.</td></tr>
+          <tr><td><b>C</b></td><td>강의 <code>meta.ts</code>에 필요한 도구 버전을 적고, 맞지 않으면 미리보기에서 경고한다.</td><td>깨지기 전에 알 수 있음. B가 먼저 있어야 하고 구현도 필요함(경고는 이미 있는 콘솔 경고 모으기와 같은 자리).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>답하는 칸</h2>
+    <div class="ask" data-id="21" data-title="21. 도구 API 버전 관리">
+      <h3>21번은 어떻게 할까요?</h3>
+      <div class="choices">
+        <label><input type="radio" name="q21" value="A"><span><b>A</b> 보류 유지 + 깨지는 변경은 ADR에 적는다 <span class="rec-mark">권고</span></span></label>
+        <label><input type="radio" name="q21" value="B"><span><b>B</b> 도구 버전과 변경 이력을 둔다</span></label>
+        <label><input type="radio" name="q21" value="C"><span><b>C</b> B + 강의가 필요한 도구 버전을 선언하고 경고한다</span></label>
+        <label><input type="radio" name="q21" value="그 외"><span><b>그 외</b> (메모에 적어 주세요)</span></label>
+      </div>
+      <label for="memo21" class="cap">메모 (도구를 쓰는 강의 저장소가 몇 개인지 등)</label>
+      <textarea id="memo21" data-memo="21" placeholder="여기에 입력"></textarea>
+    </div>
+
+    <div class="ask" data-id="공통" data-title="공통 메모" style="margin-top:14px">
+      <label for="memoAll" class="cap">이 브리핑에 대한 그 밖의 의견</label>
+      <textarea id="memoAll" data-memo="공통" placeholder="여기에 입력"></textarea>
+    </div>
+
+    <div class="actions" style="margin-top:14px">
+      <button type="button" id="copy">답변 복사</button>
+      <button type="button" id="clear" class="ghost">입력 지우기</button>
+      <span id="status" role="status"></span>
+    </div>
+    <textarea id="fallback" readonly aria-label="복사할 텍스트" style="margin-top:10px"></textarea>
+    <p class="cap" style="margin-top:8px">복사한 내용을 대화창에 붙여 넣으면 됩니다. 입력은 이 브라우저에만 저장되고 파일에는 쓰이지 않습니다.</p>
+  </section>
+
+  <footer>course-maker <code>docs/261008_004-master-elements</code> 브랜치에서 노트 [261008_003]의 항목 21을 정하기 위해 만든 브리핑입니다.</footer>
+</main>
+
+<script>
+  // 입력 저장: localStorage가 막히면 저장 없이도 동작한다
+  const KEY = "briefing-261008_002";
+  const state = { choice: {}, memo: {} };
+  try { Object.assign(state, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+  state.choice = state.choice || {}; state.memo = state.memo || {};
+
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+  document.querySelectorAll('input[type="radio"]').forEach((r) => {
+    const id = r.closest(".ask").dataset.id;
+    if (state.choice[id] === r.value) r.checked = true;
+    r.addEventListener("change", () => { state.choice[id] = r.value; save(); });
+  });
+  document.querySelectorAll("textarea[data-memo]").forEach((t) => {
+    const id = t.dataset.memo;
+    if (state.memo[id]) t.value = state.memo[id];
+    t.addEventListener("input", () => { state.memo[id] = t.value; save(); });
+  });
+
+  function buildText() {
+    const lines = ["[브리핑 답변: 도구 API 버전 관리]"];
+    document.querySelectorAll(".ask").forEach((ask) => {
+      const id = ask.dataset.id;
+      const choice = state.choice[id];
+      const memo = (state.memo[id] || "").trim();
+      if (!choice && !memo) return;
+      lines.push(`- ${ask.dataset.title}`);
+      if (choice) lines.push(`  선택: ${choice}`);
+      if (memo) lines.push(`  메모: ${memo.replace(/\n/g, "\n    ")}`);
+    });
+    if (lines.length === 1) lines.push("(입력한 내용이 없습니다)");
+    return lines.join("\n");
+  }
+
+  const status = document.getElementById("status");
+  const fallback = document.getElementById("fallback");
+  document.getElementById("copy").addEventListener("click", async () => {
+    const text = buildText();
+    try {
+      await navigator.clipboard.writeText(text);
+      status.textContent = "복사했습니다.";
+      fallback.style.display = "none";
+    } catch (e) {
+      // 클립보드가 막힌 경우: 직접 선택해서 복사할 수 있게 보여 준다
+      fallback.value = text;
+      fallback.style.display = "block";
+      fallback.select();
+      status.textContent = "자동 복사가 막혀 아래 칸에 보여 드렸습니다. 선택해서 복사해 주세요.";
+    }
+  });
+  document.getElementById("clear").addEventListener("click", () => {
+    state.choice = {}; state.memo = {}; save();
+    document.querySelectorAll('input[type="radio"]').forEach((r) => (r.checked = false));
+    document.querySelectorAll("textarea[data-memo]").forEach((t) => (t.value = ""));
+    fallback.style.display = "none";
+    status.textContent = "지웠습니다.";
+  });
+</script>
+</body>
+</html>

@@ -12,8 +12,7 @@
 | **chapter** | 실제 파일로 배포하는 단위 | `ch.N_{이름}/` | 이름은 가칭. 순서는 강의 `meta.ts`의 `chapters` 배열이 정함 |
 | **section** | 수업 주제 단위 | `sec.N_{이름}/` | PowerPoint의 구역(Section)과 같은 개념. 순서는 chapter `meta.ts`의 `sections` 배열이 정함 |
 | **slide** | 슬라이드 한 장. 파일 하나(`index.tsx`). **크기는 1920×1080px 고정(16:9)**이며 HTML, PPTX, PDF 모든 출력에서 같음 | `sl.N_{이름}/` | 순서는 section `meta.ts`의 `slides` 배열이 정함 |
-| **element** | 슬라이드를 구성하는 요소 (제목, 불릿, 도형, 그림, 칩, 뱃지 등) | | `group`으로 여러 개를 묶을 수 있음(group은 아직 없음) |
-| **group** | 여러 element를 묶은 것 (아직 구현되지 않음) | | PPT의 그룹 도형과 1:1 대응 |
+| **element** | 슬라이드를 구성하는 요소 (제목, 불릿, 도형, 그림, 칩, 뱃지 등) | | |
 
 - **순서는 항상 상위 폴더의 `meta.ts` 배열이 정합니다.** 폴더 이름의 번호(`N`)는 정리용이며 순서의 기준이 아니고, 번호 없이(`ch.intro`) 또는 접두사 없이(`intro`) 써도 됩니다. 화면에는 접두사와 번호를 뗀 이름이 보입니다.
 - 화면의 section 번호(`SECTION 1`)는 chapter 안에서의 section 순서입니다. `SECTION`은 강의 `meta.ts`의 `sectionLabel`로 바꿀 수 있습니다(`UNIT`, `MODULE` 등).

@@ -23,7 +23,7 @@
 | 목차 (chapter의 section으로 자동으로 채움) | 사용 가능 |
 | 강의 전용 요소 (`courses/{강의}/elements/`) | 사용 가능 |
 | 숨김 슬라이드 (미리보기에서는 보이고 번호에는 세지 않으며 내보낼 때 제외) | 미리보기만 (내보내기는 아직 없음) |
-| 표, 요소 묶기(group), 자동 배치(Row/Column), 날짜/바닥글/슬라이드 번호 | 아직 없음 |
+| 표, 날짜/바닥글/슬라이드 번호 | 아직 없음 |
 | 단일 HTML 파일로 내보내기 | 아직 없음 |
 | PPTX로 내보내기 (슬라이드 마스터까지 PowerPoint 마스터로 내보낼 예정) | 아직 없음 |
 | PDF로 내보내기 | 아직 없음 |
@@ -237,9 +237,10 @@ export default function VariableDefinition() {
 | `Image` | 이미지 |
 | `Chip` | 아이콘과 글자가 들어가는 알약 모양 칩 (단축키, 명령어 표시). 폭은 글자에 맞춰짐 |
 | `PromptBox` | 프롬프트를 보여 주는 어두운 상자 |
+| `Stamp` | 네온 효과가 있는 기울어진 도장 (예: "완료") |
 | `Toc` | 목차. 지금 chapter의 section 제목으로 **자동으로** 채워짐 (항목을 직접 줄 수 없음) |
 
-`Title`, `Paragraph`, `Bullets`, `Toc`는 layout의 슬롯에 자동으로 들어가고, 위치를 정해 놓는 요소(`Text`, `Shape`, `Image`, `Chip`, `PromptBox`)는 `at`으로 위치를 줍니다(아래 7-2).
+`Title`, `Paragraph`, `Bullets`, `Toc`는 layout의 슬롯에 자동으로 들어가고, 위치를 정해 놓는 요소(`Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`)는 `at`으로 위치를 줍니다(아래 7-2).
 
 **한 문장 안에서 서식을 섞기**: 템플릿 문자열 `t`로 문장을 한 줄로 쓰고, 서식이 필요한 곳에만 `${ }`로 아래 헬퍼를 넣습니다.
 
@@ -292,7 +293,7 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
 </Slide>
 ```
 
-- `Shape`와 `PromptBox`는 크기까지(`x, y, w, h`) 줘야 합니다. `Chip`은 `x, y`만 주면 폭이 글자에 맞춰집니다. `Text`와 `Image`는 `w`, `h`를 생략할 수 있습니다.
+- `Shape`와 `PromptBox`는 크기까지(`x, y, w, h`) 줘야 합니다. `Chip`은 `x, y`만 주면 폭이 글자에 맞춰지고, `Stamp`도 `x, y`만 주면 기본 크기가 됩니다. `Text`와 `Image`는 `w`, `h`를 생략할 수 있습니다.
 - `Shape`의 주요 속성: `kind`(`rect`, `roundRect`, `ellipse`, `rightArrow`, `triangle`, `line`, `path`), `fill`, `line={{ color, width, dash }}`, `rotate`, `shadow`(그림자), `glow`(도형의 글로우, 네온), `text`와 `textStyle`. `path`는 `path`와 `viewBox`도 필요합니다. 글자의 글로우는 `textStyle={{ glow: { radius: 10, color: "rgba(0, 176, 240, 0.4)" } }}`처럼 줍니다.
 - `Text`의 주요 속성: `size`, `color`, `align`, `anchor`, `bold`, `fill`, `lineHeight`.
 - **색**은 직접 값(`#FF0000`, `rgba(0, 0, 0, 0.3)`)이나 마스터 토큰 이름(`primary`, `primary-dark`, `surface`, `text`, `muted`)을 쓸 수 있습니다.
@@ -336,7 +337,7 @@ import { Bullets, CodeChip, Slide, Title } from "../../../elements";   // 도구
 
 - **어디서 가져오느냐가 우선순위를 정합니다.** `../../../elements`에서 가져오면 강의의 `Bullets`, `@/elements`에서 가져오면 도구의 `Bullets`입니다.
 - 요소를 감싸서 만들 때는 `slotKinds`를 원래 요소에서 그대로 알려 줘야 슬롯에 자동으로 들어갑니다(`CodeChip.slotKinds = Chip.slotKinds`).
-- 예: `courses/sample/elements/`에 아이콘이 정해진 칩(`ClaudeChip`, `TerminalChip`, `FileChip`)과 네온 효과가 있는 도장(`Stamp`)이 있습니다. 이미지는 `courses/sample/assets/`에 있습니다.
+- 예: `courses/sample/elements/`에 아이콘이 정해진 칩(`ClaudeChip`, `TerminalChip`, `FileChip`)이 있습니다. 이미지는 `courses/sample/assets/`에 있습니다.
 - 강의 요소의 CSS는 클래스 이름에 강의 이름을 붙여 다른 강의와 겹치지 않게 하고, 색은 마스터의 CSS 변수를 읽으세요.
 
 ## 8. 용어
@@ -347,7 +348,7 @@ import { Bullets, CodeChip, Slide, Title } from "../../../elements";   // 도구
 | chapter | 실제 파일로 배포하는 단위 (이름은 가칭) |
 | section | 수업 주제 단위. PowerPoint의 구역(Section)과 같은 개념 |
 | slide | 슬라이드 한 장 |
-| element | 슬라이드를 구성하는 요소 (제목, 불릿, 도형, 그림 등). 여러 개를 묶은 group은 아직 없음 |
+| element | 슬라이드를 구성하는 요소 (제목, 불릿, 도형, 그림 등) |
 | slide-master | 모든 슬라이드에 공통으로 적용되는 틀. PowerPoint의 슬라이드 마스터와 같은 개념 |
 | layout | slide-master 안의 영역 배치 틀 (대제목, 목차, 컨텐츠 등). 슬롯과 장식, 배경을 가짐 |
 | slot | layout이 정해 둔 자리 (제목, 부제, 본문, 자유, 목록). 슬라이드의 요소가 종류에 따라 들어감 |
@@ -367,6 +368,6 @@ PowerPoint나 DOM에만 있는 개념은 `pptx layout`, `dom element`처럼 앞�
 - 단일 HTML 파일로 내보내기 (강의 chapter 하나가 파일 하나)
 - PPTX로 내보내기
 - PDF로 내보내기
-- 표, 요소 묶기(group), 자동 배치(Row/Column) 등 슬라이드 요소 추가
+- 표 요소 추가
 - 날짜, 바닥글, 슬라이드 번호
 - 내보낼 때 PowerPoint 슬라이드 마스터로 만들기 (마스터, layout, 슬롯을 PowerPoint의 마스터와 플레이스홀더로)

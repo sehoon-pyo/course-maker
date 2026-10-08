@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>날짜, 바닥글, 번호 브리핑</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --fg: #1b2330; --muted: #5d6877; --line: #dde2ea;
+    --primary: #164194; --ok-bg: #e4f3ea; --ok-fg: #1d5a35; --warn-bg: #fff4de; --warn-fg: #7a4b00;
+    --code-bg: #eceff4;
+    --font-body: "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: Consolas, "Cascadia Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11151c; --surface: #1a212c; --fg: #e6eaf0; --muted: #9aa5b5; --line: #2c3645;
+      --primary: #5b86d6; --ok-bg: #16352a; --ok-fg: #9fd9b5; --warn-bg: #3a2e12; --warn-fg: #f2cf8a;
+      --code-bg: #232c3a; color-scheme: dark; }
+  }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.7;
+    margin: 0; padding-inline: 16px; padding-block: 40px 64px; }
+  main { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+  h1 { font-size: 1.75rem; line-height: 1.3; margin: 0; }
+  h2 { font-size: 1.15rem; margin: 0 0 12px; }
+  p { margin: 0; } p + p { margin-top: 10px; }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.06em; color: var(--muted); }
+  .lead { color: var(--muted); margin-top: 8px; }
+  .verdict { background: var(--warn-bg); color: var(--warn-fg); padding: 14px 16px; border-radius: 8px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; }
+  .cap { margin-top: 12px; font-size: 0.85rem; color: var(--muted); }
+
+  /* 슬라이드 하단 띠 그림: 1920x1080 슬라이드의 y1001~1059 영역을 가로로 늘려 보여 준다 */
+  .slide { position: relative; aspect-ratio: 16 / 9; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; min-width: 420px; }
+  .slot { position: absolute; top: 92.7%; height: 5.4%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-family: var(--font-mono); border: 1.5px dashed var(--primary); color: var(--primary); border-radius: 3px; }
+  .slot.dt { left: 6.9%; width: 22.5%; }
+  .slot.ftr { left: 33.1%; width: 33.75%; }
+  .slot.num { left: 70.6%; width: 22.5%; justify-content: flex-end; padding-right: 6px; }
+  .band { position: absolute; left: 0; right: 0; top: 0; height: 10.7%; background: var(--primary); opacity: .85; border-radius: 6px 6px 0 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font-weight: 500; color: var(--muted); font-size: 0.82rem; }
+  .tbl { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+  .tbl table { min-width: 560px; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.78rem; background: var(--ok-bg); color: var(--ok-fg); white-space: nowrap; }
+  .tag.warn { background: var(--warn-bg); color: var(--warn-fg); }
+  ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+  .rec { border-left: 3px solid var(--primary); padding-left: 16px; }
+  footer { color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">노트 261008_003 · 항목 20</div>
+    <h1>날짜, 바닥글, 슬라이드 번호</h1>
+    <p class="lead">기존 PPTX 마스터에는 있었지만 이 도구의 마스터에는 아직 없는 세 슬롯입니다. 지금 정할지, 나중으로 둘지를 정하는 항목입니다.</p>
+  </header>
+
+  <section class="verdict">
+    <p><strong>결론부터.</strong> 이미 정해진 것은 "나중에 한다"와 "번호의 기준은 chapter"뿐입니다. 날짜와 바닥글의 값이 어디서 오는지, 어느 layout에 넣는지는 정해진 것이 없습니다. 지금 새로 정할 이유가 없어서 상태를 그대로 두고, 이미 정해진 것을 노트에 모아 두기만 하는 것을 권합니다.</p>
+  </section>
+
+  <section>
+    <h2>기존 PPTX 마스터의 세 슬롯</h2>
+    <div class="card">
+      <div class="slide" role="img" aria-label="슬라이드 하단에 날짜, 바닥글, 번호 슬롯이 놓인 위치">
+        <div class="band"></div>
+        <div class="slot dt">날짜</div>
+        <div class="slot ftr">바닥글</div>
+        <div class="slot num">번호</div>
+      </div>
+      <p class="cap">1920×1080 슬라이드 기준 좌표를 비율로 옮긴 그림입니다. 날짜 x132 y1001 w432 h58, 바닥글 x636 y1001 w648 h58, 번호 x1356 y1001 w432 h58이고 모두 24px, 번호만 오른쪽 정렬입니다 (노트 [261007_004] 133~135행). 위쪽 띠는 위치 감각을 위해 넣은 것입니다.</p>
+    </div>
+    <p class="cap">"제목 및 내용"(컨텐츠) layout에 이 세 슬롯이 들어 있다고 기록되어 있습니다. 다른 layout(대제목, 목차, 제목만 있는 컨텐츠)에 있는지는 기록에 없습니다.</p>
+  </section>
+
+  <section>
+    <h2>지금 도구의 상태</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>항목</th><th>상태</th><th>근거</th></tr></thead>
+        <tbody>
+          <tr><td>마스터에 날짜, 바닥글, 번호 슬롯</td><td><span class="tag warn">없음</span></td><td><code>TextSlotType</code>은 <code>title</code>, <code>subtitle</code>, <code>body</code>, <code>free</code> 4종 (<code>src/masters/types.ts:84</code>)</td></tr>
+          <tr><td>미리보기 하단의 <code>n / N</code></td><td><span class="tag">있음</span></td><td>뷰어의 UI이고 슬라이드 위에 그려지는 것이 아님 (ADR 261008_002 ADR-1)</td></tr>
+          <tr><td>번호를 세는 기준</td><td><span class="tag">정함</span></td><td>chapter 안에서 <code>head</code> → section → <code>tail</code> 순서로 1부터, 숨김 슬라이드는 건너뜀 (ADR 261008_002 ADR-1)</td></tr>
+          <tr><td>"나중에 한다"는 결정</td><td><span class="tag">정함</span></td><td>ADR 261007_004 ADR-12, 쪽번호 layout을 만들 때 추가한다고 ADR 261008_002 ADR-1이 이어받음</td></tr>
+          <tr><td>로드맵과 마일스톤</td><td><span class="tag">있음</span></td><td>README 10번 로드맵, <code>docs/github.md</code>의 마일스톤 <code>날짜, 바닥글, 번호</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>정해지지 않은 것</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>질문</th><th>지금 알려진 것</th></tr></thead>
+        <tbody>
+          <tr><td>날짜와 바닥글의 값은 어디서 오는가</td><td>정해진 것 없음. 강의 <code>meta.ts</code>에 둘지, 슬라이드마다 둘지, 마스터에 고정할지 모두 열려 있음</td></tr>
+          <tr><td>어느 layout에 넣는가</td><td>기존 PPTX는 컨텐츠 layout에 있었다는 기록만 있음. 나머지 layout은 확인하지 못함</td></tr>
+          <tr><td>번호 슬롯을 무엇으로 표시하는가</td><td>번호의 기준(chapter 안 1부터, 숨김 제외)은 정해짐. 표시 형식(<code>3</code>인지 <code>3 / 12</code>인지)은 정해진 것 없음</td></tr>
+          <tr><td>글자 속성(색, 폰트 크기 등)</td><td>PPTX에서 읽지 않았음 (노트 [261007_004] 153행). 24px라는 크기만 기록되어 있음</td></tr>
+          <tr><td>PPTX export에서 번호를 어떻게 내보내는가</td><td>export를 만들 때 정할 일. PowerPoint의 슬라이드 번호 필드로 두면 숨김 슬라이드를 뺀 뒤에도 번호가 자동으로 맞을 수 있다는 것은 제 추측이며 확인하지 못함</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>선택지</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th></th><th>하는 일</th><th>따르는 것</th></tr></thead>
+        <tbody>
+          <tr><td><b>A</b></td><td>"나중에" 상태를 유지하고, 이미 정해진 것과 정해지지 않은 것을 노트에 정리해 둔다.</td><td>코드 변경 없음. 구현할 때 처음부터 다시 조사하지 않아도 됨.</td></tr>
+          <tr><td><b>B</b></td><td>번호만 먼저 정하고 구현한다 (기준은 이미 있음).</td><td>날짜와 바닥글 없이 번호 슬롯만 있는 상태가 됨. layout마다 넣을지, 표시 형식을 정해야 함.</td></tr>
+          <tr><td><b>C</b></td><td>세 슬롯을 지금 모두 정한다.</td><td>값의 출처(<code>meta.ts</code> 등)와 PPTX 필드 대응까지 정해야 해서 export와 함께 정하는 편이 나음.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="rec">
+    <h2>권고</h2>
+    <ul>
+      <li><b>A</b>. 필요가 생긴 근거가 아직 없습니다. 세 슬롯 모두 export(특히 PPTX)와 같이 정해야 맞는 부분이 많습니다.</li>
+      <li>노트 20번의 상태는 "나중에"로 두고, 위 두 표의 내용을 결정 칸에 요약해 적습니다.</li>
+    </ul>
+  </section>
+
+  <footer>course-maker <code>docs/261008_004-master-elements</code> 브랜치에서 노트 [261008_003]의 항목 20을 정하기 위해 만든 브리핑입니다.</footer>
+</main>
+</body>
+</html>

@@ -87,7 +87,7 @@ gh label create "area:docs"     --color bfdadc --description "문서, 용어"
 | `단일 HTML export` | 단일 HTML 파일로 내보내기 |
 | `PPTX export` | PPTX로 내보내기, PowerPoint 슬라이드 마스터로 만들기 |
 | `PDF export` | PDF로 내보내기 |
-| `슬라이드 요소 확장` | 표, group, 자동 배치(Row/Column) |
+| `슬라이드 요소 확장` | 표 |
 | `날짜, 바닥글, 번호` | 날짜, 바닥글, 슬라이드 번호 |
 
 ```bash
