@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 슬라이드를 TSX로 작성하고 브라우저 미리보기 창에서 확인한다. AI(Claude Code 등)가 로컬의 TSX를 직접 고치는 것이 기본 사용 방식이다.
 - **원본(SSOT)은 슬라이드의 TSX**이다. HTML(최종 강의자료), PPTX(납품자료), PDF(수강생 배포용)는 모두 출력물이며, 직접 고치지 않고 원본에서 다시 생성한다.
 - 기술 스택은 Vite + React + TypeScript이다. Node.js는 `^20.19.0 || >=22.12.0`.
-- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`, `Toc`), 강의 전용 요소, 인라인 서식, 숨김 슬라이드(미리보기)이다. **단일 HTML/PPTX/PDF export, 표, 날짜/바닥글/슬라이드 번호는 아직 없다.** 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
+- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`, `Toc`), 강의 전용 요소, 인라인 서식, 숨김 슬라이드(미리보기)이다. **단일 HTML/PPTX/PDF export(파일 생성), 표, 날짜/바닥글/슬라이드 번호는 아직 없다.** 미리보기 상단 바의 내보내기 버튼은 강의, chapter, 파일 형식을 고르는 모달과 `courses/{강의}/export/{연월일시분초}/` 빈 폴더 만들기까지 있다(`vite-export.ts`가 개발 서버에서 폴더를 만들고 `export/`는 git이 추적하지 않는다). 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
 
 ## 명령어
 - `npm run dev`: 개발 서버 (미리보기 창, 기본 `http://localhost:5173/`)
@@ -45,7 +45,7 @@ course-maker/
 │
 ├─ assets/fonts/           NanumSquare R, B
 ├─ docs/                   glossary.md, github.md(이슈와 프로젝트 운영), notes/(논의 기록), adr/(결정 기록), briefing/(브리핑 HTML)
-└─ index.html, package.json, tsconfig.json, vite.config.ts
+└─ index.html, package.json, tsconfig.json, vite.config.ts, vite-export.ts(내보내기 폴더를 만드는 개발 서버 플러그인)
 ```
 
 - 경로 별칭은 `@/`(= `src/`)이다.
