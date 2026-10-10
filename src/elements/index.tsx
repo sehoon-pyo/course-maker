@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { DEFAULT_LAYOUT_ID } from "@/constants";
 import { useMaster } from "@/masters/context";
+import { textStyle } from "@/masters/Layers";
+import { atStyle, type At } from "./at";
 import { Layers } from "@/masters/Layers";
 import { Inlines } from "./inlines";
 import type { Sentence } from "./inline";
@@ -64,15 +66,28 @@ export function Paragraph({ value }: { value: Sentence } & PlacementProps) {
 }
 Paragraph.slotKinds = ["body", "subtitle", "free"] as const;
 
-export function Bullets({ items }: { items: Sentence[] } & PlacementProps) {
+export interface BulletsProps extends PlacementProps {
+  items: Sentence[];
+  /** 번호 목록(1. 2. 3.) */
+  numbered?: boolean;
+  /** 슬롯 대신 정한 위치에 놓는다. `w`를 생략하면 폭은 글에 맞춘다. */
+  at?: At;
+  /** 위치를 정했을 때의 글자 크기(px)와 색(직접 값 또는 토큰 이름). 슬롯에서는 슬롯의 값을 따른다. */
+  size?: number;
+  color?: string;
+}
+
+export function Bullets({ items, numbered, at, size, color }: BulletsProps) {
+  const { tokens } = useMaster();
+  const List = numbered ? "ol" : "ul";
   return (
-    <ul className="el-bullets">
+    <List className="el-bullets" style={at ? { ...atStyle(at), ...textStyle({ size, color }, tokens) } : undefined}>
       {items.map((item, i) => (
         <li key={i}>
           <Inlines value={item} />
         </li>
       ))}
-    </ul>
+    </List>
   );
 }
 Bullets.slotKinds = ["body", "free"] as const;
