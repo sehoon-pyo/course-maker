@@ -108,6 +108,14 @@
   width: auto;
   vertical-align: middle;
 }
+/* 링크(link()): 색은 마스터 tokens의 --link-color(없으면 글자색을 따른다). 밑줄로 링크임을 알린다. */
+.el-link {
+  color: var(--link-color, inherit);
+  text-decoration: underline;
+  /* p, g 같은 글자의 아래 획과 겹치면 밑줄이 끊겨 보이므로 획 아래로 내린다. */
+  text-underline-offset: 0.3em;
+  cursor: pointer;
+}
 .em--bold {
   font-weight: 700;
 }

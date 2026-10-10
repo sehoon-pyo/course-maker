@@ -34,13 +34,19 @@ export interface InlineIcon {
   /** 마스터 `icons`의 이름 또는 import한 이미지 주소 */
   src: string;
 }
+/** 클릭하면 새 탭에서 열리는 링크 */
+export interface Link {
+  kind: "link";
+  href: string;
+  text: string;
+}
 /** 줄바꿈. 문자열의 `\n`은 줄을 바꾸지 않는다. */
 export interface Br {
   kind: "br";
 }
 
 /** 문장 안에서 서식이 바뀌는 조각. 공백은 문자열에 직접 포함한다. */
-export type Inline = string | Badge | Bold | Code | InlineChip | Br | Em | InlineIcon;
+export type Inline = string | Badge | Bold | Code | InlineChip | Br | Em | InlineIcon | Link;
 
 /** 문자열이거나, 문자열과 인라인 요소가 섞인 배열 */
 export type Sentence = string | Inline[];
@@ -68,5 +74,7 @@ export const chip = (text: string, icon?: string): InlineChip => ({ kind: "chip"
 export const em = (text: string, color: string, o: { bold?: boolean } = {}): Em => ({ kind: "em", text, color, ...o });
 /** 문장 안의 그림. `icon(boss)`처럼 import한 이미지 주소나 마스터 `icons`의 이름을 준다. */
 export const icon = (src: string): InlineIcon => ({ kind: "icon", src });
+/** 링크. `link("https://…")`는 주소를 그대로 보여 주고, `link("https://…", "다운로드")`는 글자를 보여 준다. */
+export const link = (href: string, text?: string): Link => ({ kind: "link", href, text: text ?? href });
 /** 줄바꿈. t`첫째 줄${br()}둘째 줄` */
 export const br = (): Br => ({ kind: "br" });
