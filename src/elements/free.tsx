@@ -40,7 +40,10 @@ export function Text({ value, at, size, color, align, anchor, bold, fill, lineHe
   }
   return (
     <div className="el-text" style={style}>
-      <Inlines value={value} />
+      {/* flex로 세로 정렬할 때 글 조각(em, br 등)이 따로 쌓이지 않게 한 덩어리로 감싼다. */}
+      <div>
+        <Inlines value={value} />
+      </div>
     </div>
   );
 }
@@ -148,7 +151,9 @@ export function Shape(props: ShapeProps) {
           className="el-shape-text"
           style={{ ...textStyle(textProps ?? {}, tokens), justifyContent: ANCHOR[textProps?.anchor ?? "middle"] }}
         >
-          <Inlines value={text} />
+          <div>
+            <Inlines value={text} />
+          </div>
         </div>
       )}
     </div>

@@ -4,6 +4,7 @@ import { MasterFrame } from "@/masters/MasterFrame";
 import { resolveMaster } from "@/masters/registry";
 import type { Master } from "@/masters/types";
 import { sectionTag } from "@/sections";
+import { ExportModal } from "./ExportModal";
 import { Sidebar } from "./Sidebar";
 import { SlideErrorBoundary } from "./SlideErrorBoundary";
 import { SlidePreviewArea } from "./SlidePreviewArea";
@@ -31,6 +32,7 @@ function saveSidebarOpen(open: boolean) {
 export function App() {
   const [key, go] = useHashRoute();
   const [sidebarOpen, setSidebarOpen] = useState(loadSidebarOpen);
+  const [exportOpen, setExportOpen] = useState(false);
 
   // 해시가 가리키는 슬라이드가 없으면 슬라이드가 있는 첫 강의의 첫 슬라이드를 보여 준다.
   const found = findPath(key);
@@ -159,7 +161,11 @@ export function App() {
             ))}
           </select>
         </label>
+        <button type="button" className="topbar-button" onClick={() => setExportOpen(true)}>
+          내보내기
+        </button>
       </TopBar>
+      {exportOpen && <ExportModal initialCourseId={course.id} initialChapterId={chapter.id} onClose={() => setExportOpen(false)} />}
       <div className="body">
         {sidebarOpen && <Sidebar chapter={chapter} sectionLabel={course.sectionLabel} currentKey={current.key} onSelect={go} />}
         <main className="main">

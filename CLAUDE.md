@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 슬라이드를 TSX로 작성하고 브라우저 미리보기 창에서 확인한다. AI(Claude Code 등)가 로컬의 TSX를 직접 고치는 것이 기본 사용 방식이다.
 - **원본(SSOT)은 슬라이드의 TSX**이다. HTML(최종 강의자료), PPTX(납품자료), PDF(수강생 배포용)는 모두 출력물이며, 직접 고치지 않고 원본에서 다시 생성한다.
 - 기술 스택은 Vite + React + TypeScript이다. Node.js는 `^20.19.0 || >=22.12.0`.
-- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`, `Toc`), 강의 전용 요소, 인라인 서식, 숨김 슬라이드(미리보기)이다. **단일 HTML/PPTX/PDF export, 표, 날짜/바닥글/슬라이드 번호는 아직 없다.** 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
+- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Note`, `RedBorderBox`, `StepCircle`, `Stamp`, `Toc`), 강의 전용 요소, 인라인 서식(`badge`, `bold`, `code`, `chip`, `em`, `icon`, `br`), 숨김 슬라이드(미리보기)이다. **PPTX/PDF export, 표, 날짜/바닥글/슬라이드 번호는 아직 없다.** 미리보기 상단 바의 내보내기 버튼은 강의, chapter, 파일 형식을 고르는 모달이고, `courses/{강의}/export/{연월일시분초}/`에 `CHAPTER_<번호>_<chapter 제목>.html`을 저장한다(지금은 HTML만. `export/`는 git이 추적하지 않는다). HTML export는 `vite-export.ts`(개발 서버 플러그인)가 `ssrLoadModule`로 슬라이드를 불러 `renderToStaticMarkup`으로 HTML 조각을 만들고 `vite-export-html.ts`가 CSS, 폰트, 이미지를 파일 안에 넣어 한 파일로 묶는다(`docs/adr/[261010_001]_adr.md`). 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
 
 ## 명령어
 - `npm run dev`: 개발 서버 (미리보기 창, 기본 `http://localhost:5173/`)
@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 course-maker/
 ├─ src/                    도구의 소스 (미리보기 앱)
-│  ├─ elements/            슬라이드에서 쓰는 요소와 인라인 서식 (index: Slide, Title 등 / free: Text, Shape, Image, Stamp / widgets: Chip, PromptBox, Toc / slots: 슬롯 배치)
+│  ├─ elements/            슬라이드에서 쓰는 요소와 인라인 서식 (index: Slide, Title 등 / free: Text, Shape, Image, Stamp / widgets: Chip, PromptBox, Note, RedBorderBox, StepCircle, Toc / slots: 슬롯 배치)
 │  ├─ preview/             미리보기 창 (사이드바, 상단 바, 슬라이드 표시, 오류 경계)
 │  ├─ masters/             슬라이드 마스터 (types, define: 검증과 상속, registry: 등록과 조회, MasterFrame, Layers)
 │  │                        도구가 제공하는 마스터는 없다. 마스터는 각 강의의 `masters/{id}/`에 둔다 (`src/masters/{id}/`에 두면 모든 강의가 쓰는 마스터로 읽힘, `_`로 시작하는 폴더는 등록하지 않음)
@@ -30,7 +30,9 @@ course-maker/
 │  ├─ sections.ts          section 번호표(`SECTION 1`) 형식. 목차, 사이드바, 상단 바가 같이 씀
 │  ├─ types.ts             meta.ts의 타입
 │  ├─ constants.ts         슬라이드 크기 (1920×1080)와 기본값(마스터, layout, sectionLabel)
-│  └─ styles.css           폰트, 미리보기 UI, 슬라이드 요소의 CSS (색, 크기 값은 마스터의 tokens가 정함)
+│  ├─ export/              내보내기에서 슬라이드를 HTML로 그리는 코드 (브라우저 API를 쓰지 않음)
+│  ├─ slide.css            폰트와 슬라이드 요소의 CSS (색, 크기 값은 마스터의 tokens가 정함). 미리보기와 내보내기가 같이 씀
+│  └─ styles.css           미리보기 창(사이드바, 상단 바 등)의 CSS. slide.css를 가져옴
 │
 ├─ courses/                강의가 들어가는 곳 (강의 폴더마다 git 저장소를 만들어야 함)
 │  ├─ sample/              예제 강의 (도구에 포함, 별도 저장소 아님)
@@ -45,7 +47,7 @@ course-maker/
 │
 ├─ assets/fonts/           NanumSquare R, B
 ├─ docs/                   glossary.md, github.md(이슈와 프로젝트 운영), notes/(논의 기록), adr/(결정 기록), briefing/(브리핑 HTML)
-└─ index.html, package.json, tsconfig.json, vite.config.ts
+└─ index.html, package.json, tsconfig.json, vite.config.ts, vite-export.ts, vite-export-html.ts(내보내기를 처리하는 개발 서버 플러그인)
 ```
 
 - 경로 별칭은 `@/`(= `src/`)이다.
@@ -56,7 +58,7 @@ course-maker/
 - **숨김 슬라이드**는 `slides`(또는 `head`, `tail`)에서 `{ id, hidden: true }`로 쓴다. 미리보기에서는 보이고 내보낼 때만 빠진다.
 - **`courses/`에서 이 저장소가 추적하는 것은 `sample`, `sample2`뿐**이다. 나머지는 강의별 별도 git 저장소이므로 이 저장소에 커밋하지 않는다.
 - **강의 template**(`docs/adr/[261008_003]_adr.md` ADR-20): 새 강의의 초깃값은 GitHub template 저장소 `sehoon-pyo/default-course`이다(마스터 `default`에 `section` layout 추가, 일반형 칩 `IconChip`, 예시 슬라이드). `courses/` 안에 clone해서 쓰고, 복사한 시점에 고정된다. 이 저장소가 추적하지 않으므로 template을 고칠 때는 `courses/default-course/`에서 그 저장소로 커밋한다.
-- **슬라이드 마스터**(`docs/adr/[261007_004]_adr.md`): 마스터는 course 단위로 하나만 고르고(`meta.ts`의 `master`, 없으면 `default`), id는 ① `courses/{강의}/masters/` → ② `src/masters/` 순서로 찾는다. 마스터는 `defineMaster({ tokens, background, layouts })`가 만든 데이터이고, 슬라이드의 디자인(배경, layout, 색, 크기, 요소의 모양)은 `styles.css`가 아니라 마스터가 정한다. 마스터는 `tokens` 10개를 반드시 정해야 한다(`REQUIRED_TOKENS`, `src/masters/define.ts`). 마스터끼리의 상속(`extendMaster`)은 두지 않는다.
+- **슬라이드 마스터**(`docs/adr/[261007_004]_adr.md`): 마스터는 course 단위로 하나만 고르고(`meta.ts`의 `master`, 없으면 `default`), id는 ① `courses/{강의}/masters/` → ② `src/masters/` 순서로 찾는다. 마스터는 `defineMaster({ tokens, background, layouts })`가 만든 데이터이고, 슬라이드의 디자인(배경, layout, 색, 크기, 요소의 모양)은 `slide.css`가 아니라 마스터가 정한다. 마스터는 `tokens` 10개를 반드시 정해야 한다(`REQUIRED_TOKENS`, `src/masters/define.ts`). 마스터끼리의 상속(`extendMaster`)은 두지 않는다.
 - **그리는 순서**: `MasterFrame`이 마스터와 chapter 정보를 context로 내리고, `Slide`가 layout을 골라 background < layout(장식) < element 세 단계를 쌓임 맥락을 분리해 그린다. 단계 안의 순서는 배열(작성) 순서이고 소스에 `z-index` 숫자를 쓰지 않는다. 층, 슬롯, 요소에는 `id`를 둔다.
 - **강의 전용 요소**: section 안의 슬라이드는 `../../../elements`, chapter 바로 아래의 슬라이드(`head`, `tail`)는 `../../elements`(강의의 `elements/index.ts`)에서 가져오면 도구 요소와 강의 요소를 한 줄로 쓰고, 같은 이름은 강의 것이 우선한다. `@/elements`에서 가져오면 도구의 것이다. 래퍼 요소는 `slotKinds`를 원래 요소에서 다시 알려야 한다. 도구는 아이콘 이미지를 제공하지 않는다(강의의 `assets/`).
 
@@ -65,9 +67,11 @@ course-maker/
 - 문구는 파일 맨 위 `text` 객체에 모으고, 그 안에는 문자열, `t` 템플릿, `badge()` 같은 헬퍼 호출만 넣는다. 슬라이드에 조건문이나 반복문 같은 로직을 넣지 않는다.
 - 문장 안에서 서식이 섞이면 `t` 태그드 템플릿으로 쓴다(``t`타입은 ${badge("동적", "green")}이다` ``). 서식이 없으면 일반 문자열로 쓴다. 배열 방식은 쓰지 않는다.
 - 폰트는 NanumSquare R(400), B(700)만 쓰고 가짜 굵게를 쓰지 않는다. 색, 크기, 여백은 마스터의 `tokens`(CSS 변수)로 정의하고 요소의 CSS는 변수만 읽는다. Tailwind 같은 utility class는 쓰지 않는다.
-- `<Slide layout="...">`으로 layout을 고른다(`title`, `content`(기본), `title-only`, `toc`. `default-course` template의 마스터에는 `section`(section 구분)도 있다). `Title`, `Paragraph`, `Bullets`, `Toc`는 슬롯에 자동으로 들어가고, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`는 `at={{ x, y, w, h }}`(슬라이드 기준 px)로 위치를 준다. `Shape`와 `PromptBox`는 크기까지, `Chip`과 `Stamp`는 `x, y`만 준다. 색은 직접 값이나 토큰 이름(`primary` 등)을 쓴다.
+- `<Slide layout="...">`으로 layout을 고른다(`title`, `content`(기본), `title-only`, `toc`. `default-course` template의 마스터에는 `section`(section 구분)도 있다). `Title`, `Paragraph`, `Bullets`, `Toc`는 슬롯에 자동으로 들어가고, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Note`, `RedBorderBox`, `StepCircle`, `Stamp`는 `at={{ x, y, w, h }}`(슬라이드 기준 px)로 위치를 준다. `Shape`와 `RedBorderBox`는 크기까지, `Chip`, `StepCircle`, `Stamp`는 `x, y`만 준다. `PromptBox`는 `x, y`만 주면 글에 맞춰지고, 긴 프롬프트는 `w`를 줘서 줄을 바꾸는 폭을 정한다(`h`는 보통 주지 않는다). 색은 직접 값이나 토큰 이름(`primary` 등)을 쓴다.
 - `Toc`는 항목을 직접 받지 않고 chapter의 section으로 자동으로 채운다.
-- `Chip`과 `PromptBox`의 아이콘은 `icon`으로 받는다(없어도 됨). 아이콘이 정해진 칩은 도구가 아니라 그 강의의 `elements/`에 만든다(예: `courses/sample/elements/`의 `ClaudeChip`, `TerminalChip`, `FileChip`). 칩의 아이콘은 정사각형 칸 안에 비율을 지켜 맞춰진다.
+- `Chip`과 `PromptBox`의 아이콘은 `icon`으로 받는다(없어도 됨). 값은 마스터 `icons`에 등록한 이름(`"claude"`) 또는 import한 이미지 주소이다. 아이콘이 정해진 칩을 강의의 `elements/`에 래퍼로 만들 수도 있다(예: `courses/sample/elements/`의 `ClaudeChip`). 칩의 아이콘은 정사각형 칸 안에 비율을 지켜 맞춰진다.
+- 글자 일부의 색은 `em(글자, 색 이름)`으로 쓴다. 색 값은 마스터 tokens의 `--em-{이름}`이 정하고 슬라이드에 색 값을 직접 쓰지 않는다.
+- 문장 안의 칩은 `chip(글자, 아이콘 이름)`, 문장 안의 그림은 `icon(이미지)`, 줄바꿈은 `br()`로 쓴다(문자열의 `\n`은 줄을 바꾸지 않는다). 문장에 빈칸을 두고 그 위에 `Chip`이나 `Image`를 올리지 않는다.
 - 글로우(네온)는 `Shape`의 `glow`(도형)와 `textStyle.glow`(글자)이다. 문장 안의 뱃지는 `.badge`의 `vertical-align`으로 본문 글자의 중심선에 맞춘다.
 - 새 요소나 인라인 요소는 필요할 때 하나씩 추가한다. 특정 강의에서만 쓰는 모양은 도구가 아니라 그 강의의 `elements/`에 둔다.
 

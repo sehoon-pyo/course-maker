@@ -133,6 +133,8 @@ export interface MasterDef {
   background: Layer[];
   /** 키가 layout id이다. */
   layouts: Record<string, LayoutDef>;
+  /** 아이콘 이름과 이미지 주소. `Chip`, `PromptBox`, 인라인 `chip()`의 `icon`에 이름으로 쓴다. 이미지는 강의 폴더에서 import한다. */
+  icons?: Record<string, string>;
 }
 
 /** 상속과 대체를 모두 적용한 layout */
@@ -152,6 +154,7 @@ export interface Master {
   /** 강의 전용(`courses/{강의}/masters/`)인지 도구 제공(`src/masters/`)인지 */
   source: MasterSource;
   tokens: Record<string, string>;
+  icons: Record<string, string>;
   background: Layer[];
   layouts: Record<string, Layout>;
 }
