@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 슬라이드를 TSX로 작성하고 브라우저 미리보기 창에서 확인한다. AI(Claude Code 등)가 로컬의 TSX를 직접 고치는 것이 기본 사용 방식이다.
 - **원본(SSOT)은 슬라이드의 TSX**이다. HTML(최종 강의자료), PPTX(납품자료), PDF(수강생 배포용)는 모두 출력물이며, 직접 고치지 않고 원본에서 다시 생성한다.
 - 기술 스택은 Vite + React + TypeScript이다. Node.js는 `^20.19.0 || >=22.12.0`.
-- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`, `Toc`), 강의 전용 요소, 인라인 서식, 숨김 슬라이드(미리보기)이다. **단일 HTML/PPTX/PDF export(파일 생성), 표, 날짜/바닥글/슬라이드 번호는 아직 없다.** 미리보기 상단 바의 내보내기 버튼은 강의, chapter, 파일 형식을 고르는 모달과 `courses/{강의}/export/{연월일시분초}/` 빈 폴더 만들기까지 있다(`vite-export.ts`가 개발 서버에서 폴더를 만들고 `export/`는 git이 추적하지 않는다). 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
+- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`, `Toc`), 강의 전용 요소, 인라인 서식, 숨김 슬라이드(미리보기)이다. **PPTX/PDF export, 표, 날짜/바닥글/슬라이드 번호는 아직 없다.** 미리보기 상단 바의 내보내기 버튼은 강의, chapter, 파일 형식을 고르는 모달이고, `courses/{강의}/export/{연월일시분초}/`에 `CHAPTER_<번호>_<chapter 제목>.html`을 저장한다(지금은 HTML만. `export/`는 git이 추적하지 않는다). HTML export는 `vite-export.ts`(개발 서버 플러그인)가 `ssrLoadModule`로 슬라이드를 불러 `renderToStaticMarkup`으로 HTML 조각을 만들고 `vite-export-html.ts`가 CSS, 폰트, 이미지를 파일 안에 넣어 한 파일로 묶는다(`docs/adr/[261010_001]_adr.md`). 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
 
 ## 명령어
 - `npm run dev`: 개발 서버 (미리보기 창, 기본 `http://localhost:5173/`)
@@ -30,7 +30,9 @@ course-maker/
 │  ├─ sections.ts          section 번호표(`SECTION 1`) 형식. 목차, 사이드바, 상단 바가 같이 씀
 │  ├─ types.ts             meta.ts의 타입
 │  ├─ constants.ts         슬라이드 크기 (1920×1080)와 기본값(마스터, layout, sectionLabel)
-│  └─ styles.css           폰트, 미리보기 UI, 슬라이드 요소의 CSS (색, 크기 값은 마스터의 tokens가 정함)
+│  ├─ export/              내보내기에서 슬라이드를 HTML로 그리는 코드 (브라우저 API를 쓰지 않음)
+│  ├─ slide.css            폰트와 슬라이드 요소의 CSS (색, 크기 값은 마스터의 tokens가 정함). 미리보기와 내보내기가 같이 씀
+│  └─ styles.css           미리보기 창(사이드바, 상단 바 등)의 CSS. slide.css를 가져옴
 │
 ├─ courses/                강의가 들어가는 곳 (강의 폴더마다 git 저장소를 만들어야 함)
 │  ├─ sample/              예제 강의 (도구에 포함, 별도 저장소 아님)
@@ -45,7 +47,7 @@ course-maker/
 │
 ├─ assets/fonts/           NanumSquare R, B
 ├─ docs/                   glossary.md, github.md(이슈와 프로젝트 운영), notes/(논의 기록), adr/(결정 기록), briefing/(브리핑 HTML)
-└─ index.html, package.json, tsconfig.json, vite.config.ts, vite-export.ts(내보내기 폴더를 만드는 개발 서버 플러그인)
+└─ index.html, package.json, tsconfig.json, vite.config.ts, vite-export.ts, vite-export-html.ts(내보내기를 처리하는 개발 서버 플러그인)
 ```
 
 - 경로 별칭은 `@/`(= `src/`)이다.
@@ -55,7 +57,7 @@ course-maker/
 - **번호와 이동**(`docs/adr/[261008_002]_adr.md`): 번호는 chapter 안에서 `head` → section → `tail` 순서로 이어서 매기고 숨김 슬라이드는 번호가 없다(하단은 `숨김 / N`). 하단 버튼은 `<< 이전 챕터`, `< 이전`, `다음 >`, `다음 챕터 >>`이고 `<`, `>`는 chapter 끝에서 멈춘다. 키는 `←`, `→`(슬라이드), `Ctrl + ←`, `Ctrl + →`(chapter)이다. 슬라이드 위에 그리는 페이지 번호는 쪽번호 layout을 만들 때 추가한다.
 - **숨김 슬라이드**는 `slides`(또는 `head`, `tail`)에서 `{ id, hidden: true }`로 쓴다. 미리보기에서는 보이고 내보낼 때만 빠진다.
 - **`courses/`에서 이 저장소가 추적하는 것은 `sample`, `sample2`뿐**이다. 나머지는 강의별 별도 git 저장소이므로 이 저장소에 커밋하지 않는다.
-- **슬라이드 마스터**(`docs/adr/[261007_004]_adr.md`): 마스터는 course 단위로 하나만 고르고(`meta.ts`의 `master`, 없으면 `default`), id는 ① `courses/{강의}/masters/` → ② `src/masters/` 순서로 찾는다. 마스터는 `defineMaster({ tokens, background, layouts })`가 만든 데이터이고, 슬라이드의 디자인(배경, layout, 색, 크기, 요소의 모양)은 `styles.css`가 아니라 마스터가 정한다. 마스터는 `tokens` 10개를 반드시 정해야 한다(`REQUIRED_TOKENS`, `src/masters/define.ts`). 마스터끼리의 상속(`extendMaster`)은 두지 않는다.
+- **슬라이드 마스터**(`docs/adr/[261007_004]_adr.md`): 마스터는 course 단위로 하나만 고르고(`meta.ts`의 `master`, 없으면 `default`), id는 ① `courses/{강의}/masters/` → ② `src/masters/` 순서로 찾는다. 마스터는 `defineMaster({ tokens, background, layouts })`가 만든 데이터이고, 슬라이드의 디자인(배경, layout, 색, 크기, 요소의 모양)은 `slide.css`가 아니라 마스터가 정한다. 마스터는 `tokens` 10개를 반드시 정해야 한다(`REQUIRED_TOKENS`, `src/masters/define.ts`). 마스터끼리의 상속(`extendMaster`)은 두지 않는다.
 - **그리는 순서**: `MasterFrame`이 마스터와 chapter 정보를 context로 내리고, `Slide`가 layout을 골라 background < layout(장식) < element 세 단계를 쌓임 맥락을 분리해 그린다. 단계 안의 순서는 배열(작성) 순서이고 소스에 `z-index` 숫자를 쓰지 않는다. 층, 슬롯, 요소에는 `id`를 둔다.
 - **강의 전용 요소**: section 안의 슬라이드는 `../../../elements`, chapter 바로 아래의 슬라이드(`head`, `tail`)는 `../../elements`(강의의 `elements/index.ts`)에서 가져오면 도구 요소와 강의 요소를 한 줄로 쓰고, 같은 이름은 강의 것이 우선한다. `@/elements`에서 가져오면 도구의 것이다. 래퍼 요소는 `slotKinds`를 원래 요소에서 다시 알려야 한다. 도구는 아이콘 이미지를 제공하지 않는다(강의의 `assets/`).
 

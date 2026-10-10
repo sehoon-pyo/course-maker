@@ -1,28 +1,6 @@
-/* 폰트: R(400), B(700)만 사용한다. 가짜 굵게를 막기 위해 실제 파일을 굵기에 연결한다. */
-@font-face {
-  font-family: "NanumSquare";
-  font-weight: 400;
-  font-style: normal;
-  font-display: block;
-  src: url("../assets/fonts/NanumSquareR.ttf") format("truetype");
-}
-@font-face {
-  font-family: "NanumSquare";
-  font-weight: 700;
-  font-style: normal;
-  font-display: block;
-  src: url("../assets/fonts/NanumSquareB.ttf") format("truetype");
-}
+/* 슬라이드(폰트, 공통 값, 슬라이드 요소)의 CSS는 slide.css에 있다. 내보내기도 같은 파일을 쓴다. */
+@import "./slide.css";
 
-/* 도구가 정하는 값. 슬라이드의 색, 크기, 간격 같은 디자인 값은 마스터가 CSS 변수(tokens)로 정한다. */
-:root {
-  --font-family: "NanumSquare", sans-serif;
-  --font-code: "D2Coding", Consolas, monospace;
-}
-
-* {
-  box-sizing: border-box;
-}
 html,
 body,
 #root {
@@ -33,7 +11,6 @@ body {
   font-family: var(--font-family);
   color: #222222;
 }
-
 /* ---------- 미리보기 창 (슬라이드 밖) ---------- */
 .preview {
   display: flex;
@@ -194,6 +171,7 @@ body {
   background: #064e3b;
   color: #d1fae5;
   font-size: 13px;
+  white-space: pre-wrap;
   word-break: break-all;
 }
 .modal-error {
@@ -343,211 +321,6 @@ body {
 }
 .empty {
   padding: 32px;
-}
-
-/* ---------- 슬라이드 (1920x1080 기준 px) ---------- */
-/* 값(색, 크기, 간격)은 마스터의 tokens가 CSS 변수로 정한다. 여기서는 변수를 읽기만 한다. */
-.slide {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  color: var(--color-text);
-  font-size: var(--size-body);
-  line-height: 1.5;
-}
-
-/* 쌓는 단계: background < layout < element. 단계마다 쌓임 맥락이 분리되어 서로를 넘지 못한다. */
-.tier {
-  position: absolute;
-  inset: 0;
-  isolation: isolate;
-}
-.tier--background {
-  z-index: 1;
-}
-.tier--layout {
-  z-index: 2;
-}
-.tier--element {
-  z-index: 3;
-}
-
-/* 슬롯: layout이 선언한 위치에 놓이고, 요소가 여럿이면 세로로 쌓는다. */
-.slot {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  gap: var(--slot-gap);
-}
-.slot--title {
-  color: var(--color-primary);
-  font-size: var(--size-title);
-  font-weight: 700;
-}
-.slot--subtitle,
-.slot--body,
-.slot--free {
-  font-size: var(--size-body);
-}
-
-/* at이 있는 요소를 element 단계에서 작성 순서대로 쌓는 래퍼 */
-.free {
-  position: absolute;
-  inset: 0;
-}
-.slot--list {
-  position: absolute;
-}
-
-.el-title {
-  margin: 0;
-  font: inherit;
-  line-height: 1.25;
-}
-.el-paragraph {
-  margin: 0;
-}
-.el-bullets {
-  margin: 0;
-  padding-left: 1.2em;
-}
-.el-bullets li {
-  margin-bottom: 20px;
-}
-.el-bullets li:last-child {
-  margin-bottom: 0;
-}
-.slide strong {
-  font-weight: 700;
-}
-.slide code {
-  padding: 0 8px;
-  border-radius: 6px;
-  background: var(--color-code-bg);
-  font-family: var(--font-code);
-  font-size: 0.9em;
-}
-.badge {
-  display: inline-block;
-  padding: 0 14px;
-  border-radius: 999px;
-  color: #ffffff;
-  font-size: 0.8em;
-  font-weight: 700;
-  line-height: 1.5;
-  /*
-   * 기준선에 앉으면 본문 글자의 중심선보다 약 4px(본문 48px일 때) 아래로 처진다.
-   * 한글의 중심선에 맞추되(0.11em이면 정확히 맞음) 숫자와 영문 소문자가 섞인 줄에서도 어색하지 않게 0.10em으로 올린다(시험해서 정함).
-   */
-  vertical-align: 0.1em;
-}
-.badge--green {
-  background: var(--badge-green);
-}
-.badge--red {
-  background: var(--badge-red);
-}
-.badge--blue {
-  background: var(--badge-blue);
-}
-.badge--gray {
-  background: var(--badge-gray);
-}
-
-/* ---------- 자유 배치 요소와 위젯 ---------- */
-.el-text {
-  margin: 0;
-}
-.el-shape {
-  pointer-events: none;
-}
-.el-shape-text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-}
-.el-image {
-  display: block;
-}
-
-/* Chip: 값은 마스터 tokens의 --chip-* */
-.el-chip {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  box-sizing: border-box;
-  width: max-content;
-  height: var(--chip-height);
-  padding: 0 var(--chip-pad-right) 0 var(--chip-pad-left);
-  gap: var(--chip-gap);
-  border: var(--chip-border-width) solid var(--chip-border);
-  border-radius: var(--chip-radius);
-  background: var(--chip-bg);
-  color: var(--color-text);
-  font-size: var(--chip-font-size);
-  line-height: 1;
-  white-space: nowrap;
-}
-.el-chip-icon {
-  /* 아이콘은 정사각형 칸 안에 비율을 지켜 맞춘다(가로로 긴 claude 이미지도 칸을 넘지 않는다). */
-  flex: none;
-  width: var(--chip-icon-size);
-  height: var(--chip-icon-size);
-  object-fit: contain;
-}
-
-/* PromptBox: 값은 마스터 tokens의 --promptbox-* */
-.el-promptbox {
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  overflow: hidden;
-  border: var(--promptbox-border-width) solid var(--promptbox-border);
-  border-radius: var(--promptbox-radius);
-  background: var(--promptbox-bg);
-  color: var(--promptbox-text);
-  font-size: var(--promptbox-font-size);
-  line-height: 1.4;
-}
-.el-promptbox-head {
-  display: flex;
-  flex: 0 0 var(--promptbox-head);
-  align-items: center;
-  justify-content: center;
-}
-.el-promptbox-head img {
-  height: var(--promptbox-icon-height);
-  width: auto;
-}
-.el-promptbox-line {
-  flex: 0 0 var(--promptbox-line-width);
-  margin: 0 var(--promptbox-line-inset);
-  background: var(--promptbox-line);
-}
-.el-promptbox-body {
-  flex: 1;
-  padding: var(--promptbox-pad-y) var(--promptbox-pad-x);
-}
-
-/* Toc: 목록 슬롯의 줄 */
-.toc-row {
-  position: absolute;
-  left: 0;
-  right: 0;
-}
-.toc-cell {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  padding: 0 12px;
-  overflow: hidden;
-  white-space: nowrap;
 }
 
 /* 숨김 슬라이드: 미리보기에서는 보이고 내보낼 때만 빠진다 */
