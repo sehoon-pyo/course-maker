@@ -16,7 +16,7 @@
 |---|---|
 | 미리보기 창 (목차, 강의/chapter 선택, 슬라이드와 chapter 이동 버튼, 방향키, chapter 기준 번호) | 사용 가능 |
 | 파일을 고치면 미리보기에 바로 반영 | 사용 가능 |
-| 슬라이드 요소: 제목, 문단, 불릿, 인라인 서식(뱃지, 굵게, 코드) | 사용 가능 |
+| 슬라이드 요소: 제목, 문단, 불릿, 인라인 서식(뱃지, 굵게, 코드, 칩, 강조 색, 그림, 줄바꿈) | 사용 가능 |
 | 슬라이드 마스터와 layout (대제목, 목차, 컨텐츠, 제목만 있는 컨텐츠), 강의 전용 마스터 | 사용 가능 |
 | 위치를 정해 놓는 요소: 글, 도형, 이미지, 칩, 프롬프트 상자 (칩과 프롬프트 상자의 아이콘은 선택), 도형과 글자의 글로우(네온) | 사용 가능 |
 | chapter 바로 아래의 슬라이드: section 앞(`head`: 대제목, 목차)과 뒤(`tail`: 진행 현황 등) | 사용 가능 |
@@ -235,16 +235,19 @@ export default function VariableDefinition() {
 | `Slide` | 슬라이드 한 장의 바깥 틀. `layout`으로 layout을 고른다(생략하면 `content`) |
 | `Title` | 제목 |
 | `Paragraph` | 문단 (대제목 layout에서는 부제) |
-| `Bullets` | 불릿 목록 |
+| `Bullets` | 불릿 목록. `numbered`면 번호 목록. 슬롯 대신 `at`(과 `size`, `color`)으로 위치를 정할 수도 있음 |
 | `Text` | 위치를 정해 놓는 글 |
 | `Shape` | 도형 (사각형, 둥근 사각형, 타원, 화살표, 삼각형, 선, 자유형 경로) |
 | `Image` | 이미지 |
 | `Chip` | 아이콘과 글자가 들어가는 알약 모양 칩 (단축키, 명령어 표시). 폭은 글자에 맞춰짐 |
-| `PromptBox` | 프롬프트를 보여 주는 어두운 상자 |
+| `PromptBox` | 프롬프트를 보여 주는 어두운 상자. 글자 크기는 `size`로 `normal`(기본), `small` 중에서 고름 |
+| `Note` | 보조 설명 상자(옅은 바탕, 점선 테두리). `title`을 주면 첫 줄에 굵은 제목. 글자 크기는 `size`로 `normal`(기본), `large`. 크기를 생략하면 글에 맞춰짐 |
+| `RedBorderBox` | 볼 곳을 표시하는 강조 테두리(빨간 사각형). `weight="bold"`면 굵은 선 |
+| `StepCircle` | 순서를 나타내는 번호 원. `<StepCircle at={{ x, y }} value={1} />` |
 | `Stamp` | 네온 효과가 있는 기울어진 도장 (예: "완료") |
 | `Toc` | 목차. 지금 chapter의 section 제목으로 **자동으로** 채워짐 (항목을 직접 줄 수 없음) |
 
-`Title`, `Paragraph`, `Bullets`, `Toc`는 layout의 슬롯에 자동으로 들어가고, 위치를 정해 놓는 요소(`Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`)는 `at`으로 위치를 줍니다(아래 7-2).
+`Title`, `Paragraph`, `Bullets`, `Toc`는 layout의 슬롯에 자동으로 들어가고, 위치를 정해 놓는 요소(`Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Note`, `RedBorderBox`, `StepCircle`, `Stamp`)는 `at`으로 위치를 줍니다(아래 7-2).
 
 **한 문장 안에서 서식을 섞기**: 템플릿 문자열 `t`로 문장을 한 줄로 쓰고, 서식이 필요한 곳에만 `${ }`로 아래 헬퍼를 넣습니다.
 
@@ -252,7 +255,7 @@ export default function VariableDefinition() {
 t`타입은 ${badge("동적", "green")}으로 결정된다`
 ```
 
-- `${ }` 안에는 아래 헬퍼(`badge`, `bold`, `code`)나 문자열만 넣을 수 있습니다. 다른 값을 넣으면 타입 검사가 막습니다.
+- `${ }` 안에는 아래 헬퍼(`badge`, `bold`, `code`, `chip`, `em`, `icon`, `br`)나 문자열만 넣을 수 있습니다. 다른 값을 넣으면 타입 검사가 막습니다.
 - 서식이 없는 문장은 `t` 없이 그냥 `"..."`로 씁니다.
 - 공백은 글 안에 그대로 쓰면 됩니다.
 
@@ -261,6 +264,10 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
 | `badge("텍스트", "green")` | 알약 모양 뱃지. 색은 `green`, `red`, `blue`, `gray` |
 | `bold("텍스트")` | 굵은 글씨 |
 | `code("텍스트")` | 코드 모양 |
+| `chip("/exit", "claude")` | 문장 안의 칩. 두 번째 인자는 마스터 `icons`에 등록한 아이콘 이름이고 없어도 됨 (7-3) |
+| `em("텍스트", "red")` | 글자 일부의 색. 색은 이름으로 쓰고 값은 마스터 tokens의 `--em-{이름}`이 정함. 굵게까지는 `em("텍스트", "red", { bold: true })` |
+| `icon(img)` | 문장 안의 작은 그림. import한 이미지나 마스터 `icons`의 이름을 주고, 높이는 글자에 맞춰짐 |
+| `br()` | 줄바꿈. 문자열의 `\n`은 줄을 바꾸지 않음 |
 
 **글꼴**은 NanumSquare의 R(보통)과 B(굵게)만 씁니다. 슬라이드 크기는 16:9(1920×1080)입니다.
 
@@ -297,13 +304,14 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
 </Slide>
 ```
 
-- `Shape`와 `PromptBox`는 크기까지(`x, y, w, h`) 줘야 합니다. `Chip`은 `x, y`만 주면 폭이 글자에 맞춰지고, `Stamp`도 `x, y`만 주면 기본 크기가 됩니다. `Text`와 `Image`는 `w`, `h`를 생략할 수 있습니다.
+- `Shape`는 크기까지(`x, y, w, h`) 줘야 합니다. `PromptBox`는 `x, y`만 주면 폭과 높이가 글에 맞춰지고(최소 폭은 `--promptbox-min-width`), `w`만 주면 그 폭에서 줄을 바꾸고 높이는 글에 맞춥니다. `Chip`은 `x, y`만 주면 폭이 글자에 맞춰지고, `Stamp`도 `x, y`만 주면 기본 크기가 됩니다. `Text`와 `Image`는 `w`, `h`를 생략할 수 있습니다.
 - `Shape`의 주요 속성: `kind`(`rect`, `roundRect`, `ellipse`, `rightArrow`, `triangle`, `line`, `path`), `fill`, `line={{ color, width, dash }}`, `rotate`, `shadow`(그림자), `glow`(도형의 글로우, 네온), `text`와 `textStyle`. `path`는 `path`와 `viewBox`도 필요합니다. 글자의 글로우는 `textStyle={{ glow: { radius: 10, color: "rgba(0, 176, 240, 0.4)" } }}`처럼 줍니다.
 - `Text`의 주요 속성: `size`, `color`, `align`, `anchor`, `bold`, `fill`, `lineHeight`.
 - **색**은 직접 값(`#FF0000`, `rgba(0, 0, 0, 0.3)`)이나 마스터 토큰 이름(`primary`, `primary-dark`, `surface`, `text`, `muted`)을 쓸 수 있습니다.
 - 이미지는 강의 폴더의 이미지를 `import`해서 `src`에 줍니다. 도구는 아이콘 이미지를 제공하지 않습니다.
-- `Chip`과 `PromptBox`의 아이콘은 `icon`에 강의 폴더의 이미지를 주면 붙고, 주지 않으면 없습니다. 칩의 아이콘은 정사각형 칸 안에 비율을 지켜 맞춰집니다.
-- 문장 안의 뱃지(`badge()`)는 본문 글자의 중심선에 맞춰 그려집니다.
+- `PromptBox`의 글자 크기는 `size="small"`이면 한 단계 작아집니다(값은 마스터 tokens의 `--promptbox-font-size`, `--promptbox-font-size-small`). 긴 프롬프트가 상자를 넘칠 때 씁니다.
+- `Chip`과 `PromptBox`의 아이콘은 `icon`에 마스터 `icons`에 등록한 이름(`icon="claude"`)이나 강의 폴더에서 import한 이미지를 주면 붙고, 주지 않으면 없습니다. 칩의 아이콘은 정사각형 칸 안에 비율을 지켜 맞춰집니다.
+- 문장 안의 뱃지(`badge()`)와 칩(`chip()`)은 본문 글자의 중심선에 맞춰 그려집니다. 문장 사이에 칩을 넣을 때는 빈칸 위에 `Chip`을 올리지 말고 `chip()`을 쓰세요.
 - 칩과 프롬프트 상자의 **모양(색, 크기, 간격)은 마스터가 정합니다.**
 
 ### 7-3. 슬라이드 마스터
@@ -312,13 +320,14 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
 
 - **고르는 법**: 강의 `meta.ts`의 `master`에 마스터 id를 씁니다. 없으면 `default`입니다. 강의 하나는 마스터 하나만 씁니다.
 - **찾는 곳**: ① `courses/{강의}/masters/{id}/index.tsx`(강의 전용) → ② `src/masters/{id}/index.tsx`(도구 제공). 같은 id가 양쪽에 있으면 강의 전용이 우선합니다. 없으면 사용 가능한 마스터 목록과 함께 오류가 나옵니다. `_`로 시작하는 폴더는 마스터로 등록하지 않습니다.
-- **구성**: `defineMaster({ tokens, background, layouts })`가 만든 값을 내보냅니다.
+- **구성**: `defineMaster({ tokens, background, layouts, icons })`가 만든 값을 내보냅니다.
   - `tokens`: CSS 변수 값. 아래 필수 토큰을 모두 정해야 합니다.
   - `background`: 아래에서 위로 쌓이는 층(`color`, `image`, `shape`, `text`)의 배열. 각 층에 `id`가 있고 순서는 배열 순서입니다.
+  - `icons`(선택): 아이콘 이름과 이미지 주소(`{ claude, terminal, file }`). 이미지는 강의 폴더에서 import합니다. `Chip`, `PromptBox`, `chip()`의 `icon`에 이름으로 씁니다. 등록하지 않은 이름을 쓰면 오류가 납니다.
   - `layouts`: layout id를 키로 하는 객체. layout마다 `slots`(제목, 부제, 본문, 자유, 목록 슬롯의 `x, y, w, h`와 글자 속성), `decorations`(그 layout에만 있는 장식), `background`(선택)를 가집니다.
 - **배경 상속**: layout의 `background`를 지정하지 않으면 master의 것을 그대로 씁니다. 지정하면 master의 층에서 **같은 `id`는 그 자리에서 대체**하고, 새 `id`는 맨 위에 추가하고, `{ id, remove: true }`는 층을 뺍니다.
 - **쌓는 단계**: background < layout(장식) < element(슬라이드의 요소)로 고정이고, 한 단계는 다른 단계를 넘지 못합니다. 단계 안의 순서는 배열(작성) 순서이고 `z-index` 숫자를 따로 쓰지 않습니다.
-- **필수 토큰**: `--color-text`, `--color-primary`, `--color-code-bg`, `--badge-green`, `--badge-red`, `--badge-blue`, `--badge-gray`, `--size-title`, `--size-body`, `--slot-gap`. 빠지면 빠진 목록과 함께 오류가 납니다. 칩을 쓰면 `--chip-*`, 프롬프트 상자를 쓰면 `--promptbox-*`도 정합니다(예시는 `courses/sample/masters/default/index.tsx`).
+- **필수 토큰**: `--color-text`, `--color-primary`, `--color-code-bg`, `--badge-green`, `--badge-red`, `--badge-blue`, `--badge-gray`, `--size-title`, `--size-body`, `--slot-gap`. 빠지면 빠진 목록과 함께 오류가 납니다. 칩을 쓰면 `--chip-*`, 프롬프트 상자를 쓰면 `--promptbox-*`, 보조 설명을 쓰면 `--note-*`, 강조 테두리를 쓰면 `--red-border-box-*`, 번호 원을 쓰면 `--step-circle-*`도 정합니다(예시는 `courses/sample/masters/default/index.tsx`).
 - 예시: 기본 마스터는 `courses/sample/masters/default/`, 다른 모양의 마스터는 `courses/sample2/masters/plain/`입니다.
 - 슬라이드 파일은 마스터를 직접 가져오지 않습니다. `Slide`가 강의의 마스터를 알아서 적용합니다.
 

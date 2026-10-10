@@ -172,6 +172,11 @@ export function buildMaster(id: string, source: MasterSource, def: MasterDef): M
     layouts[layoutId] = buildLayout(layoutId, def.layouts[layoutId], background, problems);
   }
 
+  for (const [name, src] of Object.entries(def.icons ?? {})) {
+    if (!/^[\w-]+$/.test(name)) problems.push(`icons: 이름 "${name}"은 영문, 숫자, _, -만 쓸 수 있습니다.`);
+    if (typeof src !== "string" || !src) problems.push(`icons: "${name}"의 이미지 주소가 비어 있습니다.`);
+  }
+
   if (problems.length > 0) throw new MasterError(id, problems);
-  return { id, source, tokens: def.tokens ?? {}, background, layouts };
+  return { id, source, tokens: def.tokens ?? {}, icons: def.icons ?? {}, background, layouts };
 }

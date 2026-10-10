@@ -102,6 +102,15 @@
 .el-bullets li:last-child {
   margin-bottom: 0;
 }
+/* 문장 안의 그림(icon()): 높이를 글자에 맞추고 가운데를 본문 글자의 중심선에 둔다. */
+.el-inline-icon {
+  height: 1.2em;
+  width: auto;
+  vertical-align: middle;
+}
+.em--bold {
+  font-weight: 700;
+}
 .slide strong {
   font-weight: 700;
 }
@@ -179,6 +188,13 @@
 .el-chip--text {
   padding-left: var(--chip-pad-right);
 }
+/* 문장 안의 칩(chip()): 칩의 가운데를 본문 글자의 중심선에 맞춘다. 글자 굵기와 기울임은 문장을 따르지 않는다. */
+.el-chip--inline {
+  vertical-align: middle;
+  font-weight: 400;
+  font-style: normal;
+  text-indent: 0;
+}
 .el-chip-icon {
   /* 아이콘은 정사각형 칸 안에 비율을 지켜 맞춘다(가로로 긴 claude 이미지도 칸을 넘지 않는다). */
   flex: none;
@@ -187,12 +203,74 @@
   object-fit: contain;
 }
 
-/* PromptBox: 값은 마스터 tokens의 --promptbox-* */
-.el-promptbox {
+/* RedBorderBox(강조 테두리): 값은 마스터 tokens의 --red-border-box-*. 선은 가장자리의 가운데에 걸친다(SVG 도형의 선과 같다). */
+.el-red-border-box {
+  box-sizing: border-box;
+  outline: var(--red-border-box-width) solid var(--red-border-box-color);
+  outline-offset: calc(var(--red-border-box-width) / -2);
+  pointer-events: none;
+}
+.el-red-border-box--bold {
+  outline-width: var(--red-border-box-width-bold);
+  outline-offset: calc(var(--red-border-box-width-bold) / -2);
+}
+
+/* StepCircle(번호 원): 값은 마스터 tokens의 --step-circle-* */
+.el-step-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--step-circle-size);
+  height: var(--step-circle-size);
+  border-radius: 50%;
+  background: var(--step-circle-bg);
+  color: var(--step-circle-color);
+  font-size: var(--step-circle-font-size);
+  line-height: 1;
+}
+
+/* Note(보조 설명): 값은 마스터 tokens의 --note-* */
+.el-note {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  /* 폭을 주지 않으면 글에 맞춘다(at.w는 인라인 style이라 이 값보다 우선한다). */
+  width: max-content;
+  padding: var(--note-pad-y) var(--note-pad-x);
+  border: var(--note-border-width) dashed var(--note-border);
+  background: var(--note-bg);
+  color: var(--note-text);
+  font-size: var(--note-font-size);
+  line-height: 1.4;
+}
+.el-note--large {
+  font-size: var(--note-font-size-large);
+}
+/* 글 블록은 상자 가운데에 두고 줄은 왼쪽 정렬한다(한 줄이면 상자 가운데에 온다). */
+.el-note > div {
+  align-self: center;
+  max-width: 100%;
+}
+.el-note-title {
+  color: var(--note-title-color);
+  font-weight: 700;
+}
+
+/*
+ * PromptBox: 값은 마스터 tokens의 --promptbox-*
+ * 머리(아이콘), 구분선, 글 영역은 가운데의 한 칸에 쌓인다. 칸의 폭은 글 폭(최대는 상자 안쪽 폭)이라
+ * 구분선이 글보다 넓어지지 않는다. 아이콘이 없으면 머리와 구분선의 줄은 높이가 0이다.
+ */
+.el-promptbox {
+  display: grid;
+  grid-template-columns: fit-content(100%);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  justify-content: center;
   box-sizing: border-box;
   overflow: hidden;
+  padding: 0 var(--promptbox-pad-x);
   border: var(--promptbox-border-width) solid var(--promptbox-border);
   border-radius: var(--promptbox-radius);
   background: var(--promptbox-bg);
@@ -200,9 +278,20 @@
   font-size: var(--promptbox-font-size);
   line-height: 1.4;
 }
+/*
+ * 폭을 정한 상자(at.w)만 안쪽 폭(cqw)을 기준으로 쓸 수 있게 한다.
+ * 폭이 글에 맞춰지는 상자에 두면 크기 계산에서 글 폭이 빠져 상자가 접힌다.
+ */
+.el-promptbox--fixed {
+  container-type: inline-size;
+}
+.el-promptbox--small {
+  font-size: var(--promptbox-font-size-small);
+}
 .el-promptbox-head {
   display: flex;
-  flex: 0 0 var(--promptbox-head);
+  grid-row: 1;
+  height: var(--promptbox-head);
   align-items: center;
   justify-content: center;
 }
@@ -211,13 +300,30 @@
   width: auto;
 }
 .el-promptbox-line {
-  flex: 0 0 var(--promptbox-line-width);
-  margin: 0 var(--promptbox-line-inset);
+  grid-row: 2;
+  height: var(--promptbox-line-width);
   background: var(--promptbox-line);
 }
+/* 글 블록은 글 영역의 세로 가운데에 두고 블록 안은 왼쪽 정렬한다. 한 줄 프롬프트는 상자 가운데에 온다. */
 .el-promptbox-body {
-  flex: 1;
-  padding: var(--promptbox-pad-y) var(--promptbox-pad-x);
+  display: flex;
+  grid-row: 3;
+  flex-direction: column;
+  align-items: center;
+  /* 칸의 최소 폭. 짧은 프롬프트에서 구분선이 너무 짧아지지 않게 한다. */
+  min-width: var(--promptbox-min-width);
+  min-height: 0;
+  padding: var(--promptbox-pad-y) 0;
+}
+/* 폭을 정한 상자에서는 최소 폭이 상자 안쪽 폭을 넘지 않게 한다(%는 grid가 칸 폭을 계산할 때 무시되어 cqw를 쓴다). */
+.el-promptbox--fixed .el-promptbox-body {
+  min-width: min(var(--promptbox-min-width), 100cqw);
+}
+.el-promptbox-text {
+  /* justify-content: center는 글이 넘칠 때 위쪽도 잘리므로 auto 여백으로 가운데에 둔다(넘치면 아래로만 넘침). */
+  margin: auto 0;
+  max-width: 100%;
+  text-align: left;
 }
 
 /* Toc: 목록 슬롯의 줄 */

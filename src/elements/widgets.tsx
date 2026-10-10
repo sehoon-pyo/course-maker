@@ -2,6 +2,7 @@ import { useMaster, useChapter } from "@/masters/context";
 import { sectionTag } from "@/sections";
 import { ANCHOR, textStyle } from "@/masters/Layers";
 import { resolveColor } from "@/masters/color";
+import { resolveIcon } from "@/masters/icon";
 import { atStyle, type At, type AtBox } from "./at";
 import type { Sentence } from "./inline";
 import { Inlines } from "./inlines";
@@ -13,7 +14,7 @@ import { useSlot, type PlacementProps } from "./slots";
 
 export interface ChipProps extends PlacementProps {
   value: Sentence;
-  /** 아이콘 이미지 주소. 도구는 아이콘을 제공하지 않으므로 강의 폴더의 이미지를 import해서 준다. */
+  /** 마스터 `icons`에 등록한 아이콘 이름(`"claude"`) 또는 import한 이미지 주소. 도구는 아이콘을 제공하지 않는다. */
   icon?: string;
   /** `x, y`만 주면 폭은 글자에 맞춘다. */
   at?: At;
@@ -21,9 +22,10 @@ export interface ChipProps extends PlacementProps {
 
 /** 아이콘과 글자가 들어가는 알약 모양 칩(단축키, 명령어 표시). 폭은 글자에 맞춰 자동으로 계산한다. */
 export function Chip({ value, icon, at }: ChipProps) {
+  const src = resolveIcon(icon, useMaster().icons);
   return (
-    <span className={icon ? "el-chip" : "el-chip el-chip--text"} style={atStyle(at)}>
-      {icon && <img className="el-chip-icon" src={icon} alt="" draggable={false} />}
+    <span className={src ? "el-chip" : "el-chip el-chip--text"} style={atStyle(at)}>
+      {src && <img className="el-chip-icon" src={src} alt="" draggable={false} />}
       <span className="el-chip-text">
         <Inlines value={value} />
       </span>
@@ -36,30 +38,101 @@ Chip.slotKinds = ["free", "body"] as const;
 
 export interface PromptBoxProps extends PlacementProps {
   value: Sentence;
-  /** 있으면 위쪽에 아이콘과 구분선이 생긴다. 도구는 아이콘을 제공하지 않는다. */
+  /** 글자 크기. `normal`(기본)은 tokens의 `--promptbox-font-size`, `small`은 `--promptbox-font-size-small` */
+  size?: "normal" | "small";
+  /** 있으면 위쪽에 아이콘과 구분선이 생긴다. 마스터 `icons`의 이름 또는 import한 이미지 주소. 도구는 아이콘을 제공하지 않는다. */
   icon?: string;
-  at: AtBox;
+  /** `x, y`만 주면 폭과 높이가 글에 맞춰진다. `w`만 주면 그 폭에서 줄을 바꾸고 높이는 글에 맞춘다. */
+  at: At;
 }
 
-/** 프롬프트를 보여 주는 어두운 상자. 안쪽 배치(머리, 구분선, 글 영역)는 상자 크기를 기준으로 정해진다. */
-export function PromptBox({ value, icon, at }: PromptBoxProps) {
+/** 프롬프트를 보여 주는 어두운 상자. 크기를 주지 않으면 글에 맞춰지고, 주면 그 안에서 글을 가운데에 둔다. */
+export function PromptBox({ value, icon, at, size = "normal" }: PromptBoxProps) {
+  const src = resolveIcon(icon, useMaster().icons);
   return (
-    <div className="el-promptbox" style={atStyle(at)}>
-      {icon && (
+    <div
+      className={["el-promptbox", size === "small" && "el-promptbox--small", at.w !== undefined && "el-promptbox--fixed"].filter(Boolean).join(" ")}
+      style={atStyle(at)}
+    >
+      {src && (
         <>
           <div className="el-promptbox-head">
-            <img src={icon} alt="" draggable={false} />
+            <img src={src} alt="" draggable={false} />
           </div>
           <div className="el-promptbox-line" />
         </>
       )}
       <div className="el-promptbox-body">
-        <Inlines value={value} />
+        <div className="el-promptbox-text">
+          <Inlines value={value} />
+        </div>
       </div>
     </div>
   );
 }
 PromptBox.slotKinds = ["free"] as const;
+
+/* ---------- Note ---------- */
+
+export interface NoteProps extends PlacementProps {
+  value: Sentence;
+  /** 있으면 첫 줄에 굵은 제목으로 들어간다(색은 tokens의 `--note-title-color`). */
+  title?: Sentence;
+  /** 글자 크기. `normal`(기본)은 tokens의 `--note-font-size`, `large`는 `--note-font-size-large` */
+  size?: "normal" | "large";
+  /** `x, y`만 주면 크기가 글에 맞춰진다. `w`만 주면 그 폭에서 줄을 바꾼다. `h`까지 주면 글은 세로 가운데에 온다. */
+  at: At;
+}
+
+/** 본문을 보충하는 보조 설명 상자(옅은 바탕, 점선 테두리). */
+export function Note({ value, title, at, size = "normal" }: NoteProps) {
+  return (
+    <div className={size === "large" ? "el-note el-note--large" : "el-note"} style={atStyle(at)}>
+      <div>
+        {title !== undefined && (
+          <div className="el-note-title">
+            <Inlines value={title} />
+          </div>
+        )}
+        <Inlines value={value} />
+      </div>
+    </div>
+  );
+}
+Note.slotKinds = ["free", "body"] as const;
+
+/* ---------- RedBorderBox ---------- */
+
+export interface RedBorderBoxProps extends PlacementProps {
+  at: AtBox;
+  /** 선 굵기. `normal`(기본)은 tokens의 `--red-border-box-width`, `bold`는 `--red-border-box-width-bold` */
+  weight?: "normal" | "bold";
+}
+
+/** 화면 캡처 등에서 볼 곳을 표시하는 강조 테두리. 선은 PPTX 도형처럼 `at` 가장자리의 가운데에 그린다. */
+export function RedBorderBox({ at, weight = "normal" }: RedBorderBoxProps) {
+  return <div className={weight === "bold" ? "el-red-border-box el-red-border-box--bold" : "el-red-border-box"} style={atStyle(at)} />;
+}
+RedBorderBox.slotKinds = ["free"] as const;
+
+/* ---------- StepCircle ---------- */
+
+export interface StepCircleProps extends PlacementProps {
+  /** 원 안의 번호(또는 짧은 글자) */
+  value: number | string;
+  /** 원의 왼쪽 위. 크기는 tokens의 `--step-circle-size` */
+  at: At;
+}
+
+/** 순서를 나타내는 번호 원. */
+export function StepCircle({ value, at }: StepCircleProps) {
+  return (
+    <div className="el-step-circle" style={atStyle({ x: at.x, y: at.y })}>
+      {value}
+    </div>
+  );
+}
+StepCircle.slotKinds = ["free"] as const;
 
 /* ---------- Toc ---------- */
 
