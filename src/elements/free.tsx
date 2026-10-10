@@ -57,6 +57,9 @@ export interface ShapeLine {
   /** px */
   width: number;
   dash?: "solid" | "dash";
+  /** 선의 시작점과 끝점에 붙는 화살표 머리. 선(`line`)과 자유형(`path`)에만 쓴다. */
+  start?: "arrow";
+  end?: "arrow";
 }
 
 interface ShapeBase extends PlacementProps {
@@ -109,6 +112,40 @@ function outline(p: ShapeProps) {
   }
 }
 
+type Point = [number, number];
+
+/** 선의 양 끝점과 각 끝점에서의 방향을 정하는 이웃 점(px). 자유형은 경로 데이터의 처음과 마지막 좌표를 쓴다. */
+function lineEnds(p: ShapeProps): { start: [Point, Point]; end: [Point, Point] } | null {
+  const { w, h } = p.at;
+  if (p.kind === "line") return { start: [[0, 0], [w, h]], end: [[w, h], [0, 0]] };
+  if (p.kind !== "path") return null;
+  const nums = (p.path.match(/-?\d*\.?\d+(?:e-?\d+)?/gi) ?? []).map(Number);
+  const pts: Point[] = [];
+  for (let i = 0; i + 1 < nums.length; i += 2) pts.push([(nums[i] * w) / p.viewBox.w, (nums[i + 1] * h) / p.viewBox.h]);
+  if (pts.length < 2) return null;
+  // 곡선의 제어점이 끝점과 같으면 방향을 알 수 없으므로 다른 점이 나올 때까지 거슬러 간다.
+  const differs = (a: Point, b: Point) => Math.hypot(a[0] - b[0], a[1] - b[1]) > 0.01;
+  const first = pts[0];
+  const last = pts[pts.length - 1];
+  const afterFirst = pts.find((q) => differs(q, first)) ?? first;
+  const beforeLast = [...pts].reverse().find((q) => differs(q, last)) ?? last;
+  return { start: [first, afterFirst], end: [last, beforeLast] };
+}
+
+/** 끝점 tip에서 from 반대쪽을 향하는 화살표 머리. 크기는 선 굵기에 비례한다(PowerPoint의 큰 화살표 머리 정도). */
+function arrowHead([tip, from]: [Point, Point], width: number): string {
+  const len = Math.max(width * 5, 12);
+  const half = Math.max(width * 2.5, 6);
+  const dx = tip[0] - from[0];
+  const dy = tip[1] - from[1];
+  const d = Math.hypot(dx, dy) || 1;
+  const ux = dx / d;
+  const uy = dy / d;
+  const bx = tip[0] - ux * len;
+  const by = tip[1] - uy * len;
+  return `${tip[0]},${tip[1]} ${bx - uy * half},${by + ux * half} ${bx + uy * half},${by - ux * half}`;
+}
+
 export function Shape(props: ShapeProps) {
   const { tokens } = useMaster();
   const { at, fill, line, rotate, shadow, glow, text, textStyle: textProps } = props;
@@ -118,6 +155,7 @@ export function Shape(props: ShapeProps) {
   const svgW = Math.max(at.w, 1);
   const svgH = Math.max(at.h, 1);
   const viewBox = props.kind === "path" ? `0 0 ${props.viewBox.w} ${props.viewBox.h}` : `0 0 ${svgW} ${svgH}`;
+  const ends = line?.start || line?.end ? lineEnds(props) : null;
 
   return (
     <div
@@ -146,6 +184,13 @@ export function Shape(props: ShapeProps) {
       >
         {outline(props)}
       </svg>
+      {/* 화살표 머리는 viewBox의 늘림을 받지 않도록 px 좌표의 svg에 따로 그린다. */}
+      {line && (line.start || line.end) && ends && (
+        <svg width={svgW} height={svgH} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }} fill={stroke}>
+          {line.start && <polygon points={arrowHead(ends.start, line.width)} />}
+          {line.end && <polygon points={arrowHead(ends.end, line.width)} />}
+        </svg>
+      )}
       {text !== undefined && (
         <div
           className="el-shape-text"
