@@ -55,6 +55,7 @@ course-maker/
 - **번호와 이동**(`docs/adr/[261008_002]_adr.md`): 번호는 chapter 안에서 `head` → section → `tail` 순서로 이어서 매기고 숨김 슬라이드는 번호가 없다(하단은 `숨김 / N`). 하단 버튼은 `<< 이전 챕터`, `< 이전`, `다음 >`, `다음 챕터 >>`이고 `<`, `>`는 chapter 끝에서 멈춘다. 키는 `←`, `→`(슬라이드), `Ctrl + ←`, `Ctrl + →`(chapter)이다. 슬라이드 위에 그리는 페이지 번호는 쪽번호 layout을 만들 때 추가한다.
 - **숨김 슬라이드**는 `slides`(또는 `head`, `tail`)에서 `{ id, hidden: true }`로 쓴다. 미리보기에서는 보이고 내보낼 때만 빠진다.
 - **`courses/`에서 이 저장소가 추적하는 것은 `sample`, `sample2`뿐**이다. 나머지는 강의별 별도 git 저장소이므로 이 저장소에 커밋하지 않는다.
+- **강의 template**(`docs/adr/[261008_003]_adr.md` ADR-20): 새 강의의 초깃값은 GitHub template 저장소 `sehoon-pyo/default-course`이다(마스터 `default`에 `section` layout 추가, 일반형 칩 `IconChip`, 예시 슬라이드). `courses/` 안에 clone해서 쓰고, 복사한 시점에 고정된다. 이 저장소가 추적하지 않으므로 template을 고칠 때는 `courses/default-course/`에서 그 저장소로 커밋한다.
 - **슬라이드 마스터**(`docs/adr/[261007_004]_adr.md`): 마스터는 course 단위로 하나만 고르고(`meta.ts`의 `master`, 없으면 `default`), id는 ① `courses/{강의}/masters/` → ② `src/masters/` 순서로 찾는다. 마스터는 `defineMaster({ tokens, background, layouts })`가 만든 데이터이고, 슬라이드의 디자인(배경, layout, 색, 크기, 요소의 모양)은 `styles.css`가 아니라 마스터가 정한다. 마스터는 `tokens` 10개를 반드시 정해야 한다(`REQUIRED_TOKENS`, `src/masters/define.ts`). 마스터끼리의 상속(`extendMaster`)은 두지 않는다.
 - **그리는 순서**: `MasterFrame`이 마스터와 chapter 정보를 context로 내리고, `Slide`가 layout을 골라 background < layout(장식) < element 세 단계를 쌓임 맥락을 분리해 그린다. 단계 안의 순서는 배열(작성) 순서이고 소스에 `z-index` 숫자를 쓰지 않는다. 층, 슬롯, 요소에는 `id`를 둔다.
 - **강의 전용 요소**: section 안의 슬라이드는 `../../../elements`, chapter 바로 아래의 슬라이드(`head`, `tail`)는 `../../elements`(강의의 `elements/index.ts`)에서 가져오면 도구 요소와 강의 요소를 한 줄로 쓰고, 같은 이름은 강의 것이 우선한다. `@/elements`에서 가져오면 도구의 것이다. 래퍼 요소는 `slotKinds`를 원래 요소에서 다시 알려야 한다. 도구는 아이콘 이미지를 제공하지 않는다(강의의 `assets/`).
@@ -64,7 +65,7 @@ course-maker/
 - 문구는 파일 맨 위 `text` 객체에 모으고, 그 안에는 문자열, `t` 템플릿, `badge()` 같은 헬퍼 호출만 넣는다. 슬라이드에 조건문이나 반복문 같은 로직을 넣지 않는다.
 - 문장 안에서 서식이 섞이면 `t` 태그드 템플릿으로 쓴다(``t`타입은 ${badge("동적", "green")}이다` ``). 서식이 없으면 일반 문자열로 쓴다. 배열 방식은 쓰지 않는다.
 - 폰트는 NanumSquare R(400), B(700)만 쓰고 가짜 굵게를 쓰지 않는다. 색, 크기, 여백은 마스터의 `tokens`(CSS 변수)로 정의하고 요소의 CSS는 변수만 읽는다. Tailwind 같은 utility class는 쓰지 않는다.
-- `<Slide layout="...">`으로 layout을 고른다(`title`, `content`(기본), `title-only`, `toc`). `Title`, `Paragraph`, `Bullets`, `Toc`는 슬롯에 자동으로 들어가고, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`는 `at={{ x, y, w, h }}`(슬라이드 기준 px)로 위치를 준다. `Shape`와 `PromptBox`는 크기까지, `Chip`과 `Stamp`는 `x, y`만 준다. 색은 직접 값이나 토큰 이름(`primary` 등)을 쓴다.
+- `<Slide layout="...">`으로 layout을 고른다(`title`, `content`(기본), `title-only`, `toc`. `default-course` template의 마스터에는 `section`(section 구분)도 있다). `Title`, `Paragraph`, `Bullets`, `Toc`는 슬롯에 자동으로 들어가고, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`는 `at={{ x, y, w, h }}`(슬라이드 기준 px)로 위치를 준다. `Shape`와 `PromptBox`는 크기까지, `Chip`과 `Stamp`는 `x, y`만 준다. 색은 직접 값이나 토큰 이름(`primary` 등)을 쓴다.
 - `Toc`는 항목을 직접 받지 않고 chapter의 section으로 자동으로 채운다.
 - `Chip`과 `PromptBox`의 아이콘은 `icon`으로 받는다(없어도 됨). 아이콘이 정해진 칩은 도구가 아니라 그 강의의 `elements/`에 만든다(예: `courses/sample/elements/`의 `ClaudeChip`, `TerminalChip`, `FileChip`). 칩의 아이콘은 정사각형 칸 안에 비율을 지켜 맞춰진다.
 - 글로우(네온)는 `Shape`의 `glow`(도형)와 `textStyle.glow`(글자)이다. 문장 안의 뱃지는 `.badge`의 `vertical-align`으로 본문 글자의 중심선에 맞춘다.
