@@ -71,9 +71,14 @@
 }
 
 /* at이 있는 요소를 element 단계에서 작성 순서대로 쌓는 래퍼 */
+/* 래퍼는 슬라이드 전체를 덮으므로 마우스를 통과시키고, 안의 요소만 받는다(뒤에 쓴 래퍼가 앞 요소의 드래그를 막지 않게). */
 .free {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+.free > * {
+  pointer-events: auto;
 }
 .slot--list {
   position: absolute;
@@ -169,6 +174,10 @@
   font-size: var(--chip-font-size);
   line-height: 1;
   white-space: nowrap;
+}
+/* 아이콘이 없으면 왼쪽 여백(아이콘 칸에 맞춘 값)이 좁아 보이므로 오른쪽 여백과 같게 한다. */
+.el-chip--text {
+  padding-left: var(--chip-pad-right);
 }
 .el-chip-icon {
   /* 아이콘은 정사각형 칸 안에 비율을 지켜 맞춘다(가로로 긴 claude 이미지도 칸을 넘지 않는다). */

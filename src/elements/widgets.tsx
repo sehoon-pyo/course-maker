@@ -22,7 +22,7 @@ export interface ChipProps extends PlacementProps {
 /** 아이콘과 글자가 들어가는 알약 모양 칩(단축키, 명령어 표시). 폭은 글자에 맞춰 자동으로 계산한다. */
 export function Chip({ value, icon, at }: ChipProps) {
   return (
-    <span className="el-chip" style={atStyle(at)}>
+    <span className={icon ? "el-chip" : "el-chip el-chip--text"} style={atStyle(at)}>
       {icon && <img className="el-chip-icon" src={icon} alt="" draggable={false} />}
       <span className="el-chip-text">
         <Inlines value={value} />
