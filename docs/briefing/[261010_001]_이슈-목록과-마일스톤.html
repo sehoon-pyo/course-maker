@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이슈 목록과 마일스톤</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --fg: #1b2330; --muted: #5d6877; --line: #dde2ea;
+    --primary: #164194; --ok-bg: #e4f3ea; --ok-fg: #1d5a35; --warn-bg: #fff4de; --warn-fg: #7a4b00;
+    --code-bg: #eceff4; --input-bg: #ffffff; --chip-bg: #e8eefb; --chip-fg: #164194;
+    --font-body: "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: Consolas, "Cascadia Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11151c; --surface: #1a212c; --fg: #e6eaf0; --muted: #9aa5b5; --line: #2c3645;
+      --primary: #5b86d6; --ok-bg: #16352a; --ok-fg: #9fd9b5; --warn-bg: #3a2e12; --warn-fg: #f2cf8a;
+      --code-bg: #232c3a; --input-bg: #11151c; --chip-bg: #22304d; --chip-fg: #a9c2f2; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.7;
+    margin: 0; padding-inline: 16px; padding-block: 40px 96px; }
+  main { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+  h1 { font-size: 1.75rem; line-height: 1.3; margin: 0; }
+  h2 { font-size: 1.25rem; margin: 0 0 8px; }
+  h3 { font-size: 1.05rem; margin: 0; line-height: 1.4; }
+  p { margin: 0; }
+  code { font-family: var(--font-mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.06em; color: var(--muted); }
+  .lead { color: var(--muted); margin-top: 8px; }
+  .note { background: var(--warn-bg); color: var(--warn-fg); padding: 14px 16px; border-radius: 8px; }
+  .ok { background: var(--ok-bg); color: var(--ok-fg); padding: 14px 16px; border-radius: 8px; }
+  .cap { font-size: 0.85rem; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font-size: 0.93rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--code-bg); font-size: 0.82rem; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  .scroll { overflow-x: auto; }
+  .ms { margin-top: 4px; }
+  .ms-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+  .ms-head .count { color: var(--muted); font-size: 0.9rem; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .card-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .num { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); }
+  .labels { display: flex; flex-wrap: wrap; gap: 6px; }
+  .lb { font-family: var(--font-mono); font-size: 0.75rem; background: var(--chip-bg); color: var(--chip-fg); padding: 1px 8px; border-radius: 999px; }
+  .lb.nd { background: var(--warn-bg); color: var(--warn-fg); }
+  .body { font-size: 0.93rem; }
+  .body ul { margin: 4px 0 0; padding-left: 20px; }
+  .src { font-size: 0.82rem; color: var(--muted); }
+  .choice { border-top: 1px dashed var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 0.92rem; }
+  .choice .q { color: var(--muted); font-size: 0.85rem; }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .opts label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+  textarea { width: 100%; min-height: 54px; resize: vertical; background: var(--input-bg); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font: inherit; font-size: 0.9rem; }
+  button { font: inherit; background: var(--primary); color: #fff; border: 0; border-radius: 8px; padding: 10px 18px; cursor: pointer; }
+  .bar { position: sticky; bottom: 0; background: var(--bg); border-top: 1px solid var(--line); padding: 12px 16px; margin-inline: -16px;
+    display: flex; gap: 12px; align-items: center; justify-content: center; }
+  .status { font-size: 0.85rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">BRIEFING 261010_001 · docs/github.md 10번 시작 순서의 5단계</div>
+    <h1>이슈 목록과 마일스톤</h1>
+    <p class="lead">노트 [261008_003]과 ADR [261008_003]의 미구현 항목을 이슈 13개로 묶고 마일스톤에 연결한 제안입니다. 이슈는 아직 하나도 만들지 않았습니다.</p>
+  </header>
+
+  <section>
+    <h2>묶는 기준</h2>
+    <div class="note">
+      <p><code>docs/github.md</code> 5-5의 규칙을 따랐습니다.</p>
+      <ul>
+        <li>지금 바로 구현할 수 있는 것은 이슈 하나씩 만듭니다.</li>
+        <li>export처럼 시점이 정해진 항목은 잘게 쪼개지 않고, 마일스톤마다 이슈 하나에 체크리스트로 묶습니다.</li>
+        <li>결정이 남은 항목에는 <code>needs-decision</code> 라벨을 붙입니다.</li>
+        <li>만든 뒤 노트의 행에 <code>#번호</code>만 추가합니다. 기존 문장은 고치지 않습니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>확인한 것과 확인하지 못한 것</h2>
+    <div class="ok">
+      <p><strong>확인함</strong>: 노트와 ADR의 구현 상태(구현 전, 일부 구현), 마일스톤 5개의 이름(<code>docs/github.md</code> 4번), 라벨 체계(3번), 저장소의 <code>.github/</code> 양식 파일.</p>
+    </div>
+    <p class="cap" style="margin-top:10px"><strong>확인하지 못함</strong>: 이 PC에 <code>gh</code>가 없어 GitHub의 실제 라벨, 마일스톤, 프로젝트가 만들어져 있는지는 보지 못했습니다. 마일스톤 <code>날짜, 바닥글, 번호</code>는 ADR-16에 따라 이름을 바꿔야 하는데, 문서에는 아직 바꾸지 않았다고 되어 있습니다. 이슈를 만들기 전에 <code>gh</code>를 설치하고 로그인해야 합니다.</p>
+  </section>
+
+  <section>
+    <h2>마일스톤 요약</h2>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>마일스톤</th><th>이슈</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td><code>단일 HTML export</code></td><td>#A1</td><td>기존</td></tr>
+        <tr><td><code>PPTX export</code></td><td>#B1, #B2</td><td>기존</td></tr>
+        <tr><td><code>PDF export</code></td><td>#C1</td><td>기존</td></tr>
+        <tr><td><code>표 요소</code></td><td>#D1</td><td>기존</td></tr>
+        <tr><td><code>날짜, 바닥글, 번호</code> → <code>슬라이드 번호</code></td><td>#E1</td><td>기존. ADR-16에 따라 이름을 바꿈(결정 1)</td></tr>
+        <tr><td><code>미리보기 개선</code></td><td>#F1, #F2, #F3</td><td>새로 만들기(결정 2)</td></tr>
+        <tr><td><code>인라인 서식 정리</code></td><td>#G1, #G2, #G3</td><td>새로 만들기(결정 3)</td></tr>
+        <tr><td>없음</td><td>#H1</td><td>저장소 운영 성격이라 마일스톤을 걸지 않음</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="cap" style="margin-top:8px">이슈 번호(#A1 등)는 이 문서 안의 임시 이름입니다. GitHub에서 붙는 번호와 다릅니다.</p>
+  </section>
+
+  <div id="issues"></div>
+
+  <section>
+    <h2>이슈로 만들지 않는 것</h2>
+    <ul>
+      <li><strong>화면에서 고쳐 TSX에 저장하는 기능</strong>: ADR-17에 따라 구현 직전에 ADR과 마일스톤을 함께 만듭니다.</li>
+      <li><strong>PowerPoint 원본과 눈으로 비교하는 일</strong>(노트 4번): 구현 항목이 아니라 확인 항목이라 제외했습니다. #B2 진단 도구가 생기면 거기서 합니다.</li>
+      <li><strong><code>group</code>, 자동 배치, 층 앵커, 목차 색 <code>#6C93C6</code></strong>: ADR-17에서 만들지 않기로 했습니다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>전체 결정</h2>
+    <div id="decisions"></div>
+  </section>
+</main>
+
+<div class="bar">
+  <button type="button" id="copy">전체 답변 복사</button>
+  <span class="status" id="status">입력은 이 브라우저의 localStorage에 저장됩니다.</span>
+</div>
+
+<script>
+const KEY = "briefing-261010_001";
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+
+const ISSUES = [
+  { ms: "단일 HTML export", items: [
+    { id: "A1", title: "단일 HTML export 구현", labels: ["feat", "area:export"],
+      body: ["chapter 하나가 파일 하나인 단일 HTML을 내보낸다(ADR-1)", "뷰어는 방향키 이동만 포함한다. 축소 표시와 이전/다음 버튼은 넣지 않는다(ADR-1)", "숨김 슬라이드는 내보낼 때 뺀다(ADR-4)"],
+      src: "ADR 261008_003 ADR-1, ADR-4 / 노트 1, 4번" } ] },
+  { ms: "PPTX export", items: [
+    { id: "B1", title: "PPTX export 구현", labels: ["feat", "area:export"],
+      body: ["chapter 하나가 파일 하나(ADR-2), 숨김 슬라이드 제외(ADR-4)",
+        "마스터를 진짜 PPTX 마스터로 내보낸다(ADR-10). 확인하지 못한 것: 나머지 layout 3개, list와 free 슬롯, 로고, 고정 문구, 토큰 10개, 생성 라이브러리 선택",
+        "자유형은 a:custGeom, 바깥 그림자는 a:outerShdw, 글로우는 a:glow(ADR-6, 7). 도형 XML에 p:style을 두지 않는다",
+        "폰트는 R이 NanumSquare, B가 NanumSquare Bold이고 b=\"1\"은 쓰지 않는다(ADR-8). 납품 때 폰트 동봉이 필요하다",
+        "강조와 code()는 런 서식, 칩 문단은 줄과 조각 단위로 쪼갠다(ADR-5). 겹침이나 틈은 PowerPoint에서 확인",
+        "Image의 fit(특히 cover의 잘림), 슬롯 넘침, 슬라이드 번호를 PPTX에서 어떻게 보일지 정하고 확인(ADR-13, 14, 16)"],
+      src: "ADR 261008_003 ADR-2, 4~8, 10, 13, 14, 16 / 노트 1번" },
+    { id: "B2", title: "HTML과 PPTX 비교 진단 도구", labels: ["feat", "area:export"],
+      body: ["HTML 좌표와 PPTX 도형 좌표를 수치로 비교한다", "슬라이드별로 HTML, PPTX, 차이 이미지를 한 페이지로 만든다. 판정은 사람이 하고 자동 합격/불합격 테스트는 만들지 않는다(ADR-9)",
+        "미리보기를 UI 없이 슬라이드만 찍는 캡처 모드가 필요하다(미해결)"],
+      src: "ADR 261008_003 ADR-9 / 노트 12번" } ] },
+  { ms: "PDF export", items: [
+    { id: "C1", title: "PDF export 구현", labels: ["feat", "area:export"],
+      body: ["Chrome headless로 HTML을 인쇄해 만들고, 생성 뒤 ToUnicode의 <0001> <0001>을 <0001> <0020>으로 고쳐 공백이 복사되게 한다(ADR-3)",
+        "chapter 하나가 파일 하나이고 숨김 슬라이드는 뺀다(ADR-2, 4)", "sample ch.3_master는 시험했다. 다른 chapter와 sample2의 검증은 구현 때 한다"],
+      src: "ADR 261008_003 ADR-2, 3, 4 / 노트 3번" } ] },
+  { ms: "표 요소", items: [
+    { id: "D1", title: "표(Table) 요소 추가", labels: ["feat", "area:elements"],
+      body: ["HTML table과 PPTX a:tbl이 구조가 직접 대응한다. colspan, rowspan은 gridSpan, rowSpan에 대응(ADR-17)", "확인하지 못함: 기존 PPTX의 표 사용 빈도"],
+      src: "ADR 261008_003 ADR-17 / 노트 24번" } ] },
+  { ms: "슬라이드 번호 (현재 이름: 날짜, 바닥글, 번호)", decision: "ms-e1", items: [
+    { id: "E1", title: "슬라이드 번호 슬롯 추가 (n / N)", labels: ["feat", "area:masters", "area:elements"],
+      body: ["content, title-only layout에 번호 슬롯을 두고 title, toc에는 두지 않는다. 날짜와 바닥글은 만들지 않는다(ADR-16)",
+        "형식은 n / N(chapter 안 1부터, N은 숨김을 뺀 수). 숨김 슬라이드에는 \"숨김\"으로 표시",
+        "<Slide number={false}>로 슬라이드에서 뺀다. 기본은 넣는 것",
+        "위치 x1356 y1001 w432 h58, 24px, 오른쪽 정렬, 세로 가운데, 색은 토큰 muted",
+        "구현할 때 README, CLAUDE.md의 \"날짜/바닥글/슬라이드 번호는 아직 없다\"와 docs/github.md의 마일스톤 이름을 고친다",
+        "강의에 필요한 수정: 마스터에 번호 슬롯이 없는 기존 강의는 번호가 표시되지 않으므로 마스터를 고쳐야 한다(확인 필요)"],
+      src: "ADR 261008_003 ADR-16 / 노트 20번" } ] },
+  { ms: "미리보기 개선 (새로 만들기)", decision: "ms-f", items: [
+    { id: "F1", title: "미리보기 상단 바에 오류 신호등 추가", labels: ["feat", "area:preview"],
+      body: ["콘솔에 나오는 경고 전체(슬롯 넘침, list 슬롯 넘침, 마스터 오류, meta.ts와 폴더 불일치 등)를 상단 바에 모은다",
+        "오류가 있으면 빨간 신호등이 켜지고, 눌러서 내용을 본다(ADR-14)"],
+      src: "ADR 261008_003 ADR-14 / 노트 17번" },
+    { id: "F2", title: "PromptBox 넘침을 잘라내지 않고 그려서 경고", labels: ["feat", "area:elements"],
+      body: ["지금은 overflow: hidden으로 잘린다. 슬롯 넘침과 같은 방식으로 그대로 그리고 경고한다(ADR-14)", "F1 신호등과 경고를 공유하므로 F1과 함께 하는 편이 좋다"],
+      src: "ADR 261008_003 ADR-14 / 노트 17, 18번" },
+    { id: "F3", title: "상단 바에 숨김 슬라이드 표시 토글 추가", labels: ["feat", "area:preview", "needs-decision"],
+      body: ["기본은 켜짐(보임). 끄면 사이드바와 이동(<, >)에서 숨김 슬라이드를 건너뛴다(ADR-19)", "미정: 끈 상태의 하단 n / N 표기. 구현 전에 정해야 한다"],
+      src: "ADR 261008_003 ADR-19 / 노트 33번" } ] },
+  { ms: "인라인 서식 정리 (새로 만들기)", decision: "ms-g", items: [
+    { id: "G1", title: "인라인 줄바꿈 헬퍼 br() 추가", labels: ["feat", "area:elements"],
+      body: ["t`첫째 줄${br()}둘째 줄`처럼 쓴다. \\n과 white-space: pre-line은 쓰지 않는다(ADR-15)", "PromptBox만이 아니라 Sentence를 받는 모든 요소(Paragraph, Bullets 등)에서 쓴다", "인라인 조각 타입을 어떻게 더할지는 Inlines를 읽고 구현 때 정한다"],
+      src: "ADR 261008_003 ADR-15 / 노트 18번" },
+    { id: "G2", title: "badge()를 없애고 강조(굵게 + 글자색)로 교체", labels: ["feat", "area:elements"],
+      body: ["badge()를 없애고 강조로 바꾼다. vertical-align 정렬도 함께 정리(ADR-5)", "기존 샘플의 badge() 사용도 바꾼다",
+        "강의에 필요한 수정: 기존 강의의 badge() 호출은 동작하지 않게 되므로 강조로 바꿔야 한다. 구현 ADR에 적어야 함"],
+      src: "ADR 261008_003 ADR-5 / 노트 5, 8, 11번" },
+    { id: "G3", title: "문장 안에 칩을 인라인으로 넣을 수 있게 하기", labels: ["feat", "area:elements", "needs-decision"],
+      body: ["문장 안에 칩을 넣는 미리보기 쪽 구현(ADR-5). PPTX에서 줄과 조각 단위로 쪼개는 일은 B1에서 한다",
+        "미정: 인라인 칩의 문법(예: 칩 헬퍼의 이름과 인자)은 문서에 정해져 있지 않다"],
+      src: "ADR 261008_003 ADR-5 / 노트 5번" } ] },
+  { ms: "마일스톤 없음", items: [
+    { id: "H1", title: "default-course template 저장소 만들기", labels: ["chore", "area:docs", "needs-decision"],
+      body: ["새 강의는 courses/ 안에서 이 template으로 저장소를 만들어 시작한다(ADR-20). 복사한 시점에 고정된다",
+        "미정: 만드는 시점과 저장소 이름", "지금의 courses/default-course/는 임시용이고 .gitignore 때문에 추적되지 않는다"],
+      src: "ADR 261008_003 ADR-20, 21 / 노트 31, 32번" } ] }
+];
+
+const DECISIONS = [
+  { id: "ms-e1", q: "결정 1. 마일스톤 \"날짜, 바닥글, 번호\"의 이름을 지금 \"슬라이드 번호\"로 바꿀까요?", opts: ["지금 바꾼다 (ADR-16은 구현할 때 바꾼다고 함)", "구현 시점에 바꾼다 (문서 그대로)"] },
+  { id: "ms-f", q: "결정 2. F1~F3(미리보기 개선)에 새 마일스톤 \"미리보기 개선\"을 만들까요?", opts: ["새 마일스톤을 만든다", "마일스톤 없이 만든다", "다른 이름 (메모에 적기)"] },
+  { id: "ms-g", q: "결정 3. G1~G3(인라인 서식)에 새 마일스톤 \"인라인 서식 정리\"를 만들까요?", opts: ["새 마일스톤을 만든다", "마일스톤 없이 만든다", "다른 이름 (메모에 적기)"] },
+  { id: "tool", q: "결정 4. 이슈를 만들려면 gh가 필요합니다. 어떻게 할까요?", opts: ["제가 gh 설치 상태를 확인하고 안내를 받는다", "이슈 본문 파일만 만들어 두고 직접 올린다", "gh가 있는 다른 환경에서 한다"] }
+];
+
+function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+function choiceHtml(key, q, opts) {
+  const v = saved[key] || {};
+  return `<div class="choice">
+    <div class="q">${esc(q)}</div>
+    <div class="opts">${opts.map((o, i) => `<label><input type="radio" name="${key}" value="${esc(o)}" ${v.pick === o ? "checked" : ""}> ${esc(o)}</label>`).join("")}</div>
+    <textarea data-memo="${key}" placeholder="메모">${esc(v.memo || "")}</textarea>
+  </div>`;
+}
+
+const issuesEl = document.getElementById("issues");
+issuesEl.innerHTML = ISSUES.map(g => {
+  const cards = g.items.map(it => `<article class="card">
+    <div class="card-top"><span class="num">#${it.id}</span><h3>${esc(it.title)}</h3></div>
+    <div class="labels">${it.labels.map(l => `<span class="lb ${l === "needs-decision" ? "nd" : ""}">${l}</span>`).join("")}<span class="lb">milestone: ${esc(g.ms)}</span></div>
+    <div class="body"><ul>${it.body.map(b => `<li>${esc(b)}</li>`).join("")}</ul></div>
+    <div class="src">출처: ${esc(it.src)}</div>
+    ${choiceHtml("issue-" + it.id, `#${it.id}를 이슈로 만들까요?`, ["만든다", "보류", "고쳐서 만든다 (메모에 적기)"])}
+  </article>`).join("");
+  return `<section class="ms"><div class="ms-head"><h2>${esc(g.ms)}</h2><span class="count">이슈 ${g.items.length}개</span></div>${cards}</section>`;
+}).join("");
+
+document.getElementById("decisions").innerHTML = DECISIONS.map(d => `<div class="card">${choiceHtml(d.id, d.q, d.opts)}</div>`).join("");
+
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+}
+document.addEventListener("change", e => {
+  if (e.target.type === "radio") {
+    const k = e.target.name; saved[k] = { ...(saved[k] || {}), pick: e.target.value }; persist();
+  }
+});
+document.addEventListener("input", e => {
+  if (e.target.dataset && e.target.dataset.memo) {
+    const k = e.target.dataset.memo; saved[k] = { ...(saved[k] || {}), memo: e.target.value }; persist();
+  }
+});
+
+function buildText() {
+  const lines = ["[261010_001 이슈 목록과 마일스톤 답변]"];
+  ISSUES.forEach(g => g.items.forEach(it => {
+    const v = saved["issue-" + it.id] || {};
+    lines.push(`#${it.id} ${it.title} (${g.ms}): ${v.pick || "미선택"}${v.memo ? " / 메모: " + v.memo : ""}`);
+  }));
+  lines.push("");
+  DECISIONS.forEach(d => {
+    const v = saved[d.id] || {};
+    lines.push(`${d.q}: ${v.pick || "미선택"}${v.memo ? " / 메모: " + v.memo : ""}`);
+  });
+  return lines.join("\n");
+}
+document.getElementById("copy").addEventListener("click", async () => {
+  const st = document.getElementById("status");
+  try { await navigator.clipboard.writeText(buildText()); st.textContent = "복사했습니다."; }
+  catch (e) { st.textContent = "복사하지 못했습니다. 브라우저 권한을 확인하세요."; }
+});
+</script>
+</body>
+</html>
