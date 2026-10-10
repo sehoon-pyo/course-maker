@@ -102,6 +102,15 @@
 .el-bullets li:last-child {
   margin-bottom: 0;
 }
+/* 문장 안의 그림(icon()): 높이를 글자에 맞추고 가운데를 본문 글자의 중심선에 둔다. */
+.el-inline-icon {
+  height: 1.2em;
+  width: auto;
+  vertical-align: middle;
+}
+.em--bold {
+  font-weight: 700;
+}
 .slide strong {
   font-weight: 700;
 }
@@ -178,6 +187,13 @@
 /* 아이콘이 없으면 왼쪽 여백(아이콘 칸에 맞춘 값)이 좁아 보이므로 오른쪽 여백과 같게 한다. */
 .el-chip--text {
   padding-left: var(--chip-pad-right);
+}
+/* 문장 안의 칩(chip()): 칩의 가운데를 본문 글자의 중심선에 맞춘다. 글자 굵기와 기울임은 문장을 따르지 않는다. */
+.el-chip--inline {
+  vertical-align: middle;
+  font-weight: 400;
+  font-style: normal;
+  text-indent: 0;
 }
 .el-chip-icon {
   /* 아이콘은 정사각형 칸 안에 비율을 지켜 맞춘다(가로로 긴 claude 이미지도 칸을 넘지 않는다). */
