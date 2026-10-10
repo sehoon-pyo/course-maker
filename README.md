@@ -22,6 +22,7 @@
 | chapter 바로 아래의 슬라이드: section 앞(`head`: 대제목, 목차)과 뒤(`tail`: 진행 현황 등) | 사용 가능 |
 | 목차 (chapter의 section으로 자동으로 채움) | 사용 가능 |
 | 강의 전용 요소 (`courses/{강의}/elements/`) | 사용 가능 |
+| 강의 template (`default-course` GitHub template 저장소) | 사용 가능 |
 | 숨김 슬라이드 (미리보기에서는 보이고 번호에는 세지 않으며 내보낼 때 제외) | 사용 가능 (HTML 내보내기에서 제외됨. PPTX, PDF는 아직 없음) |
 | 표, 날짜/바닥글/슬라이드 번호 | 아직 없음 |
 | 내보내기 버튼 (상단 바. 모달에서 강의, chapter, 파일 형식을 고르면 `courses/{강의}/export/{연월일시분초}/` 폴더에 저장) | 사용 가능 (지금은 HTML만 만듦) |
@@ -121,7 +122,21 @@ git init
 
 ### 6-1. 강의 폴더 만들기
 
-가장 쉬운 방법은 샘플을 복사하는 것입니다.
+**권장: `default-course` template에서 시작합니다.** [`sehoon-pyo/default-course`](https://github.com/sehoon-pyo/default-course)는 강의의 초깃값(마스터, 대제목, 목차, section 구분, 컨텐츠, 제목만 있는 컨텐츠 예시)을 담은 GitHub template 저장소입니다.
+
+1. 저장소 페이지에서 **Use this template**로 내 강의 저장소를 만듭니다. (내 계정에 새 저장소가 생기고 이력이 새로 시작됩니다.)
+2. `courses/` 안에 clone합니다. 이때 폴더 이름이 강의 폴더 이름이 됩니다.
+
+```bash
+cd courses
+git clone https://github.com/{내 계정}/{내 강의}.git my-course
+```
+
+- template은 **복사한 시점에 고정됩니다.** 그 뒤 template이 바뀌어도 내 강의에는 반영되지 않습니다.
+- template을 `Use this template` 없이 그대로 clone해도 열리지만, `origin`이 `default-course`를 가리키므로 내 저장소를 만들어 `git remote set-url origin {내 저장소 주소}`로 바꿔야 합니다.
+- template 자체를 고치려면 `courses/` 안에 `default-course`를 clone해서 고치고 푸시합니다. 도구 저장소는 `courses/*`를 무시하므로 섞이지 않습니다.
+
+**다른 방법: 샘플을 복사합니다.**
 
 ```bash
 # bash
@@ -131,7 +146,7 @@ cp -r courses/sample courses/my-course
 Copy-Item -Recurse courses/sample courses/my-course
 ```
 
-복사한 폴더 안에서 **반드시 따로 git 저장소를 시작합니다.** (이유는 5번 프로젝트 구조 참고)
+복사한 폴더 안에서 **반드시 따로 git 저장소를 시작합니다.** (이유는 5번 프로젝트 구조 참고. template으로 시작했다면 이미 저장소입니다.)
 
 ```bash
 cd courses/my-course
@@ -282,6 +297,7 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
 | `content` | 제목과 본문 | `Title`, `Paragraph`, `Bullets` 등 |
 | `title-only` | 제목만 있고 본문은 자유롭게 | `Title`, 그리고 `at`으로 놓는 요소 |
 | `toc` | 목차 | `Toc` |
+| `section` | section 구분(소제목). `default-course` template의 마스터에만 있음 | `Paragraph slot="label"`(`SECTION 1` 등), `Title`, `Paragraph`(설명) |
 
 ```tsx
 <Slide layout="toc">

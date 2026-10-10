@@ -26,8 +26,9 @@
 | 용어 | 뜻 |
 |---|---|
 | **slide-master** | 모든 슬라이드에 공통으로 적용되는 틀. **PowerPoint의 슬라이드 마스터와 같은 개념**. 슬라이드의 디자인(배경, layout, 색, 크기, 요소의 모양)을 한곳에서 정함. `defineMaster`로 정의하고 안에 `tokens`, `background`, `layouts`가 들어 있음 |
+| **template** | 새 강의의 초깃값을 담은 GitHub template 저장소(`default-course`). 마스터, 예시 슬라이드, 일반형 칩을 포함하고 복사한 시점에 고정됨. 도구가 아니라 강의 쪽에 속함 |
 | **background** | 아래에서 위로 쌓이는 **층(layer)의 배열**. 층은 `color`, `image`, `shape`, `text` 중 하나이고 `id`를 가짐. master에 기본값이 있고, `layout`마다 가질 수 있음 |
-| **layout** | 영역을 나누는 배치 틀. `default` 마스터는 `title`(대제목), `content`(제목과 본문), `title-only`(제목만 있는 컨텐츠), `toc`(목차). 슬롯, 장식, 배경(선택)을 가짐 |
+| **layout** | 영역을 나누는 배치 틀. `default` 마스터는 `title`(대제목), `content`(제목과 본문), `title-only`(제목만 있는 컨텐츠), `toc`(목차). `default-course` template의 마스터는 여기에 `section`(section 구분)이 더해져 있음. 슬롯, 장식, 배경(선택)을 가짐 |
 | **slot** | layout이 정해 둔 자리. 종류는 `title`, `subtitle`, `body`, `free`, `list`이고 슬라이드 크기(1920×1080) 기준 px의 `x, y, w, h`를 가짐. 슬라이드의 요소가 종류에 따라 자동으로 들어감 |
 | **list 슬롯** | 같은 모양이 반복되는 줄(목차의 항목)을 한 번에 정하는 슬롯. `rows`, `pitch`, `columns`를 가짐 |
 | **쌓는 단계** | `background` < `layout`(장식) < `element`(슬라이드의 요소) 세 단계. 고정된 순서이고 한 단계는 다른 단계를 넘지 못함. 단계 안의 순서는 배열(작성) 순서이며 `z-index` 숫자를 소스에 쓰지 않음 |
