@@ -49,6 +49,12 @@ function InlineNode({ seg }: { seg: Inline }) {
       return <EmNode seg={seg} />;
     case "icon":
       return <IconNode seg={seg} />;
+    case "link":
+      return (
+        <a className="el-link" href={seg.href} target="_blank" rel="noopener noreferrer">
+          {seg.text}
+        </a>
+      );
   }
 }
 
