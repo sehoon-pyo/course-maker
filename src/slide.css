@@ -203,6 +203,61 @@
   object-fit: contain;
 }
 
+/* RedBorderBox(강조 테두리): 값은 마스터 tokens의 --red-border-box-*. 선은 가장자리의 가운데에 걸친다(SVG 도형의 선과 같다). */
+.el-red-border-box {
+  box-sizing: border-box;
+  outline: var(--red-border-box-width) solid var(--red-border-box-color);
+  outline-offset: calc(var(--red-border-box-width) / -2);
+  pointer-events: none;
+}
+.el-red-border-box--bold {
+  outline-width: var(--red-border-box-width-bold);
+  outline-offset: calc(var(--red-border-box-width-bold) / -2);
+}
+
+/* StepCircle(번호 원): 값은 마스터 tokens의 --step-circle-* */
+.el-step-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--step-circle-size);
+  height: var(--step-circle-size);
+  border-radius: 50%;
+  background: var(--step-circle-bg);
+  color: var(--step-circle-color);
+  font-size: var(--step-circle-font-size);
+  line-height: 1;
+}
+
+/* Note(보조 설명): 값은 마스터 tokens의 --note-* */
+.el-note {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  /* 폭을 주지 않으면 글에 맞춘다(at.w는 인라인 style이라 이 값보다 우선한다). */
+  width: max-content;
+  padding: var(--note-pad-y) var(--note-pad-x);
+  border: var(--note-border-width) dashed var(--note-border);
+  background: var(--note-bg);
+  color: var(--note-text);
+  font-size: var(--note-font-size);
+  line-height: 1.4;
+}
+.el-note--large {
+  font-size: var(--note-font-size-large);
+}
+/* 글 블록은 상자 가운데에 두고 줄은 왼쪽 정렬한다(한 줄이면 상자 가운데에 온다). */
+.el-note > div {
+  align-self: center;
+  max-width: 100%;
+}
+.el-note-title {
+  color: var(--note-title-color);
+  font-weight: 700;
+}
+
 /*
  * PromptBox: 값은 마스터 tokens의 --promptbox-*
  * 머리(아이콘), 구분선, 글 영역은 가운데의 한 칸에 쌓인다. 칸의 폭은 글 폭(최대는 상자 안쪽 폭)이라
