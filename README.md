@@ -322,7 +322,7 @@ t`타입은 ${badge("동적", "green")}으로 결정된다`
 ```
 
 - `Shape`는 크기까지(`x, y, w, h`) 줘야 합니다. `PromptBox`는 `x, y`만 주면 폭과 높이가 글에 맞춰지고(최소 폭은 `--promptbox-min-width`), `w`만 주면 그 폭에서 줄을 바꾸고 높이는 글에 맞춥니다. `Chip`은 `x, y`만 주면 폭이 글자에 맞춰지고, `Stamp`도 `x, y`만 주면 기본 크기가 됩니다. `Text`와 `Image`는 `w`, `h`를 생략할 수 있습니다.
-- `Shape`의 주요 속성: `kind`(`rect`, `roundRect`, `ellipse`, `rightArrow`, `triangle`, `line`, `path`), `fill`, `line={{ color, width, dash }}`, `rotate`, `shadow`(그림자), `glow`(도형의 글로우, 네온), `text`와 `textStyle`. `path`는 `path`와 `viewBox`도 필요합니다. 글자의 글로우는 `textStyle={{ glow: { radius: 10, color: "rgba(0, 176, 240, 0.4)" } }}`처럼 줍니다.
+- `Shape`의 주요 속성: `kind`(`rect`, `roundRect`, `ellipse`, `rightArrow`, `triangle`, `line`, `path`), `fill`, `line={{ color, width, dash, start, end }}`(`start`, `end`에 `"arrow"`를 주면 선과 자유형의 끝에 화살표 머리가 붙음), `rotate`, `shadow`(그림자), `glow`(도형의 글로우, 네온), `text`와 `textStyle`. `path`는 `path`와 `viewBox`도 필요합니다. 글자의 글로우는 `textStyle={{ glow: { radius: 10, color: "rgba(0, 176, 240, 0.4)" } }}`처럼 줍니다.
 - `Text`의 주요 속성: `size`, `color`, `align`, `anchor`, `bold`, `fill`, `lineHeight`.
 - **색**은 직접 값(`#FF0000`, `rgba(0, 0, 0, 0.3)`)이나 마스터 토큰 이름(`primary`, `primary-dark`, `surface`, `text`, `muted`)을 쓸 수 있습니다.
 - 이미지는 강의 폴더의 이미지를 `import`해서 `src`에 줍니다. 도구는 아이콘 이미지를 제공하지 않습니다.
