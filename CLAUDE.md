@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 슬라이드를 TSX로 작성하고 브라우저 미리보기 창에서 확인한다. AI(Claude Code 등)가 로컬의 TSX를 직접 고치는 것이 기본 사용 방식이다.
 - **원본(SSOT)은 슬라이드의 TSX**이다. HTML(최종 강의자료), PPTX(납품자료), PDF(수강생 배포용)는 모두 출력물이며, 직접 고치지 않고 원본에서 다시 생성한다.
 - 기술 스택은 Vite + React + TypeScript이다. Node.js는 `^20.19.0 || >=22.12.0`.
-- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`, `Toc`), 강의 전용 요소, 인라인 서식, 숨김 슬라이드(미리보기)이다. **PPTX/PDF export, 표, 날짜/바닥글/슬라이드 번호는 아직 없다.** 미리보기 상단 바의 내보내기 버튼은 강의, chapter, 파일 형식을 고르는 모달이고, `courses/{강의}/export/{연월일시분초}/`에 `CHAPTER_<번호>_<chapter 제목>.html`을 저장한다(지금은 HTML만. `export/`는 git이 추적하지 않는다). HTML export는 `vite-export.ts`(개발 서버 플러그인)가 `ssrLoadModule`로 슬라이드를 불러 `renderToStaticMarkup`으로 HTML 조각을 만들고 `vite-export-html.ts`가 CSS, 폰트, 이미지를 파일 안에 넣어 한 파일로 묶는다(`docs/adr/[261010_001]_adr.md`). 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
+- 아직 개발 중이다. 구현된 것은 미리보기 창, 슬라이드 마스터와 layout(강의 전용 마스터 포함), 요소(`Slide`, `Title`, `Paragraph`, `Bullets`, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Note`, `RedBorderBox`, `StepCircle`, `Stamp`, `Toc`), 강의 전용 요소, 인라인 서식(`badge`, `bold`, `code`, `chip`, `em`, `icon`, `br`), 숨김 슬라이드(미리보기)이다. **PPTX/PDF export, 표, 날짜/바닥글/슬라이드 번호는 아직 없다.** 미리보기 상단 바의 내보내기 버튼은 강의, chapter, 파일 형식을 고르는 모달이고, `courses/{강의}/export/{연월일시분초}/`에 `CHAPTER_<번호>_<chapter 제목>.html`을 저장한다(지금은 HTML만. `export/`는 git이 추적하지 않는다). HTML export는 `vite-export.ts`(개발 서버 플러그인)가 `ssrLoadModule`로 슬라이드를 불러 `renderToStaticMarkup`으로 HTML 조각을 만들고 `vite-export-html.ts`가 CSS, 폰트, 이미지를 파일 안에 넣어 한 파일로 묶는다(`docs/adr/[261010_001]_adr.md`). 현황과 로드맵은 `README.md`의 2번과 10번을 따른다.
 
 ## 명령어
 - `npm run dev`: 개발 서버 (미리보기 창, 기본 `http://localhost:5173/`)
@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 course-maker/
 ├─ src/                    도구의 소스 (미리보기 앱)
-│  ├─ elements/            슬라이드에서 쓰는 요소와 인라인 서식 (index: Slide, Title 등 / free: Text, Shape, Image, Stamp / widgets: Chip, PromptBox, Toc / slots: 슬롯 배치)
+│  ├─ elements/            슬라이드에서 쓰는 요소와 인라인 서식 (index: Slide, Title 등 / free: Text, Shape, Image, Stamp / widgets: Chip, PromptBox, Note, RedBorderBox, StepCircle, Toc / slots: 슬롯 배치)
 │  ├─ preview/             미리보기 창 (사이드바, 상단 바, 슬라이드 표시, 오류 경계)
 │  ├─ masters/             슬라이드 마스터 (types, define: 검증과 상속, registry: 등록과 조회, MasterFrame, Layers)
 │  │                        도구가 제공하는 마스터는 없다. 마스터는 각 강의의 `masters/{id}/`에 둔다 (`src/masters/{id}/`에 두면 모든 강의가 쓰는 마스터로 읽힘, `_`로 시작하는 폴더는 등록하지 않음)
@@ -66,9 +66,11 @@ course-maker/
 - 문구는 파일 맨 위 `text` 객체에 모으고, 그 안에는 문자열, `t` 템플릿, `badge()` 같은 헬퍼 호출만 넣는다. 슬라이드에 조건문이나 반복문 같은 로직을 넣지 않는다.
 - 문장 안에서 서식이 섞이면 `t` 태그드 템플릿으로 쓴다(``t`타입은 ${badge("동적", "green")}이다` ``). 서식이 없으면 일반 문자열로 쓴다. 배열 방식은 쓰지 않는다.
 - 폰트는 NanumSquare R(400), B(700)만 쓰고 가짜 굵게를 쓰지 않는다. 색, 크기, 여백은 마스터의 `tokens`(CSS 변수)로 정의하고 요소의 CSS는 변수만 읽는다. Tailwind 같은 utility class는 쓰지 않는다.
-- `<Slide layout="...">`으로 layout을 고른다(`title`, `content`(기본), `title-only`, `toc`). `Title`, `Paragraph`, `Bullets`, `Toc`는 슬롯에 자동으로 들어가고, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Stamp`는 `at={{ x, y, w, h }}`(슬라이드 기준 px)로 위치를 준다. `Shape`와 `PromptBox`는 크기까지, `Chip`과 `Stamp`는 `x, y`만 준다. 색은 직접 값이나 토큰 이름(`primary` 등)을 쓴다.
+- `<Slide layout="...">`으로 layout을 고른다(`title`, `content`(기본), `title-only`, `toc`). `Title`, `Paragraph`, `Bullets`, `Toc`는 슬롯에 자동으로 들어가고, `Text`, `Shape`, `Image`, `Chip`, `PromptBox`, `Note`, `RedBorderBox`, `StepCircle`, `Stamp`는 `at={{ x, y, w, h }}`(슬라이드 기준 px)로 위치를 준다. `Shape`와 `RedBorderBox`는 크기까지, `Chip`, `StepCircle`, `Stamp`는 `x, y`만 준다. `PromptBox`는 `x, y`만 주면 글에 맞춰지고, 긴 프롬프트는 `w`를 줘서 줄을 바꾸는 폭을 정한다(`h`는 보통 주지 않는다). 색은 직접 값이나 토큰 이름(`primary` 등)을 쓴다.
 - `Toc`는 항목을 직접 받지 않고 chapter의 section으로 자동으로 채운다.
-- `Chip`과 `PromptBox`의 아이콘은 `icon`으로 받는다(없어도 됨). 아이콘이 정해진 칩은 도구가 아니라 그 강의의 `elements/`에 만든다(예: `courses/sample/elements/`의 `ClaudeChip`, `TerminalChip`, `FileChip`). 칩의 아이콘은 정사각형 칸 안에 비율을 지켜 맞춰진다.
+- `Chip`과 `PromptBox`의 아이콘은 `icon`으로 받는다(없어도 됨). 값은 마스터 `icons`에 등록한 이름(`"claude"`) 또는 import한 이미지 주소이다. 아이콘이 정해진 칩을 강의의 `elements/`에 래퍼로 만들 수도 있다(예: `courses/sample/elements/`의 `ClaudeChip`). 칩의 아이콘은 정사각형 칸 안에 비율을 지켜 맞춰진다.
+- 글자 일부의 색은 `em(글자, 색 이름)`으로 쓴다. 색 값은 마스터 tokens의 `--em-{이름}`이 정하고 슬라이드에 색 값을 직접 쓰지 않는다.
+- 문장 안의 칩은 `chip(글자, 아이콘 이름)`, 문장 안의 그림은 `icon(이미지)`, 줄바꿈은 `br()`로 쓴다(문자열의 `\n`은 줄을 바꾸지 않는다). 문장에 빈칸을 두고 그 위에 `Chip`이나 `Image`를 올리지 않는다.
 - 글로우(네온)는 `Shape`의 `glow`(도형)와 `textStyle.glow`(글자)이다. 문장 안의 뱃지는 `.badge`의 `vertical-align`으로 본문 글자의 중심선에 맞춘다.
 - 새 요소나 인라인 요소는 필요할 때 하나씩 추가한다. 특정 강의에서만 쓰는 모양은 도구가 아니라 그 강의의 `elements/`에 둔다.
 
