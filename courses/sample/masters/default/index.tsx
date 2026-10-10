@@ -35,6 +35,8 @@ export default defineMaster({
     "--size-title": "88px",
     "--size-body": "48px",
     "--slot-gap": "32px",
+    // link(): 링크 글자색(PowerPoint 하이퍼링크의 기본 파랑)
+    "--link-color": "#0563C1",
     // Chip: 둥근 사각형(채움 흰색 95%, 흰 테두리 3px)에 아이콘과 글자
     "--chip-height": "74px",
     "--chip-bg": "#F2F2F2",
