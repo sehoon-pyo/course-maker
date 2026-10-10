@@ -18,6 +18,8 @@ coverage/
 courses/*
 !courses/sample/
 !courses/sample2/
+# 내보낸 결과물(export 폴더)은 추적하지 않는다.
+courses/*/export/
 
 # Playwright MCP가 만드는 스냅샷과 로그
 .playwright-mcp/
