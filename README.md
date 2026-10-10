@@ -22,10 +22,10 @@
 | chapter 바로 아래의 슬라이드: section 앞(`head`: 대제목, 목차)과 뒤(`tail`: 진행 현황 등) | 사용 가능 |
 | 목차 (chapter의 section으로 자동으로 채움) | 사용 가능 |
 | 강의 전용 요소 (`courses/{강의}/elements/`) | 사용 가능 |
-| 숨김 슬라이드 (미리보기에서는 보이고 번호에는 세지 않으며 내보낼 때 제외) | 미리보기만 (내보내기는 아직 없음) |
+| 숨김 슬라이드 (미리보기에서는 보이고 번호에는 세지 않으며 내보낼 때 제외) | 사용 가능 (HTML 내보내기에서 제외됨. PPTX, PDF는 아직 없음) |
 | 표, 날짜/바닥글/슬라이드 번호 | 아직 없음 |
-| 내보내기 버튼 (상단 바. 모달에서 강의, chapter, 파일 형식을 고르면 `courses/{강의}/export/{연월일시분초}/` 빈 폴더를 만듦) | 폴더 만들기까지 (파일 생성은 아직 없음) |
-| 단일 HTML 파일로 내보내기 | 아직 없음 |
+| 내보내기 버튼 (상단 바. 모달에서 강의, chapter, 파일 형식을 고르면 `courses/{강의}/export/{연월일시분초}/` 폴더에 저장) | 사용 가능 (지금은 HTML만 만듦) |
+| 단일 HTML 파일로 내보내기 (chapter 하나가 파일 하나, 방향키로 이동) | 사용 가능 |
 | PPTX로 내보내기 (슬라이드 마스터까지 PowerPoint 마스터로 내보낼 예정) | 아직 없음 |
 | PDF로 내보내기 | 아직 없음 |
 
@@ -57,7 +57,7 @@ npm run dev
 
 - 왼쪽 위의 ☰ 버튼으로 목차를 접고 펼 수 있습니다.
 - 상단 바에서 강의와 chapter를 고를 수 있습니다.
-- 상단 바의 `내보내기` 버튼을 누르면 강의, chapter(여러 개), 파일 형식(HTML, PPTX, PDF)을 고르는 창이 열리고, `내보내기`를 누르면 `courses/{강의}/export/{연월일시분초}/` 폴더가 만들어집니다. 아직 파일은 만들지 않고 폴더만 만듭니다. `export/`는 git이 추적하지 않습니다.
+- 상단 바의 `내보내기` 버튼을 누르면 강의, chapter(여러 개), 파일 형식(HTML, PPTX, PDF)을 고르는 창이 열리고, `내보내기`를 누르면 `courses/{강의}/export/{연월일시분초}/` 폴더가 만들어지고 chapter마다 `CHAPTER_<번호>_<chapter 제목>.html` 파일이 저장됩니다. 지금은 HTML만 만들고 PPTX, PDF는 건너뜁니다. HTML은 외부 파일 없이 열리고 방향키(← →)로 넘깁니다. 숨김 슬라이드는 빠집니다. `export/`는 git이 추적하지 않습니다.
 - 슬라이드 이동은 화면 아래의 `< 이전`, `다음 >` 버튼이나 방향키(← →)로 합니다. chapter 사이의 이동은 `<< 이전 챕터`, `다음 챕터 >>` 버튼이나 `Ctrl + ←`, `Ctrl + →`입니다. `<`, `>`는 chapter 끝에서 멈춥니다.
 - 아래의 번호(`3 / 12`)는 **chapter 안**의 번호이고 사이드바의 번호도 chapter 안에서 이어집니다. 숨김 슬라이드는 번호를 매기지 않고 `숨김 / 12`로 보입니다.
 - `courses/sample`의 슬라이드 파일을 고치고 저장하면 화면이 바로 바뀝니다.
@@ -74,7 +74,9 @@ course-maker/
 │  ├─ courses.ts           courses/ 폴더를 읽어 목차 트리를 만듦
 │  ├─ types.ts             meta.ts의 타입
 │  ├─ constants.ts         슬라이드 크기 (1920×1080)
-│  └─ styles.css           폰트와 테마 값
+│  ├─ export/              내보내기에서 슬라이드를 HTML로 그리는 코드
+│  ├─ slide.css            폰트와 슬라이드 요소의 CSS (미리보기와 내보내기가 같이 씀)
+│  └─ styles.css           미리보기 창의 CSS (slide.css를 가져옴)
 │
 ├─ courses/                강의가 들어가는 곳 (강의 폴더마다 git 저장소를 만들어야 함)
 │  ├─ sample/              예제 강의 (도구에 포함, 별도 저장소 아님)
@@ -93,7 +95,7 @@ course-maker/
 │  ├─ notes/               논의 기록
 │  └─ adr/                 결정 기록
 ├─ CLAUDE.md               AI 도구가 읽는 프로젝트 안내
-└─ index.html, package.json, tsconfig.json, vite.config.ts, vite-export.ts(내보내기 폴더를 만드는 개발 서버 플러그인)
+└─ index.html, package.json, tsconfig.json, vite.config.ts, vite-export.ts, vite-export-html.ts(내보내기를 처리하는 개발 서버 플러그인)
 ```
 
 위 그림의 `courses/my-course/` 안쪽(chapter, section, slide)의 자세한 폴더 구조는 **아래 [6. 내 강의 만들기](#6-내-강의-만들기)에 써 있습니다.**
@@ -191,7 +193,7 @@ export default {
 } satisfies SectionMeta;
 ```
 
-**숨김 슬라이드**: `slides`의 항목을 `{ id, hidden: true }`로 쓰면 숨김입니다. **미리보기에서는 숨김 슬라이드도 보이고**(사이드바에 "숨김" 표시, 이전/다음으로 오갈 수 있음) **번호는 매기지 않습니다**(하단은 `숨김 / 12`처럼 보이고 다른 슬라이드의 번호는 숨김을 건너뛰고 이어집니다). HTML, PPTX, PDF로 내보낼 때만 빠집니다(내보내기는 아직 없습니다).
+**숨김 슬라이드**: `slides`의 항목을 `{ id, hidden: true }`로 쓰면 숨김입니다. **미리보기에서는 숨김 슬라이드도 보이고**(사이드바에 "숨김" 표시, 이전/다음으로 오갈 수 있음) **번호는 매기지 않습니다**(하단은 `숨김 / 12`처럼 보이고 다른 슬라이드의 번호는 숨김을 건너뛰고 이어집니다). HTML, PPTX, PDF로 내보낼 때만 빠집니다(지금은 HTML만 만들 수 있고 PPTX, PDF는 아직 없습니다).
 
 ### 6-4. 슬라이드 예시
 
@@ -364,7 +366,6 @@ PowerPoint나 DOM에만 있는 개념은 `pptx layout`, `dom element`처럼 앞�
 **폰트**: 슬라이드에는 네이버의 NanumSquare(R, B)를 씁니다. 파일은 `assets/fonts/`에 있습니다. 이 폰트의 배포처와 이용 조건은 [네이버 한글한글 아름답게 - 나눔글꼴](https://hangeul.naver.com/fonts/search?f=nanum)의 안내를 따릅니다.
 ## 10. 로드맵
 
-- 단일 HTML 파일로 내보내기 (강의 chapter 하나가 파일 하나)
 - PPTX로 내보내기
 - PDF로 내보내기
 - 표 요소 추가

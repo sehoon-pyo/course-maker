@@ -11,3 +11,5 @@ export const DEFAULT_SECTION_LABEL = "SECTION";
 
 /** 내보내기 폴더를 만드는 개발 서버 주소 (`vite-export.ts`가 받는다) */
 export const EXPORT_ENDPOINT = "/__export";
+/** 내보낼 수 있는 파일 형식 */
+export const EXPORT_FORMATS = ["HTML", "PPTX", "PDF"] as const;
